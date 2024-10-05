@@ -1,12 +1,13 @@
 { config, pkgs, lib, ... }:
 
+let userdata = import ./userdata.nix; in
 {
   systemd.services.RestoreAlsaVolume = {
       enable = true;
       description = "Setting SPDIF ALSA volume at 100% after sleep.";
       after = [ "suspend.target" ];
       serviceConfig = {
-        User = "pierre";
+        User = userdata.username;
       	Type = "forking";
       };
       script = lib.getExe(pkgs.writeShellApplication {

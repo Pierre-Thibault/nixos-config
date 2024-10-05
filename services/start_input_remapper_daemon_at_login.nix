@@ -1,5 +1,6 @@
 { config, pkgs, lib, ... }:
 
+let userdata = import ./userdata.nix; in
 {
   systemd.services.StartInputRemapperDaemonAtLogin = {
     enable = true;
@@ -11,7 +12,7 @@
         name = "start-input-mapper-daemon";
         runtimeInputs = with pkgs; [input-remapper procps su];
         text = ''
-          until pgrep -u pierre; do
+          until pgrep -u ${userdata.username}; do
             sleep 1
           done
           sleep 2
@@ -21,8 +22,8 @@
             input-remapper-reader-service&
             sleep 1
           done
-          su pierre -c "input-remapper-control --command stop-all"
-          su pierre -c "input-remapper-control --command autoload"
+          su ${userdata.username} -c "input-remapper-control --command stop-all"
+          su ${userdata.username} -c "input-remapper-control --command autoload"
           sleep infinity
         '';
     });

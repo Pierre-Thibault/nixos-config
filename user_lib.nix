@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 
+let userdata = import ./userdata.nix; in
 {
-  users.users.pierre.packages = with pkgs; [
+  users.users.${userdata.username}.packages = with pkgs; [
   ];
 }

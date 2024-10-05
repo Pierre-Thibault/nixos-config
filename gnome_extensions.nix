@@ -1,7 +1,8 @@
 { config, pkgs, lib, ... }:
 
+let userdata = import ./userdata.nix; in
 {
-  users.users.pierre.packages = with pkgs.gnomeExtensions; [
+  users.users.${userdata.username}.packages = with pkgs.gnomeExtensions; [
     blur-my-shell
     caffeine
     clipboard-history

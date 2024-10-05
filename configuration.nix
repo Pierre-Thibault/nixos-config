@@ -4,6 +4,8 @@
 
 { config, pkgs, lib, ... }:
 
+let userdata = import ./userdata.nix;
+in
 {
   imports = lib.pipe ./services [
     builtins.readDir
@@ -28,7 +30,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.initrd.luks.devices."luks-56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6".device = "/dev/disk/by-uuid/56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6";
-  networking.hostName = "pierre-nixos"; # Define your hostname.
+  networking.hostName = userdata.hostname; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -98,9 +100,9 @@
   services.flatpak.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.pierre = {
+  users.users.${userdata.username} = {
     isNormalUser = true;
-    description = "Pierre Thibault";
+    description = userdata.userfullname;
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.zsh;
   };

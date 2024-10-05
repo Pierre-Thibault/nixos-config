@@ -1,12 +1,13 @@
 { config, pkgs, lib, ... }:
 
+let userdata = import ./userdata.nix; in
 {
   systemd.services.ReloadInputRemapperAfterSleep = {
       enable = true;
       description = "Reload input-remapper config after sleep";
       after = [ "suspend.target" ];
       serviceConfig = {
-        User = "pierre";
+        User = userdata.username;
 	      Type = "forking";
       };
       script = lib.getExe(pkgs.writeShellApplication {

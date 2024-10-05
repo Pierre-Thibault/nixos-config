@@ -1,3 +1,5 @@
+# This is not a file using the Nix language so I can not define variables
+# pierre-nixos must be changed manually.
 {
   description = "My NixOS's flake";
 
