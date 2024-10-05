@@ -26,7 +26,7 @@ This directory contains some nice utility scripts I used. I added them here to e
 
 #### `clipsnipper`
 
-A simple script to grab something on the screen and to convert it as text. Very useful when the text is inside an image or in a video. The result is sent to the clipboard.
+A simple script to grab something on the screen and convert it to text. Very useful when the text is inside an image or in a video. The result is sent to the clipboard.
 
 I created a Gnome shortcut (Gnome Settings > Keyboard > Keyboard shortcuts ) with the command:
 
