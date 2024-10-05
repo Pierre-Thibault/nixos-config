@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 
-let userdata = import ./userdata.nix; in
+let userdata = import ../userdata.nix; in
 {
   systemd.services.ReloadInputRemapperAfterSleep = {
       enable = true;
