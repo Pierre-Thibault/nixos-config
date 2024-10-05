@@ -1,7 +1,7 @@
 #!/usr/bin/env bash 
 # Dependencies: tesseract-ocr gnome-screenshot wl-clipboard (for Wayland), xsel (for X11)
 
-LANGUAGES="fra+eng+spa" # Set the languages used tesseract (see https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
+LANGUAGES="fra+eng+spa" # Set the languages used by tesseract (see https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
 SCR_IMG=`mktemp`
 trap "rm $SCR_IMG*" EXIT
 
