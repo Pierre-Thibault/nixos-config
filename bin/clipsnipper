@@ -1,18 +1,16 @@
 #!/usr/bin/env bash 
-# Dependencies: tesseract-ocr imagemagick scrot xsel
+# Dependencies: tesseract-ocr gnome-screenshot wl-clipboard (for Wayland), xsel (for X11)
 
-#select tesseract_lang in eng rus equ ;do break;done
-# quick language menu, add more if you need other languages.
-
+LANGUAGES="fra+eng+spa" # Set the languages used tesseract (see https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
 SCR_IMG=`mktemp`
 trap "rm $SCR_IMG*" EXIT
 
+gnome-screenshot -a -f $SCR_IMG.png
+
+tesseract $SCR_IMG.png $SCR_IMG  -l $LANGUAGES &> /dev/null
+
 if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-  gnome-screenshot -a -f $SCR_IMG.png
+  cat $SCR_IMG.txt | xargs echo -n | wl-copy 
 else
-  import $SCR_IMG.png
+  cat $SCR_IMG.txt | xargs echo -n | xsel -bi 
 fi
-
-tesseract $SCR_IMG.png $SCR_IMG  -l fra+eng+spa &> /dev/null
-cat $SCR_IMG.txt | xargs echo -n | wl-copy 
-
