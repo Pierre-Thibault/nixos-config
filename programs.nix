@@ -8,7 +8,6 @@ let userdata = import ./userdata.nix; in
       clipgrab
       deja-dup
       discord
-      espanso-wayland
       gedit
       gimp
       gnome-browser-connector

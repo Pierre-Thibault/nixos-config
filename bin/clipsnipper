@@ -10,7 +10,7 @@ gnome-screenshot -a -f $SCR_IMG.png
 tesseract $SCR_IMG.png $SCR_IMG  -l $LANGUAGES &> /dev/null
 
 if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-  cat $SCR_IMG.txt | xargs echo -n | wl-copy 
+  cat $SCR_IMG.txt | wl-copy -n 
 else
-  cat $SCR_IMG.txt | xargs echo -n | xsel -bi 
+  cat $SCR_IMG.txt | xsel -bi 
 fi
