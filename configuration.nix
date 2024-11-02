@@ -15,7 +15,6 @@ in
     ./cli_commands.nix
     ./gnome_extensions.nix
     ./programs.nix
-    ./system_lib.nix
     ./system_packages.nix
     ./themes.nix
     ./user_lib.nix
