@@ -8,6 +8,7 @@ let userdata = import ./userdata.nix; in
     file
     gcc
     git
+    gnupg
     gnumake
     lsb-release
     nap
