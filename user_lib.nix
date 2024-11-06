@@ -8,7 +8,7 @@ let userdata = import ./userdata.nix; in
     hunspellDicts.en-gb-ise
     hunspellDicts.en-us
     hunspellDicts.fr-any
-    hunspellDicts.fr-classic
+    hunspellDicts.fr-classique
     hunspellDicts.fr-moderne
     hunspellDicts.es-mx
     languagetool
