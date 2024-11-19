@@ -7,5 +7,6 @@
       gparted
       gnomeExtensions.gsconnect
       input-remapper
+      pinentry-curses
   ];
 }

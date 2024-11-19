@@ -16,12 +16,14 @@ let userdata = import ./userdata.nix; in
       gnome.gnome-tweaks
       google-chrome
       guake
+      helix
       jetbrains.rust-rover
       keepass
       keepassxc
       keymapp
       libreoffice
       lm_sensors
+      mc
       menulibre
       obs-studio
       obsidian

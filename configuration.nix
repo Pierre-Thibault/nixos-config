@@ -106,6 +106,12 @@ in
     shell = pkgs.zsh;
   };
 
+  services.pcscd.enable = true;
+  programs.gnupg.agent = {
+     enable = true;
+     enableSSHSupport = true;
+  };  
+
   # Install firefox.
   programs.firefox.enable = true;
 
