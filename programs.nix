@@ -10,6 +10,7 @@ let userdata = import ./userdata.nix; in
       discord
       gedit
       gimp
+      gittyup
       gnome-browser-connector
       gnome.gnome-screenshot
       gnome.gnome-terminal
