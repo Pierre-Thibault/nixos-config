@@ -11,7 +11,6 @@ let userdata = import ./userdata.nix; in
     gnupg
     gnumake
     lsb-release
-    maven
     nap
     neovim
     nushell
