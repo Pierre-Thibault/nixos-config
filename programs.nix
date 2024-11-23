@@ -3,6 +3,7 @@
 let userdata = import ./userdata.nix; in
 {
   users.users.${userdata.username}.packages = with pkgs; [
+      alacritty
       brave
       cinnamon.nemo-with-extensions
       clipgrab
