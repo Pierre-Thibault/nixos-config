@@ -21,7 +21,6 @@ let userdata = import ./userdata.nix; in
     vim
     wget
     wl-clipboard
-    ydotool
     zsh
   ];
   programs.neovim.enable = true;
