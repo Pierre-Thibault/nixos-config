@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+busctl --user call \
+    org.gnome.Shell \
+    /de/lucaswerkmeister/ActivateWindowByTitle \
+    de.lucaswerkmeister.ActivateWindowByTitle \
+    activateBySubstring \
+    s 'Proton Mail — Mozilla Firefox' | grep true || xdg-open https://mail.proton.me
+

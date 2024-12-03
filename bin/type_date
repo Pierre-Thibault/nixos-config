@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+date -I | tr -d '\n' | wl-copy
+

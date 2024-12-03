@@ -69,6 +69,15 @@ in
     gnome-calculator
   ];
 
+  environment = {
+    shells = [ pkgs.zsh ];
+    variables = {
+      EDITOR = "hx";
+      SYSTEMD_EDITOR = "hx";
+      VISUAL = "hx";
+    };
+  };
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "ca";
