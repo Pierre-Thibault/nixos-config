@@ -28,7 +28,7 @@ in
     #pano
     rounded-corners
     run-or-raise
-    spacebar
+    space-bar
     #tilingnome
     top-bar-organizer
     vitals
