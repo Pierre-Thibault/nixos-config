@@ -11,7 +11,6 @@ in
 {
   users.users.${userdata.username}.packages = with pkgs.gnomeExtensions; [
     activate-window-by-title
-    all-windows
     app-icons-taskbar
     blur-my-shell
     caffeine
@@ -24,13 +23,13 @@ in
     native-window-placement
     night-light-slider-updated
     night-theme-switcher
-    open-bar
+    #open-bar
     #pano
     rounded-corners
     run-or-raise
     space-bar
     #tilingnome
-    top-bar-organizer
+    #top-bar-organizer
     vitals
   ];
 
