@@ -5,7 +5,7 @@ ln -sf /home/pierre/.themes/Graphite-blue-Light-nord/gtk-4.0/gtk.css /home/pierr
 ln -sf /home/pierre/.themes/Graphite-blue-Light-nord/gtk-4.0/gtk-dark.css /home/pierre/.config/gtk-4.0/gtk-dark.css
 ln -sf /home/pierre/.config/helix/config-light.toml /home/pierre/.config/helix/config.toml
 ln -sf /home/pierre/.config/alacritty/alacritty-light.toml /home/pierre/.config/alacritty/alacritty.toml
-ln -sf /home/pierre/.config/wezterm/wezterm-light.lua /home/pierre/.config/wezterm.lua
+ln -sf /home/pierre/.config/wezterm/wezterm-light.lua /home/pierre/.config/wezterm/wezterm.lua
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Light-nord";
 gsettings set org.gnome.shell.extensions.user-theme name "Graphite-blue-Light-nord"

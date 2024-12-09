@@ -10,14 +10,18 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
+    bat
     direnv
     fanctl
     file
+    fzf
     gcc
     git
     gnupg
     gnumake
+    helix
     lsb-release
+    mc
     nap
     neovim
     nixd
