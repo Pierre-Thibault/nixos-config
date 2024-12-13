@@ -18,8 +18,6 @@ in
     custom-hot-corners-extended
     hide-cursor
     #emoji-copy
-    just-another-search-bar
-    nasa-apod
     native-window-placement
     night-light-slider-updated
     night-theme-switcher
