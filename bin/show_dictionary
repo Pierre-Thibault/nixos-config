@@ -11,5 +11,11 @@ busctl --user call \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
+    s 'Le Robert — Mozilla Firefox' | grep true || \
+busctl --user call \
+    org.gnome.Shell \
+    /de/lucaswerkmeister/ActivateWindowByTitle \
+    de.lucaswerkmeister.ActivateWindowByTitle \
+    activateBySubstring \
     s 'Reverso' | grep true || xdg-open https://www.larousse.fr/dictionnaires/francais
 
