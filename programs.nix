@@ -12,7 +12,7 @@ in
   users.users.${userdata.username}.packages = with pkgs; [
     alacritty
     brave
-    cinnamon.nemo-with-extensions
+    nemo-with-extensions
     clipgrab
     deja-dup
     discord
@@ -20,9 +20,9 @@ in
     gimp
     gittyup
     gnome-browser-connector
-    gnome.gnome-screenshot
-    gnome.gnome-terminal
-    gnome.gnome-tweaks
+    gnome-screenshot
+    gnome-terminal
+    gnome-tweaks
     google-chrome
     guake
     jetbrains.rust-rover
@@ -37,7 +37,6 @@ in
     ocrfeeder
     openvpn
     protonvpn-gui
-    psensor
     qalculate-gtk
     tesseract
     vlc

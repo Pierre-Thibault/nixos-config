@@ -2,27 +2,38 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
-let userdata = import ./userdata.nix;
+let
+  userdata = import ./userdata.nix;
 in
 {
-  imports = lib.pipe ./services [
-    builtins.readDir
-    (lib.filterAttrs (name: _: lib.hasSuffix ".nix" name))
-    (lib.mapAttrsToList (name: _: ./services + "/${name}"))
-   ] ++ [
-    ./cli_commands.nix
-    ./gnome_extensions.nix
-    ./programs.nix
-    ./system_packages.nix
-    ./themes.nix
-    ./user_lib.nix
-    # Include the results of the hardware scan
-    ./hardware-configuration.nix
-  ];
+  imports =
+    lib.pipe ./services [
+      builtins.readDir
+      (lib.filterAttrs (name: _: lib.hasSuffix ".nix" name))
+      (lib.mapAttrsToList (name: _: ./services + "/${name}"))
+    ]
+    ++ [
+      ./cli_commands.nix
+      ./gnome_extensions.nix
+      ./programs.nix
+      ./system_packages.nix
+      ./themes.nix
+      ./user_lib.nix
+      # Include the results of the hardware scan
+      ./hardware-configuration.nix
+    ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -64,8 +75,8 @@ in
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
 
- environment.gnome.excludePackages = with pkgs.gnome; [
-    epiphany    # web browser
+  environment.gnome.excludePackages = with pkgs; [
+    epiphany # web browser
     gnome-calculator
   ];
 
@@ -91,7 +102,6 @@ in
   services.printing.enable = true;
 
   # Enable sound with pipewire.
-  sound.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -116,15 +126,18 @@ in
   users.users.${userdata.username} = {
     isNormalUser = true;
     description = userdata.userfullname;
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+    ];
     shell = pkgs.zsh;
   };
 
   services.pcscd.enable = true;
   programs.gnupg.agent = {
-     enable = true;
-     enableSSHSupport = true;
-  };  
+    enable = true;
+    enableSSHSupport = true;
+  };
 
   # Install firefox.
   programs.firefox.enable = true;
