@@ -22,7 +22,7 @@ in
     night-light-slider-updated
     night-theme-switcher
     #open-bar
-    #pano
+    pano
     rounded-corners
     run-or-raise
     space-bar

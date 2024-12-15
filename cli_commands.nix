@@ -17,18 +17,21 @@ in
     fzf
     gcc
     git
+    gitleaks
     gnupg
     gnumake
     helix
     lsb-release
     mc
     nap
+    neofetch
     neovim
     nixd
     nixfmt-rfc-style
     nushell
     openjdk17-bootstrap
     ripgrep-all
+    stow
     tree
     unzip
     vim
