@@ -22,6 +22,7 @@ in
     gnumake
     helix
     lsb-release
+    marksman
     mc
     nap
     neofetch
