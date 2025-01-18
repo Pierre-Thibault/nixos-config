@@ -22,6 +22,7 @@ in
     gnumake
     helix
     lsb-release
+    lsd
     marksman
     mc
     nap
