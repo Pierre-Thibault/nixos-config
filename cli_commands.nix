@@ -32,6 +32,7 @@ in
     nixfmt-rfc-style
     nushell
     openjdk17-bootstrap
+    ripgrep
     ripgrep-all
     stow
     tree
