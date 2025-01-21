@@ -3,4 +3,5 @@
   username = "pierre";
   userfullname = "Pierre Thibault";
   hostname = "pierre-nixos";
+  ssh_enable = false;
 }
