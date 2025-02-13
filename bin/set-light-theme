@@ -9,8 +9,8 @@ ln -sf wezterm-light.lua /home/pierre/.config/wezterm/wezterm.lua
 ln -sf config-light /home/pierre/.config/bat/config
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Light-nord";  # Legacy app
-# gsettings set org.gnome.shell.extensions.user-theme name "Graphite-blue-Light-nord"
+#gsettings set org.gnome.shell.extensions.user-theme name "Adwaita"
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false;
+sleep 1
 gsettings set org.gnome.desktop.interface accent-color "slate"
 guake --change-palette="Ocean Light"
-
