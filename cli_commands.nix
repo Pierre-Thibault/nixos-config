@@ -39,7 +39,6 @@ in
     tree
     unzip
     vim
-    wezterm
     wget
     wl-clipboard
     yazi

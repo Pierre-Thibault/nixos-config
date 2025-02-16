@@ -10,7 +10,6 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
-    alacritty
     brave
     nemo-with-extensions
     clipgrab
