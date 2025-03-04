@@ -19,6 +19,7 @@ in
     gimp
     gittyup
     gnome-browser-connector
+    gnome-pomodoro
     gnome-screenshot
     gnome-terminal
     gnome-tweaks
@@ -37,6 +38,7 @@ in
     openvpn
     protonvpn-gui
     qalculate-gtk
+    telegram-desktop
     tesseract
     vlc
     vscodium
