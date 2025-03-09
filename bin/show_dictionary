@@ -5,13 +5,13 @@ busctl --user call \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s 'Larousse — Mozilla Firefox' | grep true || \
+    s 'Larousse — Waterfox' | grep true || \
 busctl --user call \
     org.gnome.Shell \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s 'Le Robert — Mozilla Firefox' | grep true || \
+    s 'Le Robert — Waterfox' | grep true || \
 busctl --user call \
     org.gnome.Shell \
     /de/lucaswerkmeister/ActivateWindowByTitle \

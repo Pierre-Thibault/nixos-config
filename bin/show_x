@@ -5,5 +5,5 @@ busctl --user call \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s 'X — Mozilla Firefox' | grep true || xdg-open https://x.com
+    s 'X — Waterfox' | grep true || xdg-open https://x.com
 

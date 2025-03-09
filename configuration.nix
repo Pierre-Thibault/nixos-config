@@ -121,8 +121,6 @@ in
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  services.flatpak.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.${userdata.username} = {
     isNormalUser = true;
@@ -132,6 +130,19 @@ in
       "wheel"
     ];
     shell = pkgs.zsh;
+    packages = with pkgs; [
+      flatpak
+      gnome-software
+    ];
+  };
+
+  services.flatpak.enable = true;
+  systemd.services.flatpak-repo = {
+    wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.flatpak ];
+    script = ''
+      flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    '';
   };
 
   services.pcscd.enable = true;

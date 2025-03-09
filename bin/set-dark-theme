@@ -15,3 +15,4 @@ sleep 1
 gsettings set org.gnome.desktop.interface accent-color "slate"
 guake --change-palette="Oceanic Next Dark"
 
+flatpak --user=pierre override --env=GTK_THEME=Graphite-blue-Dark-nord
