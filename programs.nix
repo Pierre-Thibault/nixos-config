@@ -17,7 +17,7 @@ in
     discord
     gedit
     gimp
-    gittyup
+    gitg
     gnome-browser-connector
     gnome-pomodoro
     gnome-screenshot
