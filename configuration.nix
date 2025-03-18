@@ -90,6 +90,13 @@ in
     };
   };
 
+  services.flatpak = {
+    enable = true;
+    packages = [
+      "net.waterfox.waterfox"
+    ];
+  };
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "ca";
@@ -131,8 +138,6 @@ in
     ];
     shell = pkgs.zsh;
   };
-
-  services.flatpak.enable = true;
 
   services.pcscd.enable = true;
   programs.gnupg.agent = {
