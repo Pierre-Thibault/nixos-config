@@ -90,6 +90,7 @@ in
     };
   };
 
+  # Somehow, I am not able to list my flatpak in an external module
   services.flatpak = {
     enable = true;
     packages = [
@@ -144,9 +145,6 @@ in
     enable = true;
     enableSSHSupport = true;
   };
-
-  # Install firefox.
-  programs.firefox.enable = true;
 
   programs.zsh.enable = true;
 

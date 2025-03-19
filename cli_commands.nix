@@ -8,6 +8,11 @@
 let
   userdata = import ./userdata.nix;
 in
+# unstable = import <nixos-unstable> {
+#   config = {
+#     allowUnfree = true;
+#   };
+# };
 {
   users.users.${userdata.username}.packages = with pkgs; [
     bat
