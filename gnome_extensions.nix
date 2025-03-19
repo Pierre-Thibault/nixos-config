@@ -41,7 +41,7 @@ in
     package = pkgs.gnomeExtensions.gsconnect;
   };
 
-  environment.gnome.excludePackages = with pkgs.gnomeExtensions; [
+  environment.gnome.excludePackages = with pkgs; [
     gnome-gnome-shell-extensions # Remove default extensions
   ];
 }
