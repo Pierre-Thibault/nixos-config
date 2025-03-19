@@ -16,9 +16,7 @@ in
     app-icons-taskbar
     blur-my-shell
     caffeine
-    clipboard-history
     cronomix
-    custom-hot-corners-extended
     #emoji-copy
     hide-cursor
     nasa-apod
@@ -27,14 +25,15 @@ in
     night-theme-switcher
     #open-bar
     pano
+    removable-drive-menu
     rounded-corners
     run-or-raise
     space-bar
     tiling-shell
     #tilingnome
     #top-bar-organizer
-    top-panel-note
     vitals
+    windownavigator
   ];
 
   programs.kdeconnect = {
@@ -43,17 +42,6 @@ in
   };
 
   environment.gnome.excludePackages = with pkgs.gnomeExtensions; [
-    applications-menu
-    clipboard-history
-    custom-hot-corners-extended
-    launch-new-instance
-    light-style
-    places-status-indicator
-    screenshot-window-sizer
-    smart-auto-move
-    status-icons
-    system-monitor
-    window-list
-    workspace-indicator
+    gnome-gnome-shell-extensions # Remove default extensions
   ];
 }
