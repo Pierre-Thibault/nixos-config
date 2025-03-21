@@ -42,6 +42,6 @@ in
   };
 
   environment.gnome.excludePackages = with pkgs; [
-    gnome.gnome-shell-extensions # Remove default extensions
+    gnome-shell-extensions # Remove default extensions
   ];
 }

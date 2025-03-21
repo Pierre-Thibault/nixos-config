@@ -13,7 +13,6 @@ in
     brave
     nemo-with-extensions
     clipgrab
-    deja-dup
     discord
     gedit
     gimp
