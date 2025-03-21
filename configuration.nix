@@ -21,6 +21,7 @@ in
     ]
     ++ [
       ./cli_commands.nix
+      ./flatpak.nix
       ./gnome_extensions.nix
       ./programs.nix
       ./system_packages.nix
@@ -88,14 +89,6 @@ in
       SYSTEMD_EDITOR = "hx";
       VISUAL = "hx";
     };
-  };
-
-  # Somehow, I am not able to list my flatpak in an external module
-  services.flatpak = {
-    enable = true;
-    packages = [
-      "net.waterfox.waterfox"
-    ];
   };
 
   # Configure keymap in X11
