@@ -29,6 +29,7 @@ in
     helix
     lsb-release
     lsd
+    lsp-ai
     marksman
     mc
     nap
@@ -37,6 +38,7 @@ in
     nixd
     nixfmt-rfc-style
     nushell
+    ollama-rocm
     openjdk17-bootstrap
     ripgrep
     ripgrep-all
