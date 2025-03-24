@@ -38,7 +38,6 @@ in
     nixd
     nixfmt-rfc-style
     nushell
-    ollama-rocm
     openjdk17-bootstrap
     ripgrep
     ripgrep-all
