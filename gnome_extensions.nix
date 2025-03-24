@@ -31,7 +31,7 @@ in
     space-bar
     tiling-shell
     #tilingnome
-    #top-bar-organizer
+    top-bar-organizer
     vitals
     windownavigator
   ];
