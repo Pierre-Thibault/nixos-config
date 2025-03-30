@@ -48,6 +48,7 @@ in
     wget
     wl-clipboard
     yazi
+    yt-dlp
     zellij
     zoxide
     zsh

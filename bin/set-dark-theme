@@ -7,7 +7,7 @@ ln -sf config-dark.toml /home/pierre/.config/helix/config.toml
 ln -sf config-dark /home/pierre/.config/bat/config
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Dark-nord";  # Legacy app
-gsettings set org.gnome.shell.extensions.user-theme name "Adwaita"
+gsettings set org.gnome.shell.extensions.user-theme name "Graphite-blue-Dark-nord"
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
 sleep 1 
 gsettings set org.gnome.desktop.interface accent-color "slate"

@@ -1,7 +1,5 @@
 {
-  config,
   pkgs,
-  lib,
   ...
 }:
 
@@ -32,6 +30,7 @@ in
     tiling-shell
     #tilingnome
     top-bar-organizer
+    user-themes
     vitals
     windownavigator
   ];

@@ -23,6 +23,7 @@ in
     gnome-terminal
     gnome-tweaks
     google-chrome
+    gthumb
     guake
     jetbrains.rust-rover
     keepass
