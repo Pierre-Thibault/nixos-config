@@ -10,7 +10,7 @@ in
   users.users.${userdata.username}.packages = with pkgs.gnomeExtensions; [
     # The extensions commented are the ones that are only working when installed manually
 
-    activate-window-by-title
+    # activate-window-by-title  # I'm using my custom version.
     app-icons-taskbar
     blur-my-shell
     caffeine
@@ -30,7 +30,7 @@ in
     tiling-shell
     #tilingnome
     top-bar-organizer
-    user-themes
+    # user-themes  # Doest not work with shell scripts
     vitals
     windownavigator
   ];
