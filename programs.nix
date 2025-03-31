@@ -42,5 +42,7 @@ in
     tesseract
     vlc
     vscodium
+    warp-terminal
+    wezterm
   ];
 }

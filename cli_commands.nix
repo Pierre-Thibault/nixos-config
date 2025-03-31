@@ -21,7 +21,6 @@ in
     file
     fzf
     gcc
-    ghostty
     git
     gitleaks
     gnupg
