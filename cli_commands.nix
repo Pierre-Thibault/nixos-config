@@ -16,6 +16,7 @@ in
 {
   users.users.${userdata.username}.packages = with pkgs; [
     bat
+    dconf
     direnv
     fanctl
     file

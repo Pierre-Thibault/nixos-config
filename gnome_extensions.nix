@@ -30,7 +30,7 @@ in
     tiling-shell
     #tilingnome
     top-bar-organizer
-    # user-themes  # Doest not work with shell scripts
+    user-themes
     vitals
     windownavigator
   ];

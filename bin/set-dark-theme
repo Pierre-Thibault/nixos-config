@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-ln -sf /home/pierre/.themes/Graphite-blue-Dark-nord/gtk-4.0/assets /home/pierre/.config/gtk-4.0/assets
-ln -sf /home/pierre/.themes/Graphite-blue-Dark-nord/gtk-4.0/gtk.css /home/pierre/.config/gtk-4.0/gtk.css
-ln -sf /home/pierre/.themes/Graphite-blue-Dark-nord/gtk-4.0/gtk-dark.css /home/pierre/.config/gtk-4.0/gtk-dark.css
-ln -sf config-dark.toml /home/pierre/.config/helix/config.toml
-ln -sf config-dark /home/pierre/.config/bat/config
-ln -sf wezterm-dark.lua /home/pierre/.config/wezterm/wezterm.lua
+ln -sf ~/.themes/Graphite-blue-Dark-nord/gtk-4.0/assets ~/.config/gtk-4.0/assets
+ln -sf ~/.themes/Graphite-blue-Dark-nord/gtk-4.0/gtk.css ~/.config/gtk-4.0/gtk.css
+ln -sf ~/.themes/Graphite-blue-Dark-nord/gtk-4.0/gtk-dark.css ~/.config/gtk-4.0/gtk-dark.css
+ln -sf config-dark.toml ~/.config/helix/config.toml
+ln -sf config-dark ~/.config/bat/config
+ln -sf wezterm-dark.lua ~/.config/wezterm/wezterm.lua
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Dark-nord";  # Legacy app
-gsettings set org.gnome.shell.extensions.user-theme name "Graphite-blue-Dark-nord"
+dconf write /org/gnome/shell/extensions/user-theme/name "'Graphite-blue-Dark-nord'"
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
 sleep 1 
 gsettings set org.gnome.desktop.interface accent-color "slate"
