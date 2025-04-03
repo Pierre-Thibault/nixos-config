@@ -44,5 +44,6 @@ in
     vscodium
     warp-terminal
     wezterm
+    zed-editor
   ];
 }
