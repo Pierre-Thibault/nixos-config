@@ -3,33 +3,35 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 {
-  config,
   pkgs,
   lib,
   ...
 }:
 
 let
+  file_to_not_import = [
+    "flake.nix"
+    "configuration.nix"
+    "userdata.nix"
+  ];
+in
+let
   userdata = import ./userdata.nix;
+  get_import_dir =
+    dir:
+    lib.flatten (
+      lib.pipe dir [
+        builtins.readDir
+        (lib.filterAttrs (name: type: type == "directory" || lib.hasSuffix ".nix" name))
+        (lib.filterAttrs (name: _: !(lib.elem name file_to_not_import)))
+        (lib.mapAttrsToList (
+          name: type: if type == "directory" then get_import_dir (dir + ("/" + name)) else dir + ("/" + name)
+        ))
+      ]
+    );
 in
 {
-  imports =
-    lib.pipe ./services [
-      builtins.readDir
-      (lib.filterAttrs (name: _: lib.hasSuffix ".nix" name))
-      (lib.mapAttrsToList (name: _: ./services + "/${name}"))
-    ]
-    ++ [
-      ./cli_commands.nix
-      ./flatpak.nix
-      ./gnome_extensions.nix
-      ./programs.nix
-      ./system_packages.nix
-      ./themes.nix
-      ./user_lib.nix
-      # Include the results of the hardware scan
-      ./hardware-configuration.nix
-    ];
+  imports = get_import_dir ./.;
 
   nix.settings.experimental-features = [
     "nix-command"
