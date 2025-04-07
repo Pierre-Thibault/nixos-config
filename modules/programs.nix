@@ -36,6 +36,7 @@ in
     openvpn
     protonvpn-gui
     qalculate-gtk
+    taplo
     telegram-desktop
     tesseract
     vlc
