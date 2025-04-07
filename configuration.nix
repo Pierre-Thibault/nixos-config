@@ -9,29 +9,21 @@
 }:
 
 let
-  file_to_not_import = [
-    "flake.nix"
-    "configuration.nix"
-    "userdata.nix"
-  ];
+  inherit (builtins) filter map toString;
+  inherit (lib) pipe;
+  inherit (lib.filesystem) listFilesRecursive;
+  inherit (lib.strings) hasSuffix;
 in
 let
   userdata = import ./userdata.nix;
-  get_import_dir =
-    dir:
-    lib.flatten (
-      lib.pipe dir [
-        builtins.readDir
-        (lib.filterAttrs (name: type: type == "directory" || lib.hasSuffix ".nix" name))
-        (lib.filterAttrs (name: _: !(lib.elem name file_to_not_import)))
-        (lib.mapAttrsToList (
-          name: type: if type == "directory" then get_import_dir (dir + ("/" + name)) else dir + ("/" + name)
-        ))
-      ]
-    );
+  import_modules = pipe ./modules [
+    listFilesRecursive
+    (map toString)
+    (filter (hasSuffix ".nix"))
+  ];
 in
 {
-  imports = get_import_dir ./.;
+  imports = import_modules;
 
   nix.settings.experimental-features = [
     "nix-command"

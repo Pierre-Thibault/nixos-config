@@ -4,7 +4,7 @@
 }:
 
 let
-  userdata = import ./userdata.nix;
+  userdata = import ../userdata.nix;
 in
 # unstable = import <nixos-unstable> {
 #   config = {
