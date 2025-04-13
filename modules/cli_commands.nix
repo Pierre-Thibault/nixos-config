@@ -50,8 +50,4 @@ in
     zoxide
     zsh
   ];
-  programs.neovim = {
-    enable = true;
-    defaultEditor = false;
-  };
 }
