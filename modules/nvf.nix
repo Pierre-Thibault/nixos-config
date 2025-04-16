@@ -32,7 +32,7 @@
         theme = {
           enable = true;
           name = "catppuccin";
-          # style = "mocha";
+          style = "frappe";
           transparent = true;
         };
         options.background = "light";
