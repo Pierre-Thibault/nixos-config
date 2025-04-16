@@ -7,10 +7,6 @@
     enable = true;
     settings = {
       vim = {
-        startPlugins = [
-          "catppuccin"
-        ];
-
         languages = {
           enableLSP = true;
           enableTreesitter = true;
@@ -36,9 +32,10 @@
         theme = {
           enable = true;
           name = "catppuccin";
-          style = "mocha";
+          # style = "mocha";
           transparent = true;
         };
+        options.background = "light";
       };
     };
   };
