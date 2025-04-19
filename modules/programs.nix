@@ -22,7 +22,6 @@ in
     gnome-tweaks
     google-chrome
     gthumb
-    jetbrains.rust-rover
     keepass
     keepassxc
     keymapp
