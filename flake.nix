@@ -6,13 +6,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
-    nvf.url = "github:notashelf/nvf"; # Neovim configuration
   };
   outputs =
     {
       nixpkgs,
       nix-flatpak,
-      nvf,
       ...
     }:
     {
@@ -20,7 +18,6 @@
         system = "x86_64-linux";
         modules = [
           nix-flatpak.nixosModules.nix-flatpak
-          nvf.nixosModules.default
           ./configuration.nix
         ];
       };
