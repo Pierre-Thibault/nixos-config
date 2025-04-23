@@ -13,9 +13,18 @@
       nix-flatpak,
       ...
     }:
+    let
+      unstableTarball = fetchTarball {
+        url = "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz";
+        sha256 = "0a16swsbgnzr5j991ggq17fiyyfvcn434k624250b4rp9bdj83hx";
+      };
+      unstable = import unstableTarball { system = "x86_64-linux"; };
+    in
     {
       nixosConfigurations.pierre-nixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
+        specialArgs = {
+          inherit unstable;
+        };
         modules = [
           nix-flatpak.nixosModules.nix-flatpak
           ./configuration.nix

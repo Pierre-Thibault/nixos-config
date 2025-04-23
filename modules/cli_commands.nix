@@ -1,16 +1,12 @@
 {
   pkgs,
+  unstable,
   ...
 }:
 
 let
   userdata = import ../userdata.nix;
 in
-# unstable = import <nixos-unstable> {
-#   config = {
-#     allowUnfree = true;
-#   };
-# };
 {
   users.users.${userdata.username}.packages = with pkgs; [
     bat
@@ -38,6 +34,7 @@ in
     openjdk17-bootstrap
     ripgrep
     ripgrep-all
+    unstable.simple-completion-language-server
     stow
     tree
     unzip
