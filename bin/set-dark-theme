@@ -6,6 +6,7 @@ ln -sf ~/.themes/Graphite-blue-Dark-nord/gtk-4.0/gtk-dark.css ~/.config/gtk-4.0/
 ln -sf config-dark.toml ~/.config/helix/config.toml
 ln -sf config-dark ~/.config/bat/config
 ln -sf wezterm-dark.lua ~/.config/wezterm/wezterm.lua
+ln -sf config-dark.kdl ~/.config/zellij/config.kdl
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Dark-nord";  # Legacy app
 dconf write /org/gnome/shell/extensions/user-theme/name "'Graphite-blue-Dark-nord'"

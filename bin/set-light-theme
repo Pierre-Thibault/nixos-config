@@ -6,6 +6,7 @@ ln -sf ~/.themes/Graphite-blue-Light-nord/gtk-4.0/gtk-dark.css ~/.config/gtk-4.0
 ln -sf config-light.toml ~/.config/helix/config.toml
 ln -sf config-light ~/.config/bat/config
 ln -sf wezterm-light.lua ~/.config/wezterm/wezterm.lua
+ln -sf zellij-light.kdl ~/.config/zellij/config.kdl
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Light-nord";  # Legacy app
 dconf write /org/gnome/shell/extensions/user-theme/name "'Adwaita'"
