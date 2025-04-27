@@ -32,6 +32,7 @@ in
     obsidian
     ocrfeeder
     openvpn
+    protonmail-desktop
     protonvpn-gui
     qalculate-gtk
     taplo
