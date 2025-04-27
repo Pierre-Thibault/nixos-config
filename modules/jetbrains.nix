@@ -11,6 +11,5 @@ in
     pycharm-community-src
     pycharm-professional
     rust-rover
-    webstorm
   ];
 }
