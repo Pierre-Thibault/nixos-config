@@ -9,7 +9,7 @@ ln -sf wezterm-light.lua ~/.config/wezterm/wezterm.lua
 ln -sf config-light.kdl ~/.config/zellij/config.kdl
 
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Light-nord";  # Legacy app
-dconf write /org/gnome/shell/extensions/user-theme/name "'Adwaita'"
+dconf write /org/gnome/shell/extensions/user-theme/name "'Adwaita'"  # Using another theme due to contrast issues
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false;
 sleep 1
 gsettings set org.gnome.desktop.interface accent-color "slate"

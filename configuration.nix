@@ -74,6 +74,7 @@ in
   environment.gnome.excludePackages = with pkgs; [
     epiphany # web browser
     gnome-calculator
+    gnome-calendar
   ];
 
   environment = {
