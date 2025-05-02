@@ -34,6 +34,7 @@ in
     openvpn
     protonvpn-gui
     qalculate-gtk
+    stretchly
     taplo
     telegram-desktop
     tesseract

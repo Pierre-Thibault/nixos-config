@@ -12,6 +12,7 @@ in
 
     # activate-window-by-title  # I'm using my custom version.
     app-icons-taskbar
+    appindicator
     blur-my-shell
     caffeine
     cronomix
