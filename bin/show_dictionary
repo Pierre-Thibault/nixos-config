@@ -4,6 +4,13 @@ busctl --user call \
     org.gnome.Shell \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
+    setCurrentDesktopFirst \
+    b 1
+
+busctl --user call \
+    org.gnome.Shell \
+    /de/lucaswerkmeister/ActivateWindowByTitle \
+    de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
     s 'Larousse — Waterfox' | grep true || \
 busctl --user call \
