@@ -9,6 +9,7 @@ in
 {
   users.users.${userdata.username}.packages = with pkgs; [
     # General dev tools that I want available all the times
+    bash-language-server
     lsp-ai
     marksman
     taplo
