@@ -23,7 +23,6 @@ in
     helix
     lsb-release
     lsd
-    lsp-ai
     marksman
     mc
     nap
