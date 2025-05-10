@@ -18,6 +18,7 @@ in
     gcc
     git
     gitleaks
+    gnome-epub-thumbnailer
     gnupg
     gnumake
     helix
