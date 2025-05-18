@@ -11,7 +11,7 @@ ln -sf config-dark.kdl ~/.config/zellij/config.kdl
 gsettings set org.gnome.desktop.interface gtk-theme "Graphite-blue-Dark-nord";  # Legacy app
 dconf write /org/gnome/shell/extensions/user-theme/name "'Graphite-blue-Dark-nord'"
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
-sleep 1 
+sleep 4
 gsettings set org.gnome.desktop.interface accent-color "slate"
 guake --change-palette="Oceanic Next Dark"
 
