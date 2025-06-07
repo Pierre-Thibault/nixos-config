@@ -15,6 +15,7 @@ in
     appindicator
     blur-my-shell
     caffeine
+    color-picker
     cronomix
     #emoji-copy
     hide-cursor
