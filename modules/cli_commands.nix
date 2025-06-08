@@ -9,10 +9,15 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
+    bandwhich
     bat
+    bottom
     dconf
     direnv
+    dust
+    eza
     fanctl
+    fd
     file
     fzf
     gcc
@@ -33,10 +38,11 @@ in
     nixfmt-rfc-style
     nushell
     openjdk17-bootstrap
-    ripgrep
+    procs
     ripgrep-all
     unstable.simple-completion-language-server
     stow
+    tokei
     tree
     unzip
     vim
