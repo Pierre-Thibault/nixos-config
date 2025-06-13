@@ -7,3 +7,4 @@ ln -sf config-dark.kdl ~/.config/zellij/config.kdl
 
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
 sleep 4
+gsettings set org.gnome.desktop.interface accent-color "slate"

@@ -10,14 +10,14 @@ in
   users.users.${userdata.username}.packages = with pkgs.gnomeExtensions; [
     # The extensions commented are the ones that are only working when installed manually
 
-    # activate-window-by-title  # I'm using my custom version.
+    activate-window-by-title
     app-icons-taskbar
     appindicator
     blur-my-shell
     caffeine
     color-picker
     cronomix
-    #emoji-copy
+    emoji-copy
     hide-cursor
     nasa-apod
     native-window-placement
