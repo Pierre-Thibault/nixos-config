@@ -67,10 +67,7 @@ in
     LC_TIME = "fr_CA.UTF-8";
   };
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Enable the GNOME Desktop Environment.
+  # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
 
@@ -94,8 +91,8 @@ in
     variant = "multix";
   };
 
-  # Configure console keymap
-  console.keyMap = "cf";
+  # Configure console keymap to use the xserver config
+  console.useXkbConfig = true;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
