@@ -1,6 +1,5 @@
 {
   pkgs,
-  unstable,
   ...
 }:
 
@@ -40,7 +39,7 @@ in
     openjdk17-bootstrap
     procs
     ripgrep-all
-    unstable.simple-completion-language-server
+    simple-completion-language-server
     stow
     tokei
     tree
