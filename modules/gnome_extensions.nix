@@ -23,7 +23,7 @@ in
     native-window-placement
     night-light-slider-updated
     night-theme-switcher
-    #open-bar
+    open-bar
     pano
     removable-drive-menu
     rounded-corners
