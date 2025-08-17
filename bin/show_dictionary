@@ -7,22 +7,20 @@ busctl --user call \
     setCurrentDesktopFirst \
     b 1
 
+for title in Larousse "Le Robert" Éditeur
+do
+    if busctl --user call \
+        org.gnome.Shell \
+        /de/lucaswerkmeister/ActivateWindowByTitle \
+        de.lucaswerkmeister.ActivateWindowByTitle \
+        activateBySubstring \
+        s "$title — Waterfox" | grep true; then
+        exit 0
+        fi
+done
 busctl --user call \
     org.gnome.Shell \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s 'Larousse — Waterfox' | grep true || \
-busctl --user call \
-    org.gnome.Shell \
-    /de/lucaswerkmeister/ActivateWindowByTitle \
-    de.lucaswerkmeister.ActivateWindowByTitle \
-    activateBySubstring \
-    s 'Le Robert — Waterfox' | grep true || \
-busctl --user call \
-    org.gnome.Shell \
-    /de/lucaswerkmeister/ActivateWindowByTitle \
-    de.lucaswerkmeister.ActivateWindowByTitle \
-    activateBySubstring \
-    s 'Reverso' | grep true || xdg-open https://www.larousse.fr/dictionnaires/francais
-
+    s "Reverso"
