@@ -8,6 +8,7 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
+    audacity
     brave
     nemo-with-extensions
     clipgrab
