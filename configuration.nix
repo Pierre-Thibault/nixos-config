@@ -67,26 +67,6 @@ in
     LC_TIME = "fr_CA.UTF-8";
   };
 
-  # Enable keyd service
-  services.keyd = {
-    enable = true;
-    keyboards = {
-      default = {
-        settings = {
-          main = {
-            capslock = "rightalt";
-            leftcontrol = "leftmeta";
-            leftmeta = "leftalt";
-            rightmeta = "leftalt";
-            leftalt = "leftcontrol";
-            rightalt = "leftcontrol";
-            rightcontrol = "rightcontrol";
-          };
-        };
-      };
-    };
-  };
-
   # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
