@@ -7,10 +7,16 @@ busctl --user call \
     setCurrentDesktopFirst \
     b 1
 
-busctl --user call \
-    org.gnome.Shell \
-    /de/lucaswerkmeister/ActivateWindowByTitle \
-    de.lucaswerkmeister.ActivateWindowByTitle \
-    activateBySubstring \
-    s 'X — Waterfox' | grep true || xdg-open https://x.com
+for title in "Accueil / X" "Home / X"
+do
+    if busctl --user call \
+        org.gnome.Shell \
+        /de/lucaswerkmeister/ActivateWindowByTitle \
+        de.lucaswerkmeister.ActivateWindowByTitle \
+        activateByTitle \
+        s "$title — Waterfox" | grep true; then
+        exit 0
+        fi
+done
+xdg-open https://x.com
 
