@@ -151,8 +151,22 @@ in
   services.openssh.enable = userdata.ssh_enable;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = if userdata.ssh_enable then [ 22 ] else [ ];
-  networking.firewall.allowedUDPPorts = if userdata.ssh_enable then [ 22 ] else [ ];
+  networking.firewall.allowedTCPPorts =
+    if userdata.ssh_enable then
+      [
+        22
+      ]
+    else
+      [
+      ];
+  networking.firewall.allowedUDPPorts =
+    if userdata.ssh_enable then
+      [
+        22
+      ]
+    else
+      [
+      ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
