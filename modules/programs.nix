@@ -22,6 +22,7 @@ in
     gnome-terminal
     gnome-tweaks
     google-chrome
+    ghostty
     gthumb
     keepass
     keepassxc
