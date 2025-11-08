@@ -32,7 +32,6 @@ in
     mc
     nap
     neofetch
-    neovim
     nixd
     nixfmt-rfc-style
     nushell
