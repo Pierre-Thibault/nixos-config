@@ -22,6 +22,7 @@ in
     gcc
     git
     gitleaks
+    gitui
     gnome-epub-thumbnailer
     gnupg
     gnumake
