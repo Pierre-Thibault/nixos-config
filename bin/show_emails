@@ -12,5 +12,5 @@ busctl --user call \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s 'Proton Mail — Waterfox' | grep true || xdg-open https://mail.proton.me
+    s "Proton Mail —" | grep true || xdg-open https://mail.proton.me
 

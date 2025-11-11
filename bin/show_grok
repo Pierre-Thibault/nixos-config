@@ -12,5 +12,5 @@ busctl --user call \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s 'Grok / X — Waterfox' | grep true || xdg-open https://x.com/i/grok
+    s 'Grok / X — ' | grep true || xdg-open https://x.com/i/grok
 

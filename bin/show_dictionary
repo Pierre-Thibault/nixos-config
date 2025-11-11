@@ -7,14 +7,14 @@ busctl --user call \
     setCurrentDesktopFirst \
     b 1
 
-for title in Larousse "Le Robert" Éditeur
+for title in Reverso Larousse "Le Robert" Éditeur
 do
     if busctl --user call \
         org.gnome.Shell \
         /de/lucaswerkmeister/ActivateWindowByTitle \
         de.lucaswerkmeister.ActivateWindowByTitle \
         activateBySubstring \
-        s "$title — Waterfox" | grep true; then
+        s "$title — Profil" | grep true; then
         exit 0
         fi
 done
@@ -23,4 +23,4 @@ busctl --user call \
     /de/lucaswerkmeister/ActivateWindowByTitle \
     de.lucaswerkmeister.ActivateWindowByTitle \
     activateBySubstring \
-    s "Reverso"
+    s "Reverso — Profil"
