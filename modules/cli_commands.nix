@@ -11,7 +11,6 @@ in
     bandwhich
     bat
     bottom
-    dconf
     direnv
     dust
     eza

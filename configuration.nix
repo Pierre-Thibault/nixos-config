@@ -140,6 +140,11 @@ in
     enableSSHSupport = true;
   };
 
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
   # Install firefox.
   # programs.firefox.enable = true;
 
