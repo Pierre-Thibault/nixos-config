@@ -11,16 +11,12 @@ in
     # The extensions commented are the ones that are only working when installed manually
 
     activate-window-by-title
-    app-icons-taskbar
     appindicator
     blur-my-shell
     caffeine
     color-picker
-    cronomix
     emoji-copy
     hide-cursor
-    nasa-apod
-    native-window-placement
     night-light-slider-updated
     night-theme-switcher
     open-bar
@@ -30,9 +26,6 @@ in
     run-or-raise
     space-bar
     tiling-shell
-    #tilingnome
-    # top-bar-organizer
-    vitals
     windownavigator
   ];
 
