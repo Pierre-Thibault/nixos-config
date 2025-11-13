@@ -46,7 +46,6 @@ in
     vim
     wget
     wl-clipboard
-    xdotool
     yazi
     yt-dlp
     zellij
