@@ -83,6 +83,17 @@ in
     gnome-calculator
   ];
 
+  programs.dconf.profiles.user.databases = [
+    {
+      lockAll = true; # prevents overriding
+      settings = {
+        "org/gnome/desktop/interface" = {
+          accent-color = "slate";
+        };
+      };
+    }
+  ];
+
   environment = {
     shells = [ pkgs.zsh ];
     variables = {
