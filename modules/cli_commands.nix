@@ -11,6 +11,7 @@ in
     bandwhich
     bat
     bottom
+    devenv
     direnv
     dust
     eza
