@@ -25,10 +25,13 @@ in
 {
   imports = import_modules;
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    trusted-users = [ userdata.username ];
+  };
 
   # Bootloader.
   boot.loader = {
