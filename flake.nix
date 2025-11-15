@@ -5,12 +5,14 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
   outputs =
     {
       nixpkgs,
       nix-flatpak,
+      nixpkgs-unstable,
       ...
     }:
     {
@@ -19,6 +21,9 @@
           nix-flatpak.nixosModules.nix-flatpak
           ./configuration.nix
         ];
+        specialArgs = {
+          unstable = import nixpkgs-unstable { system = "x86_64-linux"; };
+        };
       };
     };
 }

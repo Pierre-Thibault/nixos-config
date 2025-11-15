@@ -1,5 +1,6 @@
 {
   pkgs,
+  unstable,
   ...
 }:
 
@@ -35,7 +36,7 @@ in
     neofetch
     nixd
     nixfmt-rfc-style
-    nushell
+    unstable.nushell # For Yazelix
     openjdk17-bootstrap
     procs
     ripgrep-all
