@@ -97,6 +97,8 @@ in
     }
   ];
 
+  services.desktopManager.plasma6.enable = true;
+
   environment = {
     shells = [ pkgs.zsh ];
     variables = {

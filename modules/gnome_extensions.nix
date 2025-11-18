@@ -29,10 +29,10 @@ in
     windownavigator
   ];
 
-  programs.kdeconnect = {
-    enable = true;
-    package = pkgs.gnomeExtensions.gsconnect;
-  };
+  # programs.kdeconnect = {
+  #   enable = true;
+  #   package = pkgs.gnomeExtensions.gsconnect;
+  # };
 
   environment.gnome.excludePackages = with pkgs; [
     gnome-shell-extensions # Remove default extensions
