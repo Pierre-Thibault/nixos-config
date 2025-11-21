@@ -13,8 +13,6 @@ let
   inherit (lib) pipe;
   inherit (lib.filesystem) listFilesRecursive;
   inherit (lib.strings) hasSuffix;
-in
-let
   userdata = import ./userdata.nix;
   import_modules = pipe ./modules [
     listFilesRecursive

@@ -37,7 +37,6 @@ in
     nixd
     nixfmt-rfc-style
     unstable.nushell # For Yazelix
-    openjdk17-bootstrap
     procs
     ripgrep-all
     simple-completion-language-server
