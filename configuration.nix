@@ -26,7 +26,7 @@ in
 
   boot = {
     loader = {
-      system-boot = {
+      systemd-boot = {
         enable = true;
         configurationLimit = 50;
       };
