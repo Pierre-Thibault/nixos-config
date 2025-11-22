@@ -138,19 +138,37 @@ in
     gnome-calculator
   ];
 
-  programs.dconf.profiles.user.databases = [
-    {
-      lockAll = true; # prevents overriding
-      settings = {
-        "org/gnome/desktop/interface" = {
-          accent-color = "slate";
+  programs = {
+    dconf.profiles.user.databases = [
+      {
+        lockAll = true; # prevents overriding
+        settings = {
+          "org/gnome/desktop/interface" = {
+            accent-color = "slate";
+          };
         };
-      };
-    }
-  ];
+      }
+    ];
 
-  programs.steam = {
-    enable = true;
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+
+    steam = {
+      enable = true;
+    };
+
+    zsh = {
+      enable = true;
+      autosuggestions.enable = true;
+      syntaxHighlighting.enable = true;
+    };
   };
 
   environment = {
@@ -174,25 +192,6 @@ in
       "wheel"
     ];
     shell = pkgs.zsh;
-  };
-
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
-
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-  };
-
-  # Install firefox.
-  # programs.firefox.enable = true;
-
-  programs.zsh = {
-    enable = true;
-    autosuggestions.enable = true;
-    syntaxHighlighting.enable = true;
   };
 
   # Allow unfree packages
