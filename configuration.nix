@@ -187,6 +187,8 @@ in
 
     # Enable the OpenSSH daemon.
     openssh.enable = userdata.ssh_enable;
+
+    espanso.enable = true;
   };
 
   # This value determines the NixOS release from which the default
