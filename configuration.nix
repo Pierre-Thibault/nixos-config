@@ -14,22 +14,15 @@ let
   inherit (lib.filesystem) listFilesRecursive;
   inherit (lib.strings) hasSuffix;
   userdata = import ./userdata.nix;
-  import_modules = pipe ./modules [
+  inherit (userdata) username;
+  modules = pipe ./modules [
     listFilesRecursive
     (map toString)
     (filter (hasSuffix ".nix"))
   ];
 in
 {
-  imports = import_modules;
-
-  nix.settings = {
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-    trusted-users = [ userdata.username ];
-  };
+  imports = modules;
 
   boot = {
     loader = {
@@ -51,49 +44,112 @@ in
     ];
   };
 
+  # Configure console keymap to use the xserver config
+  console.useXkbConfig = true;
+
+  environment = {
+    gnome.excludePackages = with pkgs; [
+      epiphany # web browser
+      gnome-calculator
+    ];
+    shells = [ pkgs.zsh ];
+    variables =
+      let
+        editor = "hx";
+      in
+      {
+        EDITOR = editor;
+        SYSTEMD_EDITOR = editor;
+        VISUAL = editor;
+      };
+  };
+
+  i18n =
+    let
+      locale = "fr_CA.UTF-8";
+    in
+    {
+      defaultLocale = locale;
+
+      extraLocaleSettings = {
+        LC_ADDRESS = locale;
+        LC_IDENTIFICATION = locale;
+        LC_MEASUREMENT = locale;
+        LC_MONETARY = locale;
+        LC_NAME = locale;
+        LC_NUMERIC = locale;
+        LC_PAPER = locale;
+        LC_TELEPHONE = locale;
+        LC_TIME = locale;
+      };
+    };
+
   networking = {
     hostName = userdata.hostname; # Define your hostname.
     networkmanager.enable = true;
 
     # Open ports in the firewall.
-    firewall.allowedTCPPorts =
-      if userdata.ssh_enable then
-        [
-          22
-        ]
-      else
-        [
-        ];
-    firewall.allowedUDPPorts =
-      if userdata.ssh_enable then
-        [
-          22
-        ]
-      else
-        [
-        ];
+    firewall =
+      let
+        ssh-port-list =
+          if userdata.ssh_enable then
+            [
+              22
+            ]
+          else
+            [
+            ];
+      in
+      {
+        allowedTCPPorts = ssh-port-list;
+        allowedUDPPorts = ssh-port-list;
+      };
   };
 
-  # Set your time zone.
-  time.timeZone = "America/New_York";
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    trusted-users = [ username ];
+  };
 
-  # Select internationalisation properties.
-  i18n = {
-    defaultLocale = "fr_CA.UTF-8";
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
 
-    extraLocaleSettings = {
-      LC_ADDRESS = "fr_CA.UTF-8";
-      LC_IDENTIFICATION = "fr_CA.UTF-8";
-      LC_MEASUREMENT = "fr_CA.UTF-8";
-      LC_MONETARY = "fr_CA.UTF-8";
-      LC_NAME = "fr_CA.UTF-8";
-      LC_NUMERIC = "fr_CA.UTF-8";
-      LC_PAPER = "fr_CA.UTF-8";
-      LC_TELEPHONE = "fr_CA.UTF-8";
-      LC_TIME = "fr_CA.UTF-8";
+  programs = {
+    dconf.profiles.user.databases = [
+      {
+        lockAll = true; # prevents overriding
+        settings = {
+          "org/gnome/desktop/interface" = {
+            accent-color = "slate";
+          };
+        };
+      }
+    ];
+
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
     };
 
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+
+    steam = {
+      enable = true;
+    };
+
+    zsh = {
+      enable = true;
+      autosuggestions.enable = true;
+      syntaxHighlighting.enable = true;
+    };
   };
+
   services = {
     xserver = {
       # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
@@ -133,69 +189,6 @@ in
     openssh.enable = userdata.ssh_enable;
   };
 
-  environment = {
-    gnome.excludePackages = with pkgs; [
-      epiphany # web browser
-      gnome-calculator
-    ];
-    shells = [ pkgs.zsh ];
-    variables = {
-      EDITOR = "hx";
-      SYSTEMD_EDITOR = "hx";
-      VISUAL = "hx";
-    };
-  };
-
-  programs = {
-    dconf.profiles.user.databases = [
-      {
-        lockAll = true; # prevents overriding
-        settings = {
-          "org/gnome/desktop/interface" = {
-            accent-color = "slate";
-          };
-        };
-      }
-    ];
-
-    direnv = {
-      enable = true;
-      nix-direnv.enable = true;
-    };
-
-    gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
-    };
-
-    steam = {
-      enable = true;
-    };
-
-    zsh = {
-      enable = true;
-      autosuggestions.enable = true;
-      syntaxHighlighting.enable = true;
-    };
-  };
-
-  # Configure console keymap to use the xserver config
-  console.useXkbConfig = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.${userdata.username} = {
-    isNormalUser = true;
-    description = userdata.userfullname;
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-    ];
-    shell = pkgs.zsh;
-  };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
@@ -204,4 +197,16 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.11"; # Did you read the comment?
 
+  time.timeZone = "America/New_York";
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.users.${username} = {
+    isNormalUser = true;
+    description = userdata.userfullname;
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+    ];
+    shell = pkgs.zsh;
+  };
 }
