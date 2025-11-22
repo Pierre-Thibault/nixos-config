@@ -133,10 +133,18 @@ in
     openssh.enable = userdata.ssh_enable;
   };
 
-  environment.gnome.excludePackages = with pkgs; [
-    epiphany # web browser
-    gnome-calculator
-  ];
+  environment = {
+    gnome.excludePackages = with pkgs; [
+      epiphany # web browser
+      gnome-calculator
+    ];
+    shells = [ pkgs.zsh ];
+    variables = {
+      EDITOR = "hx";
+      SYSTEMD_EDITOR = "hx";
+      VISUAL = "hx";
+    };
+  };
 
   programs = {
     dconf.profiles.user.databases = [
@@ -168,15 +176,6 @@ in
       enable = true;
       autosuggestions.enable = true;
       syntaxHighlighting.enable = true;
-    };
-  };
-
-  environment = {
-    shells = [ pkgs.zsh ];
-    variables = {
-      EDITOR = "hx";
-      SYSTEMD_EDITOR = "hx";
-      VISUAL = "hx";
     };
   };
 
