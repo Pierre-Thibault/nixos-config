@@ -51,34 +51,49 @@ in
     ];
   };
 
-  networking.hostName = userdata.hostname; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking = {
+    hostName = userdata.hostname; # Define your hostname.
+    networkmanager.enable = true;
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Enable networking
-  networking.networkmanager.enable = true;
+    # Open ports in the firewall.
+    firewall.allowedTCPPorts =
+      if userdata.ssh_enable then
+        [
+          22
+        ]
+      else
+        [
+        ];
+    firewall.allowedUDPPorts =
+      if userdata.ssh_enable then
+        [
+          22
+        ]
+      else
+        [
+        ];
+  };
 
   # Set your time zone.
   time.timeZone = "America/New_York";
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "fr_CA.UTF-8";
+  i18n = {
+    defaultLocale = "fr_CA.UTF-8";
 
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "fr_CA.UTF-8";
-    LC_IDENTIFICATION = "fr_CA.UTF-8";
-    LC_MEASUREMENT = "fr_CA.UTF-8";
-    LC_MONETARY = "fr_CA.UTF-8";
-    LC_NAME = "fr_CA.UTF-8";
-    LC_NUMERIC = "fr_CA.UTF-8";
-    LC_PAPER = "fr_CA.UTF-8";
-    LC_TELEPHONE = "fr_CA.UTF-8";
-    LC_TIME = "fr_CA.UTF-8";
+    extraLocaleSettings = {
+      LC_ADDRESS = "fr_CA.UTF-8";
+      LC_IDENTIFICATION = "fr_CA.UTF-8";
+      LC_MEASUREMENT = "fr_CA.UTF-8";
+      LC_MONETARY = "fr_CA.UTF-8";
+      LC_NAME = "fr_CA.UTF-8";
+      LC_NUMERIC = "fr_CA.UTF-8";
+      LC_PAPER = "fr_CA.UTF-8";
+      LC_TELEPHONE = "fr_CA.UTF-8";
+      LC_TIME = "fr_CA.UTF-8";
+    };
+
   };
-
   services = {
     xserver = {
       # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
@@ -182,26 +197,6 @@ in
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-
-  # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts =
-    if userdata.ssh_enable then
-      [
-        22
-      ]
-    else
-      [
-      ];
-  networking.firewall.allowedUDPPorts =
-    if userdata.ssh_enable then
-      [
-        22
-      ]
-    else
-      [
-      ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
