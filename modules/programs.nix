@@ -34,6 +34,7 @@ in
     obsidian
     ocrfeeder
     openvpn
+    polari
     protonvpn-gui
     qalculate-gtk
     stretchly
