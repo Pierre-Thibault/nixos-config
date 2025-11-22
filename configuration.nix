@@ -31,28 +31,32 @@ in
     trusted-users = [ userdata.username ];
   };
 
-  # Bootloader.
-  boot.loader = {
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
-    systemd-boot.configurationLimit = 50;
+  boot = {
+    loader = {
+      system-boot = {
+        enable = true;
+        configurationLimit = 50;
+      };
+      efi.canTouchEfiVariables = true;
+    };
+
+    initrd.luks.devices."luks-56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6".device =
+      "/dev/disk/by-uuid/56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6";
+
+    kernelModules = [
+      "vboxdrv"
+      "vboxnetflt"
+      "vboxnetadp"
+      "vboxpci"
+    ];
   };
 
-  boot.initrd.luks.devices."luks-56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6".device =
-    "/dev/disk/by-uuid/56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6";
   networking.hostName = userdata.hostname; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  boot.kernelModules = [
-    "vboxdrv"
-    "vboxnetflt"
-    "vboxnetadp"
-    "vboxpci"
-  ];
 
   # Enable networking
   networking.networkmanager.enable = true;
