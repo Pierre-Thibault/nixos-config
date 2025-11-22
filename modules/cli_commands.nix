@@ -12,6 +12,7 @@ in
     bandwhich
     bat
     bottom
+    devbox
     devenv
     direnv
     dust
