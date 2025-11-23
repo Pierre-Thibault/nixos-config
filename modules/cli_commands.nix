@@ -42,6 +42,7 @@ in
     procs
     ripgrep-all
     simple-completion-language-server
+    starship
     stow
     tokei
     tree
