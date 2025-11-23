@@ -30,7 +30,6 @@ in
     gnupg
     gnumake
     helix
-    home-manager
     lsb-release
     lsd
     marksman

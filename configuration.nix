@@ -139,6 +139,10 @@ in
       enableSSHSupport = true;
     };
 
+    starship = {
+      enable = true;
+    };
+
     steam = {
       enable = true;
     };
