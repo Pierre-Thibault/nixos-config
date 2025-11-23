@@ -20,6 +20,7 @@ in
     fanctl
     fd
     file
+    fish
     fzf
     gcc
     git
