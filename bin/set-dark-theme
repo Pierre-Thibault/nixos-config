@@ -5,6 +5,8 @@ ln -sf config-dark ~/.config/bat/config
 ln -sf wezterm-dark.lua ~/.config/wezterm/wezterm.lua
 ln -sf config-dark.kdl ~/.config/zellij/config.kdl
 ln -sf theme-dark.toml ~/.config/yazi/theme.toml
+ln -sf starship-dark.toml ~/.config/starship/starship.toml
+
 
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
 sleep 4
