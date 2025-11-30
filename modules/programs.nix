@@ -40,6 +40,7 @@ in
     stretchly
     telegram-desktop
     tesseract
+    ulauncher
     vlc
     vscodium
     warp-terminal
