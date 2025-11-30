@@ -9,6 +9,7 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
+    atuin
     bandwhich
     bat
     bottom
