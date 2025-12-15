@@ -26,6 +26,7 @@ in
     run-or-raise
     space-bar
     tiling-shell
+    window-title-is-back
     windownavigator
   ];
 
