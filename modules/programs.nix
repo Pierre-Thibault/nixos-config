@@ -11,7 +11,6 @@ in
     audacity
     brave
     nemo-with-extensions
-    clipgrab
     discord
     gedit
     gimp

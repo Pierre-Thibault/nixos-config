@@ -13,6 +13,7 @@ in
     bandwhich
     bat
     bottom
+    claude-code
     devbox
     devenv
     direnv
