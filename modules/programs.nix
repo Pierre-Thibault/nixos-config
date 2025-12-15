@@ -12,6 +12,7 @@ in
     brave
     nemo-with-extensions
     discord
+    file-roller
     gedit
     gimp
     gitg
