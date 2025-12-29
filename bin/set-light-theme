@@ -8,4 +8,5 @@ ln -sf theme-light.toml ~/.config/yazi/theme.toml
 ln -sf starship-light.toml ~/.config/starship/starship.toml
 
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false;
-sleep 4
+
+pkill -USR1 hx

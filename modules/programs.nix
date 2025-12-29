@@ -10,6 +10,7 @@ in
   users.users.${userdata.username}.packages = with pkgs; [
     audacity
     brave
+    copyq
     nemo-with-extensions
     discord
     file-roller

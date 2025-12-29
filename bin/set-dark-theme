@@ -9,4 +9,5 @@ ln -sf starship-dark.toml ~/.config/starship/starship.toml
 
 
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
-sleep 4
+
+pkill -USR1 hx
