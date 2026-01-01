@@ -8,8 +8,7 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs.jetbrains; [
-    pycharm-community-src
-    pycharm-professional
+    pycharm
     rust-rover
   ];
 }
