@@ -5,27 +5,27 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-25-05.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
-    # espanso-fix.url = "github:pitkling/nixpkgs/espanso-fix-capabilities-export";
   };
   outputs =
     {
       nixpkgs,
+      nixpkgs-25-05,
       nix-flatpak,
       nixpkgs-unstable,
-      # espanso-fix,
       ...
     }:
     {
       nixosConfigurations.pierre-nixos = nixpkgs.lib.nixosSystem {
         modules = [
           nix-flatpak.nixosModules.nix-flatpak
-          # espanso-fix.nixosModules.espanso-capdacoverride
           ./configuration.nix
         ];
         specialArgs = {
           unstable = import nixpkgs-unstable { system = "x86_64-linux"; };
+          nixos-25-05 = import nixpkgs-25-05 { system = "x86_64-linux"; };
         };
       };
     };

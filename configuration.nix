@@ -5,6 +5,7 @@
 {
   pkgs,
   lib,
+  nixos-25-05,
   ...
 }:
 
@@ -48,11 +49,17 @@ in
   console.useXkbConfig = true;
 
   environment = {
-    gnome.excludePackages = with pkgs; [
+    gnome.excludePackages = with nixos-25-05.pkgs; [
       epiphany # web browser
       gnome-calculator
     ];
     shells = [ pkgs.zsh ];
+    systemPackages = with nixos-25-05.pkgs; [
+      gnome-shell
+      gnome-control-center
+      gnome-settings-daemon
+      mutter
+    ];
     variables =
       let
         editor = "hx";
@@ -153,11 +160,18 @@ in
   security.rtkit.enable = true;
 
   services = {
-    # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
-
     xserver = {
+      # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
+      displayManager.gdm.enable = true;
+      desktopManager.gnome = {
+        enable = true;
+        # Use Gnome 48 from 25.05
+        extraGSettingsOverrides = ''
+          [org.gnome.shell]
+          enabled-extensions=[]
+        '';
+      };
+
       # Configure keymap in X11
       xkb = {
         layout = "ca";

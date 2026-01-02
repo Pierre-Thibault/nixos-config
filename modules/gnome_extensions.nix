@@ -1,5 +1,5 @@
 {
-  pkgs,
+  nixos-25-05,
   ...
 }:
 
@@ -7,7 +7,7 @@ let
   userdata = import ../userdata.nix;
 in
 {
-  users.users.${userdata.username}.packages = with pkgs.gnomeExtensions; [
+  users.users.${userdata.username}.packages = with nixos-25-05.pkgs.gnomeExtensions; [
     # The extensions commented are the ones that are only working when installed manually
 
     activate-window-by-title
@@ -35,7 +35,7 @@ in
   #   package = pkgs.gnomeExtensions.gsconnect;
   # };
 
-  environment.gnome.excludePackages = with pkgs; [
+  environment.gnome.excludePackages = with nixos-25-05.pkgs; [
     gnome-shell-extensions # Remove default extensions
   ];
 }
