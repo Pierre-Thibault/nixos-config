@@ -14,6 +14,7 @@ in
     bat
     bottom
     claude-code
+    curl
     devbox
     devenv
     direnv
@@ -29,10 +30,12 @@ in
     gitleaks
     gitui
     gnome-epub-thumbnailer
-    gnupg
     gnumake
+    gnupg
     helix
+    hx-lsp
     home-manager
+    jq
     lsb-release
     lsd
     marksman
@@ -41,7 +44,6 @@ in
     neofetch
     nixd
     nixfmt-rfc-style
-    unstable.nushell # For Yazelix
     procs
     ripgrep-all
     simple-completion-language-server
@@ -49,6 +51,7 @@ in
     stow
     tokei
     tree
+    unstable.nushell # For Yazelix
     unzip
     vim
     wget
