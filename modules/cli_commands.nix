@@ -29,6 +29,7 @@ in
     git
     gitleaks
     gitui
+    glow
     gnome-epub-thumbnailer
     gnumake
     gnupg
@@ -46,6 +47,7 @@ in
     nixd
     nixfmt-rfc-style
     procs
+    python313Packages.grip
     ripgrep-all
     simple-completion-language-server
     starship
