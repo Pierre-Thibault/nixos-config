@@ -36,6 +36,7 @@ in
     hx-lsp
     home-manager
     jq
+    lazygit
     lsb-release
     lsd
     marksman
