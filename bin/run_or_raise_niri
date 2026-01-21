@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Generic run-or-raise script for Niri
+# Usage: run_or_raise_niri <app_id> <launch_command>
+#
+# Example: run_or_raise_niri "waterfox" "flatpak run net.waterfox.waterfox"
+
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <app_id> <launch_command>"
+    exit 1
+fi
+
+APP_ID="$1"
+shift  # Remove first argument
+LAUNCH_CMD="$@"  # All remaining arguments are the launch command
+
+# Get list of windows from niri (using --json flag for scripts)
+window_found=$(niri msg --json windows | jq -r ".[] | select(.app_id | ascii_downcase | contains(\"${APP_ID,,}\")) | .id" | head -1)
+
+if [ -n "$window_found" ]; then
+    # Window found, focus it
+    niri msg action focus-window --id "$window_found"
+else
+    # Window not found, launch it
+    $LAUNCH_CMD &
+fi

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Try to find any dictionary window
+for title in Reverso Larousse "Le Robert" LanguageTool; do
+    window_id=$(niri msg --json windows | jq -r ".[] | select(.title | contains(\"$title\")) | .id" | head -1)
+
+    if [ -n "$window_id" ]; then
+        # Window found, focus it
+        niri msg action focus-window --id "$window_id"
+        exit 0
+    fi
+done
+
+# No dictionary window found - script ends without opening anything
+# (matching the original Gnome behavior)

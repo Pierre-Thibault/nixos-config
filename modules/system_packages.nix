@@ -1,12 +1,13 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
-      corefonts
-      ecryptfs
-      gparted
-      gnomeExtensions.gsconnect
-      input-remapper
-      pinentry-curses
+    corefonts
+    ecryptfs
+    gnomeExtensions.gsconnect
+    gparted
+    input-remapper
+    jq
+    pinentry-curses
   ];
 }

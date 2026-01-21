@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Get window ID that matches "Grok / X"
+window_id=$(niri msg --json windows | jq -r '.[] | select(.title | contains("Grok / X")) | .id' | head -1)
+
+if [ -n "$window_id" ]; then
+    # Window found, focus it
+    niri msg action focus-window --id "$window_id"
+else
+    # Window not found, open Grok
+    xdg-open https://x.com/i/grok
+fi

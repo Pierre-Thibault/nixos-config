@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Function to activate window by title substring in Niri
+activate_window_by_title() {
+    local search_title="$1"
+    local fallback_command="$2"
+
+    # Get window ID that matches title
+    window_id=$(niri msg --json windows | jq -r ".[] | select(.title | contains(\"$search_title\")) | .id" | head -1)
+
+    if [ -n "$window_id" ]; then
+        # Window found, focus it
+        niri msg action focus-window --id "$window_id"
+        return 0
+    else
+        # Window not found, execute fallback
+        eval "$fallback_command"
+        return 1
+    fi
+}
+
+# Activate Notes.txt window or open it
+activate_window_by_title "Notes.txt" "gnome-text-editor ~/MyNotes.txt"

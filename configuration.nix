@@ -89,6 +89,9 @@ in
         LC_TELEPHONE = locale;
         LC_TIME = locale;
       };
+
+      # Disable IBus input method completely
+      inputMethod.enable = lib.mkForce false;
     };
 
   networking = {

@@ -12,7 +12,6 @@ in
     brave
     copyq
     nemo-with-extensions
-    discord
     file-roller
     gedit
     gimp
@@ -42,6 +41,7 @@ in
     telegram-desktop
     tesseract
     ulauncher
+    vesktop
     vlc
     vscodium
     warp-terminal
