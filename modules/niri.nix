@@ -100,6 +100,16 @@
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
+    settings = {
+      General = {
+        # Enable all Bluetooth profiles
+        Enable = "Source,Sink,Media,Socket";
+        # Reconnect automatically after suspend
+        AutoEnable = true;
+        # Delay before resuming (in seconds)
+        ResumeDelay = 2;
+      };
+    };
   };
   services.blueman.enable = true;
 

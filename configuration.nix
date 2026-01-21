@@ -96,7 +96,14 @@ in
 
   networking = {
     hostName = userdata.hostname; # Define your hostname.
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      # Keep WiFi connection alive during suspend
+      wifi = {
+        powersave = false;
+        scanRandMacAddress = false;
+      };
+    };
 
     # Open ports in the firewall.
     firewall =
