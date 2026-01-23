@@ -1,22 +1,29 @@
 #!/usr/bin/env bash
 
 # Show a rofi menu to select and focus a window of the current application
-# Usage: select_app_window_niri
+# Usage: select_app_window_niri [--all]
+# --all: Show all windows on workspace instead of just current app
 
 # Get the currently focused workspace ID
 current_workspace=$(niri msg --json workspaces | jq -r '.[] | select(.is_focused) | .id')
 
-# Get the currently focused window and its app_id
-focused_window=$(niri msg --json windows | jq -r '.[] | select(.is_focused)')
-focused_app_id=$(echo "$focused_window" | jq -r '.app_id')
+# Check if --all flag is provided
+if [ "$1" = "--all" ]; then
+    # Get all windows on current workspace
+    windows_json=$(niri msg --json windows | jq -r ".[] | select(.workspace_id == $current_workspace)")
+else
+    # Get the currently focused window and its app_id
+    focused_window=$(niri msg --json windows | jq -r '.[] | select(.is_focused)')
+    focused_app_id=$(echo "$focused_window" | jq -r '.app_id')
 
-if [ -z "$focused_app_id" ] || [ "$focused_app_id" = "null" ]; then
-    notify-send "No window currently focused"
-    exit 1
+    if [ -z "$focused_app_id" ] || [ "$focused_app_id" = "null" ]; then
+        notify-send "No window currently focused"
+        exit 1
+    fi
+
+    # Get all windows with the same app_id on current workspace
+    windows_json=$(niri msg --json windows | jq -r ".[] | select(.app_id == \"$focused_app_id\") | select(.workspace_id == $current_workspace)")
 fi
-
-# Get all windows with the same app_id on current workspace
-windows_json=$(niri msg --json windows | jq -r ".[] | select(.app_id == \"$focused_app_id\") | select(.workspace_id == $current_workspace)")
 
 if [ -z "$windows_json" ]; then
     exit 0
