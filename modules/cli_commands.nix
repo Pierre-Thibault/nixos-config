@@ -46,6 +46,7 @@ in
     neofetch
     nixd
     nixfmt-rfc-style
+    opencode
     procs
     python313Packages.grip
     ripgrep-all

@@ -91,6 +91,9 @@
 
     # Launcher
     fuzzel
+
+    # Window menu
+    rofi
   ];
 
   # Enable polkit for privilege escalation

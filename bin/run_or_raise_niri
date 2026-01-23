@@ -14,13 +14,33 @@ APP_ID="$1"
 shift  # Remove first argument
 LAUNCH_CMD="$@"  # All remaining arguments are the launch command
 
-# Get list of windows from niri (using --json flag for scripts)
-window_found=$(niri msg --json windows | jq -r ".[] | select(.app_id | ascii_downcase | contains(\"${APP_ID,,}\")) | .id" | head -1)
+# Get the currently focused workspace ID
+current_workspace=$(niri msg --json workspaces | jq -r '.[] | select(.is_focused) | .id')
 
-if [ -n "$window_found" ]; then
-    # Window found, focus it
-    niri msg action focus-window --id "$window_found"
-else
-    # Window not found, launch it
+# Get all windows matching the app_id on current workspace, sorted by id
+windows=($(niri msg --json windows | jq -r ".[] | select(.app_id | ascii_downcase | contains(\"${APP_ID,,}\")) | select(.workspace_id == $current_workspace) | .id" | sort -n))
+
+if [ ${#windows[@]} -eq 0 ]; then
+    # No windows found on current workspace, launch a new instance
     $LAUNCH_CMD &
+else
+    # At least one window exists
+    # Check if one of our app windows is currently focused
+    focused_index=-1
+    for i in "${!windows[@]}"; do
+        is_focused=$(niri msg --json windows | jq -r ".[] | select(.id == ${windows[$i]}) | .is_focused")
+        if [ "$is_focused" = "true" ]; then
+            focused_index=$i
+            break
+        fi
+    done
+
+    if [ $focused_index -eq -1 ]; then
+        # None of our app windows is focused, focus the first one
+        niri msg action focus-window --id "${windows[0]}"
+    else
+        # One of our windows is focused, cycle to the next one
+        next_index=$(( (focused_index + 1) % ${#windows[@]} ))
+        niri msg action focus-window --id "${windows[$next_index]}"
+    fi
 fi

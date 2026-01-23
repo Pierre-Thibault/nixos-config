@@ -7,6 +7,8 @@ ln -sf config-dark.kdl ~/.config/zellij/config.kdl
 ln -sf theme-dark.toml ~/.config/yazi/theme.toml
 ln -sf starship-dark.toml ~/.config/starship/starship.toml
 ln -sf style-dark.css ~/.config/waybar/style.css
+ln -sf catppuccin-mocha-lavander.ini ~/.config/fuzzel/themes/catppuccin.ini
+ln -sf catppuccin-mocha.rasi ~/.config/rofi/catppuccin.rasi
 
 
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
