@@ -31,6 +31,7 @@
 
     # Idle daemon
     swayidle # Idle management daemon
+    playerctl # Media player control (for video idle detection)
 
     # Color picker
     hyprpicker # Works with any Wayland compositor
