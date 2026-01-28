@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Get window ID that matches "X — Profil"
-window_id=$(niri msg --json windows | jq -r '.[] | select(.title | contains("X — Profil")) | .id' | head -1)
+# Get window ID that matches "X — ..." (any X page)
+window_id=$(niri msg --json windows | jq -r '.[] | select(.title | test("X — | / X")) | .id' | head -1)
 
 if [ -n "$window_id" ]; then
     # Window found, focus it

@@ -45,9 +45,6 @@
     # Status bar
     waybar # Status bar with workspace support
 
-    # App launcher
-    # Note: ulauncher is already in modules/programs.nix
-
     # Emoji picker
     wofi-emoji # Emoji picker for Wayland
 

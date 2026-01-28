@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Launch rofi in grid view mode
+rofi -show drun \
+    -show-icons \
+    -theme-str 'window {width: 80%; height: 70%;}' \
+    -theme-str 'listview {columns: 6; lines: 4; layout: vertical;}' \
+    -theme-str 'element {orientation: vertical; padding: 15px;}' \
+    -theme-str 'element-icon {size: 64px; margin: 0 0 10px 0;}' \
+    -theme-str 'element-text {horizontal-align: 0.5;}'
