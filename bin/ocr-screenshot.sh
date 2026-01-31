@@ -8,7 +8,7 @@ TEMP_IMG="/tmp/ocr-screenshot-$$.png"
 grim -g "$(slurp)" "$TEMP_IMG" || exit 1
 
 # Perform OCR
-TEXT=$(tesseract "$TEMP_IMG" - 2>/dev/null)
+TEXT=$(tesseract "$TEMP_IMG" - -l fra+eng+spa 2>/dev/null)
 
 # Clean up
 rm -f "$TEMP_IMG"
