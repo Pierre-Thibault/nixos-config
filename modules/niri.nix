@@ -92,6 +92,9 @@
 
     # Window menu
     rofi
+
+    # OSD (On-Screen Display) for volume and brightness
+    swayosd
   ];
 
   # Enable polkit for privilege escalation
@@ -121,7 +124,6 @@
 
   # Fonts for better rendering (especially for waybar icons)
   fonts.packages = with pkgs; [
-    noto-fonts
     noto-fonts-color-emoji
     font-awesome
     nerd-fonts.fira-code

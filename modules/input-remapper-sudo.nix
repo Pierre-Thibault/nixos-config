@@ -2,6 +2,9 @@
 
 let userdata = import ../userdata.nix; in
 {
+  # Enable input-remapper service
+  services.input-remapper.enable = true;
+
   # Allow user to restart input-remapper daemon without password
   security.sudo.extraRules = [
     {

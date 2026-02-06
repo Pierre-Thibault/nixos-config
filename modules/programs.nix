@@ -5,12 +5,24 @@
 
 let
   userdata = import ../userdata.nix;
+
+  # Wrapper pour CopyQ qui ignore le thème Qt global
+  copyq-wrapped = pkgs.symlinkJoin {
+    name = "copyq-wrapped";
+    paths = [ pkgs.copyq ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/copyq \
+        --unset QT_QPA_PLATFORMTHEME \
+        --unset QT_STYLE_OVERRIDE
+    '';
+  };
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
     audacity
     brave
-    copyq
+    copyq-wrapped
     nemo-with-extensions
     file-roller
     gedit
