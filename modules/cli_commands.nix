@@ -38,6 +38,7 @@ in
     home-manager
     jq
     lazygit
+    litellm
     lsb-release
     lsd
     marksman
