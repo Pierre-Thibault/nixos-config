@@ -212,6 +212,13 @@ in
 
     # Enable the OpenSSH daemon.
     openssh.enable = userdata.ssh_enable;
+
+    earlyoom = {
+      enable = true;
+      freeMemThreshold = 5;
+      freeSwapThreshold = 10;
+      enableNotifications = true; # notifie via systemd-oomd/notify
+    };
   };
 
   # This value determines the NixOS release from which the default
