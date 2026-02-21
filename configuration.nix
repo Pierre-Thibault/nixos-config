@@ -6,6 +6,7 @@
   pkgs,
   lib,
   nixos-25-05,
+  unstable,
   ...
 }:
 
@@ -130,9 +131,6 @@ in
     ];
     trusted-users = [ username ];
   };
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   programs = {
     dconf.profiles.user.databases = [

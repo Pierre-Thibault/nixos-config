@@ -24,8 +24,14 @@
           ./configuration.nix
         ];
         specialArgs = {
-          unstable = import nixpkgs-unstable { system = "x86_64-linux"; };
-          nixos-25-05 = import nixpkgs-25-05 { system = "x86_64-linux"; };
+          unstable = import nixpkgs-unstable {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+          nixos-25-05 = import nixpkgs-25-05 {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
         };
       };
     };

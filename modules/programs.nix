@@ -23,6 +23,7 @@ in
     audacity
     brave
     copyq-wrapped
+    code-cursor-fhs
     nemo-with-extensions
     file-roller
     gedit
