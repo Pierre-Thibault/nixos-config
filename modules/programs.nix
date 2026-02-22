@@ -20,6 +20,7 @@ let
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
+    anki
     audacity
     brave
     copyq-wrapped

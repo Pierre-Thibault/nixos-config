@@ -61,6 +61,7 @@ in
     vim
     wget
     wl-clipboard
+    wlrctl
     yazi
     yt-dlp
     zellij
