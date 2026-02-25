@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Aider wrapper with automatic theme detection
+
+# Detect system color scheme
+COLOR_SCHEME=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)
+
+if [[ "$COLOR_SCHEME" == *"dark"* ]]; then
+    exec aider --dark-mode --code-theme catppuccin-mocha "$@"
+else
+    exec aider --light-mode --code-theme catppuccin-latte "$@"
+fi

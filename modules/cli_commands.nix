@@ -47,8 +47,9 @@ in
     neofetch
     nixd
     nixfmt-rfc-style
-    opencode
+    unstable.opencode
     procs
+    python313Packages.catppuccin
     python313Packages.grip
     ripgrep-all
     simple-completion-language-server

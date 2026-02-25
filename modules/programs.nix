@@ -1,5 +1,6 @@
 {
   pkgs,
+  unstable,
   ...
 }:
 
@@ -47,6 +48,7 @@ in
     obs-studio
     obsidian
     ocrfeeder
+    unstable.opencode-desktop
     openvpn
     polari
     protonvpn-gui
