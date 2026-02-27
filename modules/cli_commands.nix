@@ -63,6 +63,7 @@ in
     wget
     wl-clipboard
     wlrctl
+    wtype
     yazi
     yt-dlp
     zellij
