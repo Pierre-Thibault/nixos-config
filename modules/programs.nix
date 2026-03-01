@@ -24,11 +24,11 @@ in
     anki
     audacity
     brave
-    copyq-wrapped
     code-cursor-fhs
-    nemo-with-extensions
+    copyq-wrapped
     file-roller
     gedit
+    ghostty
     gimp
     gitg
     gnome-browser-connector
@@ -37,7 +37,6 @@ in
     gnome-terminal
     gnome-tweaks
     google-chrome
-    ghostty
     gthumb
     keepass
     keepassxc
@@ -45,10 +44,10 @@ in
     libreoffice
     lm_sensors
     menulibre
+    nemo-with-extensions
     obs-studio
     obsidian
     ocrfeeder
-    unstable.opencode-desktop
     openvpn
     polari
     protonvpn-gui
@@ -56,6 +55,7 @@ in
     stretchly
     telegram-desktop
     tesseract
+    unstable.opencode-desktop
     vesktop
     vlc
     vscodium
