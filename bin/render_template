@@ -3,131 +3,153 @@
 # render-template.sh
 # ------------------
 # Purpose:
-#   Reads a YAML config file (passed as first argument),
-#   extracts .input_file and .output_file paths,
-#   then uses minijinja-cli to render the input template
-#   using the same YAML file as the context/data source.
+#   Renders Jinja templates using minijinja-cli.
+#   - Accepts one or more YAML config files as arguments
+#   - Each YAML can define:
+#     - Flat: input_file, output_file + context variables
+#     - Or:   renders: [ {input_file, output_file}, ... ] + shared context
 #
 # Requirements:
-#   - yq (mikefarah/yq v4+) must be installed
-#   - minijinja-cli must be installed (cargo install minijinja-cli)
+#   - yq (mikefarah/yq v4+)
+#   - minijinja-cli
 #
 # Usage:
-#   ./render-template.sh path/to/config.yaml
-#
-# Expected YAML structure (minimal example):
-#
-# input_file:  "templates/nginx.conf.jinja"
-# output_file: "/etc/nginx/sites-available/default"
-#
-# Optional richer structure:
-#
-# input_file: "templates/api.env.j2"
-# output_file: ".env"
-# # ... any other keys become available in the template context
+#   ./render-template.sh config.yaml
+#   ./render-template.sh config1.yaml config2.yaml
+#   ./render-template.sh parameters-*.yaml
 #
 
 set -euo pipefail
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Helper functions
+# Helpers
 # ──────────────────────────────────────────────────────────────────────────────
 
 die() {
-    local msg="$1"
-    local code="${2:-1}"
-    echo "ERROR: $msg" >&2
-    exit "$code"
+    echo "ERROR: ${1:-Unknown error}" >&2
+    exit "${2:-1}"
 }
 
 check_command() {
-    local cmd="$1"
-    command -v "$cmd" >/dev/null 2>&1 || die "'$cmd' is required but not found. Please install it."
+    command -v "$1" >/dev/null 2>&1 || die "'$1' is required but not installed."
+}
+
+render_single() {
+    local config_file="$1"
+    local input_rel output_file input_full config_dir
+
+    config_dir=$(dirname "$(realpath "$config_file")")
+
+    input_rel=$(yq -r '.input_file // ""' "$config_file")
+    output_file=$(yq -r '.output_file // ""' "$config_file")
+
+    [[ -z "$input_rel" ]] && die "Missing .input_file in $config_file"
+    [[ -z "$output_file" ]] && die "Missing .output_file in $config_file"
+
+    input_full="$config_dir/$input_rel"
+
+    [[ -f "$input_full" ]] || die "Template not found: $input_full (from $config_file)"
+
+    echo "Rendering single template from $config_file:"
+    echo "  Template : $input_full"
+    echo "  Output   : $output_file"
+    echo "  Context  : $config_file"
+
+    local output_dir
+    output_dir=$(dirname "$output_file")
+    [[ -d "$output_dir" ]] || {
+        echo "Creating directory: $output_dir"
+        mkdir -p "$output_dir" || die "Failed to create $output_dir"
+    }
+
+    minijinja-cli \
+        --strict \
+        "$input_full" \
+        "$config_file" \
+        > "$output_file.tmp" \
+        || die "minijinja-cli failed on $input_rel (from $config_file)"
+
+    mv "$output_file.tmp" "$output_file"
+    echo "  → Done: $output_file"
+}
+
+render_multi() {
+    local config_file="$1"
+    local render_count i input_rel output_file input_full config_dir
+
+    config_dir=$(dirname "$(realpath "$config_file")")
+
+    render_count=$(yq '.renders | length // 0' "$config_file")
+    [[ "$render_count" -eq 0 ]] && return 1  # not multi → let caller handle
+
+    echo "Found $render_count template(s) in $config_file"
+
+    for i in $(seq 0 $((render_count - 1))); do
+        input_rel=$(yq -r ".renders[$i].input_file // \"\"" "$config_file")
+        output_file=$(yq -r ".renders[$i].output_file // \"\"" "$config_file")
+
+        [[ -z "$input_rel" ]] && die "Missing .renders[$i].input_file in $config_file"
+        [[ -z "$output_file" ]] && die "Missing .renders[$i].output_file in $config_file"
+
+        input_full="$config_dir/$input_rel"
+
+        [[ -f "$input_full" ]] || die "Template not found: $input_full (from $config_file)"
+
+        echo ""
+        echo "  [$((i+1))/$render_count] $config_file → $input_rel"
+        echo "     Output : $output_file"
+
+        local output_dir
+        output_dir=$(dirname "$output_file")
+        [[ -d "$output_dir" ]] || mkdir -p "$output_dir" || die "Failed to create $output_dir"
+
+        minijinja-cli \
+            --strict \
+            "$input_full" \
+            "$config_file" \
+            > "$output_file.tmp" \
+            || die "minijinja-cli failed on $input_rel (from $config_file)"
+
+        mv "$output_file.tmp" "$output_file"
+        echo "     → Done"
+    done
+
+    return 0
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Argument validation
+# Main logic
 # ──────────────────────────────────────────────────────────────────────────────
 
-if [[ $# -ne 1 ]]; then
-    echo "Usage: $0 <config.yaml>"
-    echo
-    echo "Example:"
-    echo "  $0 my-render-config.yaml"
+[[ $# -eq 0 ]] && {
+    echo "Usage: $0 <config.yaml> [config2.yaml ...]"
+    echo "Processes each YAML file independently."
     exit 1
-fi
-
-CONFIG_FILE="$1"
-
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    die "Config file not found: $CONFIG_FILE"
-fi
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Check dependencies
-# ──────────────────────────────────────────────────────────────────────────────
+}
 
 check_command yq
 check_command minijinja-cli
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Extract required paths using yq
-# ──────────────────────────────────────────────────────────────────────────────
+for CONFIG_FILE in "$@"; do
+    echo ""
+    echo "══════════════════════════════════════════════════════════"
+    echo "Processing config: $CONFIG_FILE"
+    echo "══════════════════════════════════════════════════════════"
 
-INPUT_TEMPLATE=$(yq -r '.input_file // ""' "$CONFIG_FILE")
-OUTPUT_FILE=$(yq -r '.output_file // ""' "$CONFIG_FILE")
+    [[ -f "$CONFIG_FILE" ]] || {
+        echo "WARNING: Skipping — file not found: $CONFIG_FILE" >&2
+        continue
+    }
 
-if [[ -z "$INPUT_TEMPLATE" ]]; then
-    die "Missing or empty '.input_file' key in $CONFIG_FILE"
-fi
+    # Try multi-render format first
+    if render_multi "$CONFIG_FILE"; then
+        :  # success, continue to next file
+    else
+        # Fall back to single-render format
+        render_single "$CONFIG_FILE"
+    fi
+done
 
-if [[ -z "$OUTPUT_FILE" ]]; then
-    die "Missing or empty '.output_file' key in $CONFIG_FILE"
-fi
-
-# Make input path relative to config file location (very common pattern)
-CONFIG_DIR=$(dirname "$CONFIG_FILE")
-INPUT_TEMPLATE_FULL="$CONFIG_DIR/$INPUT_TEMPLATE"
-
-if [[ ! -f "$INPUT_TEMPLATE_FULL" ]]; then
-    die "Template file not found: $INPUT_TEMPLATE_FULL  (resolved from .input_file)"
-fi
-
-echo "Rendering:"
-echo "  Template : $INPUT_TEMPLATE_FULL"
-echo "  Output   : $OUTPUT_FILE"
-echo "  Context  : $CONFIG_FILE"
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Create output directory if needed
-# ──────────────────────────────────────────────────────────────────────────────
-
-OUTPUT_DIR=$(dirname "$OUTPUT_FILE")
-if [[ ! -d "$OUTPUT_DIR" ]]; then
-    echo "Creating output directory: $OUTPUT_DIR"
-    mkdir -p "$OUTPUT_DIR" || die "Failed to create output directory: $OUTPUT_DIR"
-fi
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Run minijinja-cli
-#   - --file supplies the context (the same YAML becomes the data)
-#   - template name is given as positional argument
-# ──────────────────────────────────────────────────────────────────────────────
-
-if ! minijinja-cli \
-    --strict \
-    "$INPUT_TEMPLATE_FULL" \
-    "$CONFIG_FILE" \
-    > "$OUTPUT_FILE"
-then
-    # Capture and show the real error from minijinja-cli
-    # (the || die was already there, but now we can make the message better)
-    die "minijinja-cli failed (likely due to missing variable(s) in context).
-Run with --strict to catch undefined variables early.
-Template: $INPUT_TEMPLATE_FULL
-Context : $CONFIG_FILE"
-fi
-
-echo "Successfully rendered → $OUTPUT_FILE"
-
+echo ""
+echo "All config files processed."
 exit 0
