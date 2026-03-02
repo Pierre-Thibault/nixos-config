@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+#
+# render-template.sh
+# ------------------
+# Purpose:
+#   Reads a YAML config file (passed as first argument),
+#   extracts .input_file and .output_file paths,
+#   then uses minijinja-cli to render the input template
+#   using the same YAML file as the context/data source.
+#
+# Requirements:
+#   - yq (mikefarah/yq v4+) must be installed
+#   - minijinja-cli must be installed (cargo install minijinja-cli)
+#
+# Usage:
+#   ./render-template.sh path/to/config.yaml
+#
+# Expected YAML structure (minimal example):
+#
+# input_file:  "templates/nginx.conf.jinja"
+# output_file: "/etc/nginx/sites-available/default"
+#
+# Optional richer structure:
+#
+# input_file: "templates/api.env.j2"
+# output_file: ".env"
+# # ... any other keys become available in the template context
+#
+
+set -euo pipefail
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Helper functions
+# ──────────────────────────────────────────────────────────────────────────────
+
+die() {
+    local msg="$1"
+    local code="${2:-1}"
+    echo "ERROR: $msg" >&2
+    exit "$code"
+}
+
+check_command() {
+    local cmd="$1"
+    command -v "$cmd" >/dev/null 2>&1 || die "'$cmd' is required but not found. Please install it."
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Argument validation
+# ──────────────────────────────────────────────────────────────────────────────
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 <config.yaml>"
+    echo
+    echo "Example:"
+    echo "  $0 my-render-config.yaml"
+    exit 1
+fi
+
+CONFIG_FILE="$1"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    die "Config file not found: $CONFIG_FILE"
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Check dependencies
+# ──────────────────────────────────────────────────────────────────────────────
+
+check_command yq
+check_command minijinja-cli
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Extract required paths using yq
+# ──────────────────────────────────────────────────────────────────────────────
+
+INPUT_TEMPLATE=$(yq -r '.input_file // ""' "$CONFIG_FILE")
+OUTPUT_FILE=$(yq -r '.output_file // ""' "$CONFIG_FILE")
+
+if [[ -z "$INPUT_TEMPLATE" ]]; then
+    die "Missing or empty '.input_file' key in $CONFIG_FILE"
+fi
+
+if [[ -z "$OUTPUT_FILE" ]]; then
+    die "Missing or empty '.output_file' key in $CONFIG_FILE"
+fi
+
+# Make input path relative to config file location (very common pattern)
+CONFIG_DIR=$(dirname "$CONFIG_FILE")
+INPUT_TEMPLATE_FULL="$CONFIG_DIR/$INPUT_TEMPLATE"
+
+if [[ ! -f "$INPUT_TEMPLATE_FULL" ]]; then
+    die "Template file not found: $INPUT_TEMPLATE_FULL  (resolved from .input_file)"
+fi
+
+echo "Rendering:"
+echo "  Template : $INPUT_TEMPLATE_FULL"
+echo "  Output   : $OUTPUT_FILE"
+echo "  Context  : $CONFIG_FILE"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Create output directory if needed
+# ──────────────────────────────────────────────────────────────────────────────
+
+OUTPUT_DIR=$(dirname "$OUTPUT_FILE")
+if [[ ! -d "$OUTPUT_DIR" ]]; then
+    echo "Creating output directory: $OUTPUT_DIR"
+    mkdir -p "$OUTPUT_DIR" || die "Failed to create output directory: $OUTPUT_DIR"
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Run minijinja-cli
+#   - --file supplies the context (the same YAML becomes the data)
+#   - template name is given as positional argument
+# ──────────────────────────────────────────────────────────────────────────────
+
+if ! minijinja-cli \
+    --strict \
+    "$INPUT_TEMPLATE_FULL" \
+    "$CONFIG_FILE" \
+    > "$OUTPUT_FILE"
+then
+    # Capture and show the real error from minijinja-cli
+    # (the || die was already there, but now we can make the message better)
+    die "minijinja-cli failed (likely due to missing variable(s) in context).
+Run with --strict to catch undefined variables early.
+Template: $INPUT_TEMPLATE_FULL
+Context : $CONFIG_FILE"
+fi
+
+echo "Successfully rendered → $OUTPUT_FILE"
+
+exit 0
