@@ -44,6 +44,7 @@ in
     libreoffice
     lm_sensors
     menulibre
+    minijinja
     nemo-with-extensions
     obs-studio
     obsidian
@@ -61,6 +62,7 @@ in
     vscodium
     warp-terminal
     wezterm
+    yq
     zed-editor
   ];
 }
