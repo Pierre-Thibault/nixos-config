@@ -25,6 +25,7 @@ in
     file
     fish
     fzf
+    gammastep
     gcc
     git
     gitleaks

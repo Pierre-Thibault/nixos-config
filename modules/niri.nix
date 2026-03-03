@@ -72,7 +72,7 @@
     brightnessctl # Backlight control
 
     # Color temperature / blue light filter
-    wlsunset # Automatic color temperature adjustment
+    gammastep # Automatic color temperature adjustment (Wayland)
 
     # Power menu
     wlogout # Graphical logout/power menu
