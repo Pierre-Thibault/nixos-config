@@ -217,6 +217,12 @@ in
       freeSwapThreshold = 10;
       enableNotifications = true; # notifie via systemd-oomd/notify
     };
+
+    geoclue2 = {
+      enable = true;
+      staticLatitude = 45.9;
+      staticLongitude = -74.2;
+    };
   };
 
   # This value determines the NixOS release from which the default

@@ -71,9 +71,6 @@
     # Brightness control
     brightnessctl # Backlight control
 
-    # Color temperature / blue light filter
-    gammastep # Automatic color temperature adjustment (Wayland)
-
     # Power menu
     wlogout # Graphical logout/power menu
 
@@ -95,6 +92,9 @@
 
     # OSD (On-Screen Display) for volume and brightness
     swayosd
+
+    # Screen temperature
+    redland-wayland
   ];
 
   # Enable polkit for privilege escalation
