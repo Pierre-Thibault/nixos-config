@@ -54,6 +54,7 @@ in
     protonvpn-gui
     qalculate-gtk
     stretchly
+    sunwait
     telegram-desktop
     tesseract
     unstable.opencode-desktop
