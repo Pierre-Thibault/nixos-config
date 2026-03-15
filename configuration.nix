@@ -133,6 +133,8 @@ in
   };
 
   programs = {
+    nix-index-database.comma.enable = true; # Add the ability to run any package by prepending its name with a comma
+
     dconf.profiles.user.databases = [
       {
         lockAll = true; # prevents overriding

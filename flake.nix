@@ -8,6 +8,11 @@
     nixpkgs-25-05.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+
+    };
   };
   outputs =
     {
@@ -15,12 +20,14 @@
       nixpkgs-25-05,
       nix-flatpak,
       nixpkgs-unstable,
+      nix-index-database,
       ...
     }:
     {
       nixosConfigurations.pierre-nixos = nixpkgs.lib.nixosSystem {
         modules = [
           nix-flatpak.nixosModules.nix-flatpak
+          nix-index-database.nixosModules.default
           ./configuration.nix
         ];
         specialArgs = {
