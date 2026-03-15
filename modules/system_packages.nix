@@ -9,5 +9,6 @@
     input-remapper
     jq
     pinentry-curses
+    xwayland-satellite
   ];
 }

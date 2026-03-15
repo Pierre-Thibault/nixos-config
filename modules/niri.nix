@@ -9,6 +9,9 @@
     enable = true;
   };
 
+  # Enable XWayland for X11 apps (gparted, etc.)
+  programs.xwayland.enable = true;
+
   # Enable XDG portal for screen sharing and other desktop integration
   xdg.portal = {
     enable = true;
@@ -99,6 +102,21 @@
 
   # Enable polkit for privilege escalation
   security.polkit.enable = true;
+
+  # Start polkit authentication agent with graphical session
+  systemd.user.services.polkit-gnome = {
+    description = "Polkit GNOME Authentication Agent";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 1;
+      TimeoutStopSec = 10;
+    };
+  };
 
   # Enable Bluetooth support
   hardware.bluetooth = {

@@ -6,7 +6,6 @@
   pkgs,
   lib,
   nixos-25-05,
-  unstable,
   ...
 }:
 
@@ -55,12 +54,15 @@ in
       gnome-calculator
     ];
     shells = [ pkgs.zsh ];
-    systemPackages = with nixos-25-05.pkgs; [
-      gnome-shell
-      gnome-control-center
-      gnome-settings-daemon
-      mutter
-    ];
+    systemPackages =
+      with nixos-25-05.pkgs;
+      [
+        gnome-shell
+        gnome-control-center
+        gnome-settings-daemon
+        mutter
+      ]
+      ++ [ pkgs.polkit_gnome ];
     variables =
       let
         editor = "hx";
@@ -167,7 +169,10 @@ in
     };
   };
 
-  security.rtkit.enable = true;
+  security = {
+    rtkit.enable = true;
+    polkit.enable = true;
+  };
 
   services = {
     xserver = {
