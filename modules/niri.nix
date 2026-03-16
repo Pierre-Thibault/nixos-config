@@ -33,7 +33,7 @@
     swaylock-effects # Screen locker with effects
 
     # Idle daemon
-    swayidle # Idle management daemon
+    hypridle # Idle management daemon
     playerctl # Media player control (for video idle detection)
 
     # Color picker
