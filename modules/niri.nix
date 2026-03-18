@@ -123,6 +123,10 @@
       procps    # pkill
       hyprlock
     ];
+    serviceConfig = {
+      # Delay startup to let Wayland compositor fully initialize
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+    };
   };
 
   # Enable Bluetooth support
