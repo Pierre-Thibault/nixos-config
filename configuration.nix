@@ -158,8 +158,6 @@ in
       enableSSHSupport = true;
     };
 
-    hyprlock.enable = true;
-
     steam = {
       enable = true;
     };
@@ -174,7 +172,7 @@ in
   security = {
     rtkit.enable = true;
     polkit.enable = true;
-    pam.services.hyprlock = { };
+    pam.services.gtklock = { };
   };
 
   services = {

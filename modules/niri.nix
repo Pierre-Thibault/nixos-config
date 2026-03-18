@@ -31,6 +31,7 @@
 
     # Idle daemon
     hypridle # Idle management daemon
+    gtklock # GTK-based screen locker
     playerctl # Media player control (for video idle detection)
 
     # Color picker
@@ -121,7 +122,6 @@
       bash
       coreutils # sleep
       procps    # pkill
-      hyprlock
     ];
     serviceConfig = {
       # Delay startup to let Wayland compositor fully initialize
