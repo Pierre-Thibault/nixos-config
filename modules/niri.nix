@@ -29,9 +29,6 @@
     # Wallpaper utility
     swaybg # Background setter for Wayland (Niri compatible)
 
-    # Screen locker
-    swaylock-effects # Screen locker with effects
-
     # Idle daemon
     hypridle # Idle management daemon
     playerctl # Media player control (for video idle detection)
