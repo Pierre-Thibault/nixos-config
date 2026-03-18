@@ -47,10 +47,12 @@ if [ -z "$CACHE_DATE" ]; then
     fi
 fi
 
-HOUR=$(date +%H)
+CURRENT_MINUTES=$((10#$(date +%H) * 60 + 10#$(date +%M)))
+SUNRISE_MINUTES=$((10#$SUNRISE_HOUR * 60))
+SUNSET_MINUTES=$((10#$SUNSET_HOUR * 60 - 15))  # 15 min avant le coucher
 
 # Determine if it should be light or dark
-if [ "$HOUR" -ge "$SUNRISE_HOUR" ] && [ "$HOUR" -lt "$SUNSET_HOUR" ]; then
+if [ "$CURRENT_MINUTES" -ge "$SUNRISE_MINUTES" ] && [ "$CURRENT_MINUTES" -lt "$SUNSET_MINUTES" ]; then
     DESIRED_THEME="light"
 else
     DESIRED_THEME="dark"
