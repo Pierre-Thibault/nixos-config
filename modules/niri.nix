@@ -115,6 +115,16 @@
     };
   };
 
+  # Add dependencies to hypridle service PATH for scripts
+  systemd.user.services.hypridle = {
+    path = with pkgs; [
+      bash
+      coreutils # sleep
+      procps    # pkill
+      hyprlock
+    ];
+  };
+
   # Enable Bluetooth support
   hardware.bluetooth = {
     enable = true;
