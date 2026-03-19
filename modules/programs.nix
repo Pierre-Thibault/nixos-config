@@ -43,6 +43,7 @@ in
     keymapp
     libreoffice
     lm_sensors
+    lmstudio
     menulibre
     minijinja
     nemo-with-extensions
