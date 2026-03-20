@@ -176,18 +176,20 @@ in
   };
 
   services = {
-    xserver = {
-      # Enable the GNOME Desktop Environment (it is xserver but in reality it is Wayland).
-      displayManager.gdm.enable = true;
-      desktopManager.gnome = {
-        enable = true;
-        # Use Gnome 48 from 25.05
-        extraGSettingsOverrides = ''
-          [org.gnome.shell]
-          enabled-extensions=[]
-        '';
-      };
+    displayManager = {
+      gdm.enable = true;
+      defaultSession = "niri";
+    };
+    desktopManager.gnome = {
+      enable = true;
+      # Use Gnome 48 from 25.05
+      extraGSettingsOverrides = ''
+        [org.gnome.shell]
+        enabled-extensions=[]
+      '';
+    };
 
+    xserver = {
       # Configure keymap in X11
       xkb = {
         layout = "ca";
