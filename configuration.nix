@@ -135,6 +135,8 @@ in
   };
 
   programs = {
+    nix-ld.enable = true; # Allow running dynamically linked binaries (npm packages, etc.)
+
     nix-index-database.comma.enable = true; # Add the ability to run any package by prepending its name with a comma
 
     dconf.profiles.user.databases = [
