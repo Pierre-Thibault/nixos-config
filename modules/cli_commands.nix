@@ -37,6 +37,7 @@ in
     hx-lsp
     home-manager
     jq
+    unstable.kilocode-cli
     lazygit
     litellm
     lsb-release
