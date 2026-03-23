@@ -16,7 +16,4 @@ echo "$(date): Starting bluetooth-resume.sh" >> "$LOGFILE"
 # Wait for all background jobs to complete
 wait
 
-# Restart hypridle to prevent stale state (delayed to let current instance finish)
-(sleep 5 && systemctl --user restart hypridle.service) &
-
 echo "$(date): Resume actions completed" >> "$LOGFILE"

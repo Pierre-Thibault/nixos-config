@@ -141,12 +141,15 @@ in
 
     dconf.profiles.user.databases = [
       {
-        lockAll = true; # prevents overriding
         settings = {
           "org/gnome/desktop/interface" = {
             accent-color = "slate";
+            gtk-theme = "adw-gtk3";
           };
         };
+        locks = [
+          "/org/gnome/desktop/interface/accent-color"
+        ];
       }
     ];
 

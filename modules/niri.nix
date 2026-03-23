@@ -121,8 +121,10 @@
     path = with pkgs; [
       bash
       coreutils # sleep
-      procps    # pkill
+      procps # pkill
     ];
+    # Prevent hypridle from running for gdm-greeter (no config file there)
+    unitConfig.ConditionUser = "!gdm-greeter";
     serviceConfig = {
       # Delay startup to let Wayland compositor fully initialize
       ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";

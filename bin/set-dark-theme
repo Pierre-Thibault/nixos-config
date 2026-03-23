@@ -11,7 +11,11 @@ ln -sf catppuccin-mocha-lavander.ini ~/.config/fuzzel/themes/catppuccin.ini
 ln -sf catppuccin-mocha.rasi ~/.config/rofi/catppuccin.rasi
 
 
+mkdir -p ~/.themes
+ln -sfn /run/current-system/sw/share/themes/adw-gtk3-dark ~/.themes/adw-gtk3
+
+gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3'
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true;
+gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
 
 pkill -USR1 hx

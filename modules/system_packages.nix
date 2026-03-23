@@ -2,6 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
+    adw-gtk3
     corefonts
     ecryptfs
     gnomeExtensions.gsconnect
