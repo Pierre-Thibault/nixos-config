@@ -5,7 +5,8 @@
 TEMP_IMG="/tmp/ocr-screenshot-$$.png"
 
 # Capture selected area
-grim -g "$(slurp)" "$TEMP_IMG" || exit 1
+SELECTION=$(slurp) || exit 1
+grim -g "$SELECTION" "$TEMP_IMG" || exit 1
 
 # Perform OCR
 TEXT=$(tesseract "$TEMP_IMG" - -l fra+eng+spa 2>/dev/null)
