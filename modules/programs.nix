@@ -66,5 +66,6 @@ in
     wezterm
     yq
     zed-editor
+    zoom-us
   ];
 }
