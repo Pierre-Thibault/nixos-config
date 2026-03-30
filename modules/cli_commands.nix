@@ -13,7 +13,7 @@ in
     bandwhich
     bat
     bottom
-    claude-code
+    unstable.claude-code
     curl
     devbox
     devenv
