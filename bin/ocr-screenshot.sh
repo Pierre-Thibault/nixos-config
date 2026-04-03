@@ -17,6 +17,7 @@ rm -f "$TEMP_IMG"
 # Copy to clipboard if we got text
 if [ -n "$TEXT" ]; then
     echo -n "$TEXT" | wl-copy
+    pw-play "$(dirname "$(readlink -f "$0")")/camera-shutter.oga" &
     notify-send "OCR" "Texte copié dans le presse-papiers"
 else
     notify-send "OCR" "Aucun texte détecté" --urgency=critical
