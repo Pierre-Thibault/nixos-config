@@ -9,6 +9,7 @@ ln -sf starship-light.toml ~/.config/starship/starship.toml
 ln -sf style-light.css ~/.config/waybar/style.css
 ln -sf catppuccin-latte-lavander.ini ~/.config/fuzzel/themes/catppuccin.ini
 ln -sf catppuccin-latte.rasi ~/.config/rofi/catppuccin.rasi
+ln -sf default-light.jpg "$HOME/Images/Fonds d'écran/default.jpg"
 
 mkdir -p ~/.themes
 ln -sfn /run/current-system/sw/share/themes/adw-gtk3 ~/.themes/adw-gtk3
@@ -16,5 +17,7 @@ ln -sfn /run/current-system/sw/share/themes/adw-gtk3 ~/.themes/adw-gtk3
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false
+
+systemctl --user restart swaybg
 
 pkill -USR1 hx
