@@ -6,6 +6,7 @@
   pkgs,
   lib,
   nixos-25-05,
+  unstable,
   ...
 }:
 
@@ -46,7 +47,9 @@ in
   };
 
   # Configure console keymap to use the xserver config
-  console.useXkbConfig = true;
+  console = {
+    useXkbConfig = true;
+  };
 
   environment = {
     gnome.excludePackages = with nixos-25-05.pkgs; [
@@ -203,6 +206,24 @@ in
     };
 
     desktopManager.plasma6.enable = true;
+
+    # Replace the default console
+    kmscon = {
+      enable = true;
+      package = unstable.kmscon;
+      hwRender = false;
+      fonts = [
+        {
+          name = "JetBrainsMono Nerd Font";
+          package = pkgs.nerd-fonts.jetbrains-mono;
+        }
+      ];
+      extraConfig = builtins.concatStringsSep "\n" [
+        "font-size=12"
+        "xkb-layout=ca"
+        "xkb-variant=multix"
+      ];
+    };
 
     # Enable CUPS to print documents.
     printing.enable = true;
