@@ -18,5 +18,7 @@ in
     hunspellDicts.es-mx
     languagetool
     typos-lsp
+
+    ffmpeg
   ];
 }
