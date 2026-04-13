@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generic web search script using fuzzel
+# Generic web search script using rofi
 # Usage: web-search.sh "Search Name" "https://example.com/search?q="
 
 SEARCH_NAME="$1"
@@ -10,8 +10,8 @@ if [ -z "$SEARCH_NAME" ] || [ -z "$SEARCH_URL" ]; then
     exit 1
 fi
 
-# Use fuzzel to get search query (free text input)
-QUERY=$(fuzzel --dmenu --prompt="$SEARCH_NAME: " --width=60 --lines=0 < /dev/null)
+# Use rofi to get search query (free text input)
+QUERY=$(rofi -dmenu -p "$SEARCH_NAME" -lines 0 -theme-str 'window {height: 80px;} listview {enabled: false;}' < /dev/null)
 
 # Exit if user cancelled (empty query)
 if [ -z "$QUERY" ]; then
