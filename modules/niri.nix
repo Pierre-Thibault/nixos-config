@@ -86,9 +86,6 @@
     polkit_gnome # Polkit authentication agent
 
     # Launcher
-    fuzzel
-
-    # Window menu
     rofi
 
     # OSD (On-Screen Display) for volume and brightness
