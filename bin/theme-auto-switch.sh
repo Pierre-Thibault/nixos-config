@@ -25,8 +25,11 @@ fi
 
 # Fetch new sun times if cache is invalid
 if [ -z "$CACHE_DATE" ]; then
+    # Wait for network connectivity (max 30s)
+    nm-online -q -t 30 2>/dev/null || true
+
     # Fetch from sunrise-sunset.org API (Montreal coordinates)
-    if RESPONSE=$(curl -s "https://api.sunrise-sunset.org/json?lat=45.9&lng=-74.2&formatted=0&tzid=America/Toronto"); then
+    if RESPONSE=$(curl -s --connect-timeout 10 "https://api.sunrise-sunset.org/json?lat=45.9&lng=-74.2&formatted=0&tzid=America/Toronto"); then
         # Extract sunrise and sunset times (in ISO 8601 format)
         SUNRISE=$(echo "$RESPONSE" | grep -o '"sunrise":"[^"]*"' | cut -d'"' -f4)
         SUNSET=$(echo "$RESPONSE" | grep -o '"sunset":"[^"]*"' | cut -d'"' -f4)
@@ -44,7 +47,9 @@ if [ -z "$CACHE_DATE" ]; then
     else
         # Fallback values if API fails
         SUNRISE_HOUR=7
+        SUNRISE_MIN=00
         SUNSET_HOUR=17
+        SUNSET_MIN=00
     fi
 fi
 
