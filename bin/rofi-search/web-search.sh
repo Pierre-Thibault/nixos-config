@@ -22,4 +22,4 @@ fi
 ENCODED_QUERY=$(jq -rn --arg str "$QUERY" '$str | @uri')
 
 # Open browser with search URL (detached from current process)
-setsid -f flatpak run net.waterfox.waterfox --new-tab "${SEARCH_URL}${ENCODED_QUERY}" >/dev/null 2>&1
+setsid -f brave --new-tab "${SEARCH_URL}${ENCODED_QUERY}" >/dev/null 2>&1
