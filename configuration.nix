@@ -272,6 +272,7 @@ in
     extraGroups = [
       "networkmanager"
       "wheel"
+      "i2c" # ddcutil: monitor brightness control via DDC/CI
     ];
     shell = pkgs.zsh;
   };

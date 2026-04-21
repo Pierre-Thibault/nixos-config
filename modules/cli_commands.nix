@@ -15,6 +15,7 @@ in
     bottom
     unstable.claude-code
     curl
+    ddcutil
     devbox
     devenv
     direnv

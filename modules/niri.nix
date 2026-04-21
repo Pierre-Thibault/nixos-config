@@ -93,6 +93,10 @@
 
     # Screen temperature
     redland-wayland
+
+    # Ambient light / backlight auto-adjustment
+    clight
+    clightd
   ];
 
   # Enable polkit for privilege escalation
@@ -144,6 +148,36 @@
     };
   };
   services.blueman.enable = true;
+
+  # clightd D-Bus system service (no NixOS module exists for it)
+  services.dbus.packages = [ pkgs.clightd ];
+
+  systemd.services.clightd = {
+    description = "Bus service to manage screen brightness/gamma/dpms";
+    requires = [ "polkit.service" ];
+    after = [ "systemd-modules-load.service" ];
+    serviceConfig = {
+      Type       = "dbus";
+      BusName    = "org.clightd.clightd";
+      User       = "root";
+      ExecStart  = "${pkgs.clightd}/libexec/clightd";
+      Restart    = "on-failure";
+      RestartSec = 5;
+      Environment = [
+        "CLIGHTD_BL_VCP=0x10"
+        "CLIGHTD_BL_SYSFS_ENABLED=1"
+        "CLIGHTD_BL_DDC_ENABLED=1"
+        "CLIGHTD_BL_EMULATED_ENABLED=1"
+        "CLIGHTD_PIPEWIRE_RUNTIME_DIR=/run/user/1000/"
+        # Needed so clightd (running as root) can find the Wayland socket for gamma
+        "XDG_RUNTIME_DIR=/run/user/1000"
+      ];
+    };
+    wantedBy = [ "multi-user.target" ];
+  };
+
+  # i2c-dev needed by clightd and ddcutil for DDC monitor control
+  hardware.i2c.enable = true;
 
   # Configure session variables
   environment.sessionVariables = {
