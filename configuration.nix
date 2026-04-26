@@ -46,6 +46,19 @@ in
     ];
   };
 
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      libva-utils # vainfo
+      libva-vdpau-driver
+      libvdpau-va-gl
+    ];
+  };
+
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "radeonsi";
+  };
+
   # Configure console keymap to use the xserver config
   console = {
     useXkbConfig = true;
