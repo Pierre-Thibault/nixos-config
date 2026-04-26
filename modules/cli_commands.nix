@@ -65,6 +65,7 @@ in
     wl-clipboard
     wlrctl
     wtype
+    yad
     yazi
     yt-dlp
     zellij
