@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+
+# Daemon that tracks niri workspace focus history (MRU order).
+# Listens to niri's event-stream and persists the MRU list to /tmp/niri-mru.json.
+
+import json
+import subprocess
+import sys
+
+MRU_FILE = "/tmp/niri-mru.json"
+
+
+def load_mru():
+    try:
+        with open(MRU_FILE) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def save_mru(mru):
+    with open(MRU_FILE, "w") as f:
+        json.dump(mru, f)
+
+
+def push(mru, workspace_id):
+    mru = [w for w in mru if w != workspace_id]
+    mru.insert(0, workspace_id)
+    return mru
+
+
+def main():
+    mru = load_mru()
+    proc = subprocess.Popen(
+        ["niri", "msg", "--json", "event-stream"],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    for line in proc.stdout:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+        # WorkspacesChanged fires whenever workspace focus changes.
+        if "WorkspacesChanged" in event:
+            workspaces = event["WorkspacesChanged"]["workspaces"]
+            focused = next((w for w in workspaces if w.get("is_focused")), None)
+            if focused:
+                mru = push(mru, focused["id"])
+                save_mru(mru)
+
+        # WorkspaceActivated exists in some niri versions.
+        elif "WorkspaceActivated" in event:
+            ws = event["WorkspaceActivated"]
+            if ws.get("focused", True):
+                mru = push(mru, ws["id"])
+                save_mru(mru)
+
+
+if __name__ == "__main__":
+    main()

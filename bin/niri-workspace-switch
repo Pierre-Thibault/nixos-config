@@ -1,0 +1,84 @@
+#!/usr/bin/env nix-shell
+#!nix-shell -i python3 -p python3
+
+# Show niri workspaces in MRU order via rofi and focus the selected one.
+# Depends on niri-workspace-mru-daemon writing /tmp/niri-mru.json.
+
+import json
+import subprocess
+import sys
+
+MRU_FILE = "/tmp/niri-mru.json"
+
+
+def load_mru():
+    try:
+        with open(MRU_FILE) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def get_workspaces():
+    result = subprocess.run(
+        ["niri", "msg", "--json", "workspaces"],
+        capture_output=True,
+        text=True,
+    )
+    return {ws["id"]: ws for ws in json.loads(result.stdout)}
+
+
+def format_workspace(ws):
+    idx = ws["idx"]
+    name = ws.get("name")
+    if name:
+        return f"{idx} - {name}"
+    return str(idx)
+
+
+def main():
+    mru = load_mru()
+    workspaces = get_workspaces()
+
+    # Order workspaces by MRU; append any not yet in MRU at the end.
+    seen = set()
+    ordered = []
+    for ws_id in mru:
+        if ws_id in workspaces:
+            ordered.append(workspaces[ws_id])
+            seen.add(ws_id)
+    for ws in workspaces.values():
+        if ws["id"] not in seen:
+            ordered.append(ws)
+
+    if not ordered:
+        sys.exit(0)
+
+    lines = [format_workspace(ws) for ws in ordered]
+    rofi_input = "\n".join(lines)
+
+    rofi_cmd = ["rofi", "-dmenu", "-p", "Workspace"]
+    if len(ordered) > 1:
+        rofi_cmd += ["-selected-row", "1"]
+
+    result = subprocess.run(
+        rofi_cmd,
+        input=rofi_input,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0 or not result.stdout.strip():
+        sys.exit(0)
+
+    selected = result.stdout.strip()
+    for i, line in enumerate(lines):
+        if line == selected:
+            subprocess.run(
+                ["niri", "msg", "action", "focus-workspace", str(ordered[i]["idx"])]
+            )
+            break
+
+
+if __name__ == "__main__":
+    main()

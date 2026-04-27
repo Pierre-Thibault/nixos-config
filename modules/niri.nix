@@ -117,6 +117,21 @@
     };
   };
 
+  # Workspace MRU daemon — tracks workspace focus history for niri-workspace-switch
+  systemd.user.services.niri-workspace-mru-daemon = {
+    description = "Niri workspace MRU tracker";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    path = [ pkgs.python3 pkgs.niri ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "/home/pierre/nixos-config/bin/niri-workspace-mru-daemon";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
+
   # Add dependencies to hypridle service PATH for scripts
   systemd.user.services.hypridle = {
     path = with pkgs; [
