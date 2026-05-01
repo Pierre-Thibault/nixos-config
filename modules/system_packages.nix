@@ -10,6 +10,7 @@
     input-remapper
     jq
     pinentry-curses
+    v4l-utils
     xwayland-satellite
   ];
 }
