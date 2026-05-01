@@ -15,6 +15,7 @@ ln -sfn /run/current-system/sw/share/themes/adw-gtk3-dark ~/.themes/adw-gtk3
 
 gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3'
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 12'
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
 
 systemctl --user start redland.service 2>/dev/null || true

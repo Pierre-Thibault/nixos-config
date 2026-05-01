@@ -13,8 +13,9 @@ ln -sf default-light.jpg "$HOME/Images/Fonds d'écran/default.jpg"
 mkdir -p ~/.themes
 ln -sfn /run/current-system/sw/share/themes/adw-gtk3 ~/.themes/adw-gtk3
 
-gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
+gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3'
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
+gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 12'
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false
 
 systemctl --user stop redland.service 2>/dev/null || true
