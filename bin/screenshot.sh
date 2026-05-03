@@ -24,10 +24,17 @@ else
     GRIM_ARGS=()
 fi
 
+TMPFILE=$(mktemp /tmp/screenshot-XXXXXX.png)
+
+grim "${GRIM_ARGS[@]}" "$TMPFILE" || { rm -f "$TMPFILE"; exit 1; }
+
 if [ "$EDIT" = true ]; then
-    grim "${GRIM_ARGS[@]}" - | swappy -f -
+    swappy -f "$TMPFILE"
 else
-    grim "${GRIM_ARGS[@]}" - | tee "$SCREENSHOT_DIR/$FILENAME" | wl-copy
+    cp "$TMPFILE" "$SCREENSHOT_DIR/$FILENAME"
+    wl-copy < "$TMPFILE"
 fi
+
+rm -f "$TMPFILE"
 
 pw-play "$SOUND" &
