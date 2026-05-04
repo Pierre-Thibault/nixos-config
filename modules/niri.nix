@@ -32,6 +32,7 @@
     # Idle daemon
     hypridle # Idle management daemon
     gtklock # GTK-based screen locker
+    wlinhibit # Wayland idle inhibitor (used by caffeine)
     playerctl # Media player control (for video idle detection)
 
     # Color picker
