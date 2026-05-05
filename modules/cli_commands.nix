@@ -12,6 +12,7 @@ in
     atuin
     bandwhich
     bat
+    borgbackup
     bottom
     unstable.claude-code
     curl
