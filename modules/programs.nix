@@ -18,12 +18,12 @@ let
         --unset QT_STYLE_OVERRIDE
     '';
   };
+
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
     anki
     audacity
-    brave
     (brave.override {
       commandLineArgs = "--enable-features=VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization --enable-gpu-rasterization --ozone-platform=wayland";
     })
