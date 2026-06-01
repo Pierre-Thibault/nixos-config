@@ -60,6 +60,12 @@ let
   '';
 in
 {
+  qt = {
+    enable = true;
+    platformTheme = "gnome";
+    style = "adwaita";
+  };
+
   # Run setup script on activation
   system.activationScripts.gtk-slate-accent = {
     text = ''
