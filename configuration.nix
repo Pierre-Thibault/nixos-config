@@ -248,6 +248,8 @@ in
       alsa.enable = true;
       alsa.support32Bit = true;
       pulse.enable = true;
+      wireplumber.enable = true;
+
       # If you want to use JACK applications, uncomment this
       #jack.enable = true;
 
@@ -266,6 +268,24 @@ in
       freeSwapThreshold = 10;
       enableNotifications = true; # notifie via systemd-oomd/notify
     };
+
+  };
+
+  # Hack to make OBS work on Niri:
+  systemd.user.services.xdg-desktop-portal-wlr = {
+    environment = {
+      XDG_CURRENT_DESKTOP = "sway";
+    };
+  };
+
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true; # Important pour Niri
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config.common.default = [
+      "gtk"
+      "wlr"
+    ];
   };
 
   # This value determines the NixOS release from which the default

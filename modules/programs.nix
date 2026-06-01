@@ -42,6 +42,10 @@ in
     google-chrome
     gthumb
     keepass
+    kdePackages.kdenlive
+    frei0r # Video effects (zoom, text, transitions)
+    movit # High-quality effects (GPU)
+    rubberband # To adjust audio speed without pitch    keepass
     keepassxc
     keymapp
     libreoffice
@@ -50,7 +54,6 @@ in
     menulibre
     minijinja
     nemo-with-extensions
-    obs-studio
     obsidian
     ocrfeeder
     openvpn
@@ -72,4 +75,13 @@ in
     zed-editor
     zoom-us
   ];
+
+  programs.obs-studio = {
+    enable = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      wlrobs # For Wayland (recommended)
+      obs-pipewire-audio-capture # System audio
+      obs-backgroundremoval # (optional : green screen or automatic removal)
+    ];
+  };
 }
