@@ -57,6 +57,7 @@ in
     obsidian
     ocrfeeder
     openvpn
+    pandoc
     pika-backup
     polari
     protonvpn-gui
