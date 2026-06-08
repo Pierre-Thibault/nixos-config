@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Run a command from rofi and show output in a Ghostty window if any is produced.
+tmpfile=$(mktemp)
+bash -c "$*" > "$tmpfile" 2>&1
+
+if [ -s "$tmpfile" ]; then
+    wezterm start --always-new-process --class rofi-output -- bash -c "cat '$tmpfile'; echo; read -rp 'Press Enter to close...'; rm -f '$tmpfile'"
+else
+    rm -f "$tmpfile"
+fi
