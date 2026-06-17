@@ -7,10 +7,15 @@
 let
   userdata = import ../userdata.nix;
 
+  # CopyQ sans le plugin de chiffrement GnuPG (cause un timeout de 10s au démarrage)
+  copyq-no-encrypt = pkgs.copyq.overrideAttrs (oldAttrs: {
+    cmakeFlags = oldAttrs.cmakeFlags ++ [ "-DWITH_ITEM_ENCRYPT=OFF" ];
+  });
+
   # Wrapper pour CopyQ qui ignore le thème Qt global
   copyq-wrapped = pkgs.symlinkJoin {
     name = "copyq-wrapped";
-    paths = [ pkgs.copyq ];
+    paths = [ copyq-no-encrypt ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/copyq \
