@@ -60,7 +60,7 @@ in
     openvpn
     pika-backup
     polari
-    protonvpn-gui
+    proton-vpn
     qalculate-gtk
     stretchly
     sunwait

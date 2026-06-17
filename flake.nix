@@ -4,8 +4,7 @@
   description = "My NixOS's flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs-25-05.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     nix-index-database = {
@@ -17,7 +16,6 @@
   outputs =
     {
       nixpkgs,
-      nixpkgs-25-05,
       nix-flatpak,
       nixpkgs-unstable,
       nix-index-database,
@@ -32,10 +30,6 @@
         ];
         specialArgs = {
           unstable = import nixpkgs-unstable {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
-          nixos-25-05 = import nixpkgs-25-05 {
             system = "x86_64-linux";
             config.allowUnfree = true;
           };

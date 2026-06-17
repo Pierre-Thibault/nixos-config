@@ -6,7 +6,6 @@
   config,
   pkgs,
   lib,
-  nixos-25-05,
   unstable,
   ...
 }:
@@ -73,20 +72,14 @@ in
   };
 
   environment = {
-    gnome.excludePackages = with nixos-25-05.pkgs; [
+    gnome.excludePackages = with pkgs; [
       epiphany # web browser
       gnome-calculator
     ];
     shells = [ pkgs.zsh ];
-    systemPackages =
-      with nixos-25-05.pkgs;
-      [
-        gnome-shell
-        gnome-control-center
-        gnome-settings-daemon
-        mutter
-      ]
-      ++ [ pkgs.polkit_gnome ];
+    systemPackages = with pkgs; [
+      polkit_gnome
+    ];
     variables =
       let
         editor = "hx";
@@ -211,7 +204,6 @@ in
     };
     desktopManager.gnome = {
       enable = true;
-      # Use Gnome 48 from 25.05
       extraGSettingsOverrides = ''
         [org.gnome.shell]
         enabled-extensions=[]
@@ -225,8 +217,6 @@ in
         variant = "multix";
       };
     };
-
-    desktopManager.plasma6.enable = true;
 
     # Replace the default console
     kmscon = {

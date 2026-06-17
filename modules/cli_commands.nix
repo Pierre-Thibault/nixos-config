@@ -23,6 +23,7 @@ in
     dust
     eza
     fanctl
+    fastfetch
     fd
     file
     fish
@@ -46,9 +47,8 @@ in
     marksman
     mc
     nap
-    neofetch
     nixd
-    nixfmt-rfc-style
+    nixfmt
     unstable.opencode
     procs
     python313Packages.catppuccin
