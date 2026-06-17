@@ -73,6 +73,9 @@ in
     tesseract
     unstable.opencode-desktop
     vesktop
+    (vivaldi.override {
+      commandLineArgs = "--enable-features=VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization --enable-gpu-rasterization --ozone-platform=wayland";
+    })
     vlc
     vscodium
     warp-terminal
