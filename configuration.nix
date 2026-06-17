@@ -161,6 +161,7 @@ in
         settings = {
           "org/gnome/desktop/interface" = {
             accent-color = "slate";
+            gtk-enable-primary-paste = true;
             gtk-theme = "adw-gtk3";
           };
         };
