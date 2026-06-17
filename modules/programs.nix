@@ -29,6 +29,7 @@ in
     })
     code-cursor-fhs
     copyq-wrapped
+    droidcam
     file-roller
     gedit
     ghostty
@@ -79,9 +80,10 @@ in
   programs.obs-studio = {
     enable = true;
     plugins = with pkgs.obs-studio-plugins; [
-      wlrobs # For Wayland (recommended)
-      obs-pipewire-audio-capture # System audio
+      droidcam-obs
       obs-backgroundremoval # (optional : green screen or automatic removal)
+      obs-pipewire-audio-capture # System audio
+      wlrobs # For Wayland (recommended)
     ];
   };
 }

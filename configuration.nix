@@ -3,6 +3,7 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 {
+  config,
   pkgs,
   lib,
   nixos-25-05,
@@ -39,11 +40,18 @@ in
       "/dev/disk/by-uuid/56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6";
 
     kernelModules = [
+      "v4l2loopback"
       "vboxdrv"
       "vboxnetflt"
       "vboxnetadp"
       "vboxpci"
     ];
+
+    # For using Droidcam:
+    extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
+    extraModprobeConfig = ''
+      options v4l2loopback devices=1 video_nr=2 card_label="DroidCam" exclusive_caps=1
+    '';
   };
 
   hardware.graphics = {
@@ -303,9 +311,10 @@ in
     isNormalUser = true;
     description = userdata.userfullname;
     extraGroups = [
-      "networkmanager"
-      "wheel"
       "i2c" # ddcutil: monitor brightness control via DDC/CI
+      "networkmanager"
+      "video"
+      "wheel"
     ];
     shell = pkgs.zsh;
   };
