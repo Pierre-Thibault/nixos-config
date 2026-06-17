@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Returns "lat lon" using Google Geolocation API with nearby WiFi networks
+
+API_KEY=$(cat "$HOME/secrets/google-geo-location" 2>/dev/null | tr -d '[:space:]')
+
+if [ -z "$API_KEY" ]; then
+    echo "45.9 -74.2"
+    exit 0
+fi
+
+WIFI_JSON=$(nmcli -t -f BSSID,SIGNAL dev wifi list 2>/dev/null | head -20 | \
+    sed 's/\\:/COLON/g' | \
+    while IFS=: read -r bssid signal; do
+        BSSID=$(echo "$bssid" | sed 's/COLON/:/g')
+        echo "{\"macAddress\":\"$BSSID\",\"signalStrength\":$signal}"
+    done | paste -sd ',')
+
+RESPONSE=$(curl -sf -X POST \
+    "https://www.googleapis.com/geolocation/v1/geolocate?key=${API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "{\"wifiAccessPoints\":[${WIFI_JSON}]}")
+
+LAT=$(echo "$RESPONSE" | jq -r '.location.lat // empty' 2>/dev/null)
+LON=$(echo "$RESPONSE" | jq -r '.location.lng // empty' 2>/dev/null)
+
+if [ -n "$LAT" ] && [ -n "$LON" ]; then
+    echo "$LAT $LON"
+else
+    echo "45.9 -74.2"
+fi

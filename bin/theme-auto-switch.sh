@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Auto-switch theme based on sunrise/sunset
-# Coordinates: 45.9°N, 74.2°W (Montreal area)
 
 THEME_TOGGLE_SCRIPT="/home/pierre/.config/waybar/theme-toggle.sh"
 STATE_FILE="/home/pierre/.config/waybar/theme-state"
@@ -41,8 +40,11 @@ if [ -z "$CACHE_DATE" ]; then
         # Wait for network connectivity (max 30s)
         nm-online -q -t 30 2>/dev/null || true
 
-        # Fetch from sunrise-sunset.org API (Montreal coordinates)
-        if RESPONSE=$(curl -s --connect-timeout 10 "https://api.sunrise-sunset.org/json?lat=45.9&lng=-74.2&formatted=0&tzid=America/Toronto"); then
+        # Fetch from sunrise-sunset.org API
+        COORDS=$(get-location)
+        LAT=$(echo "$COORDS" | cut -d' ' -f1)
+        LON=$(echo "$COORDS" | cut -d' ' -f2)
+        if RESPONSE=$(curl -s --connect-timeout 10 "https://api.sunrise-sunset.org/json?lat=${LAT}&lng=${LON}&formatted=0&tzid=America/Toronto"); then
             # Extract sunrise and sunset times (in ISO 8601 format)
             SUNRISE=$(echo "$RESPONSE" | grep -o '"sunrise":"[^"]*"' | cut -d'"' -f4)
             SUNSET=$(echo "$RESPONSE" | grep -o '"sunset":"[^"]*"' | cut -d'"' -f4)
