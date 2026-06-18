@@ -5,7 +5,7 @@
 COLOR_SCHEME=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)
 
 if [[ "$COLOR_SCHEME" == *"dark"* ]]; then
-    exec aider --dark-mode --code-theme catppuccin-mocha "$@"
+    exec aider-setup --dark-mode --code-theme monokai "$@"
 else
-    exec aider --light-mode --code-theme catppuccin-latte "$@"
+    exec aider-setup --light-mode --code-theme solarized-light "$@"
 fi

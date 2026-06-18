@@ -3,3 +3,4 @@ cspell.json
 .nobackup
 secrets/
 .aider.*
+.aider*

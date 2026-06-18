@@ -52,7 +52,6 @@ in
     unstable.opencode
     procs
     rclone
-    python313Packages.catppuccin
     python313Packages.grip
     ripgrep-all
     simple-completion-language-server
