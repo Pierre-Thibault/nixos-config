@@ -18,8 +18,12 @@ if [ -z "$QUERY" ]; then
     exit 0
 fi
 
+# Replace {channel} placeholder with current NixOS version
+CHANNEL=$(nixos-version 2>/dev/null | grep -oP '^\d+\.\d+' || echo "unstable")
+SEARCH_URL="${SEARCH_URL/\{channel\}/$CHANNEL}"
+
 # URL encode the query using jq
 ENCODED_QUERY=$(jq -rn --arg str "$QUERY" '$str | @uri')
 
 # Open browser with search URL (detached from current process)
-setsid -f brave --new-tab "${SEARCH_URL}${ENCODED_QUERY}" >/dev/null 2>&1
+setsid -f xdg-open "${SEARCH_URL}${ENCODED_QUERY}" >/dev/null 2>&1
