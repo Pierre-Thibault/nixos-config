@@ -41,9 +41,14 @@ if [ -z "$CACHE_DATE" ]; then
         nm-online -q -t 30 2>/dev/null || true
 
         # Fetch from sunrise-sunset.org API
-        COORDS=$(get-location)
+        COORDS=$("$HOME/nixos-config/bin/get-location")
         LAT=$(echo "$COORDS" | cut -d' ' -f1)
         LON=$(echo "$COORDS" | cut -d' ' -f2)
+        # Fallback if coordinates are empty (e.g. get-location not in PATH)
+        if [ -z "$LAT" ] || [ -z "$LON" ]; then
+            LAT="45.9"
+            LON="-74.2"
+        fi
         if RESPONSE=$(curl -s --connect-timeout 10 "https://api.sunrise-sunset.org/json?lat=${LAT}&lng=${LON}&formatted=0&tzid=America/Toronto"); then
             # Extract sunrise and sunset times (in ISO 8601 format)
             SUNRISE=$(echo "$RESPONSE" | grep -o '"sunrise":"[^"]*"' | cut -d'"' -f4)
