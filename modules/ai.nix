@@ -45,6 +45,11 @@ in
         target = "https://api.together.xyz";
         keyEnvVar = "TOGETHER_API_KEY";
       };
+      openai = {
+        hostname = "openai.proxy";
+        target = "https://api.openai.com";
+        keyEnvVar = "OPENAI_API_KEY";
+      };
       huggingface = {
         hostname = "huggingface.proxy";
         target = "https://huggingface.co";
@@ -60,6 +65,8 @@ in
     # Note: incompatible with Claude Code subscription auth — choose one.
     # ANTHROPIC_BASE_URL = "http://anthropic.proxy:4140";
     # ANTHROPIC_API_KEY = "proxy";
+    OPENAI_BASE_URL = "http://openai.proxy:4140/v1";
+    OPENAI_API_KEY = "proxy";
     GROQ_API_BASE = "http://groq.proxy:4140";
     GROQ_API_KEY = "proxy";
     XAI_API_BASE = "http://xai.proxy:4140";

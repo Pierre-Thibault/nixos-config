@@ -23,12 +23,11 @@ let
 
   caddyfile = pkgs.writeText "api-proxy-caddyfile" (''
     {
-      # The admin API is disabled to prevent real API keys from being readable
-      # at http://localhost:2019/config/ — Caddy embeds substituted key values
-      # in its compiled JSON config, which the admin API exposes in plaintext.
-      # Trade-off: `systemctl reload caddy` no longer works gracefully; NixOS
-      # automatically falls back to `systemctl restart caddy` on reload failure,
-      # causing a brief interruption when the proxy config changes.
+      # Admin API disabled to prevent real API keys from being readable at
+      # localhost:2019/config/ — Caddy embeds substituted key values in its
+      # compiled JSON config, which the admin API exposes in plaintext.
+      # reloadIfChanged is set to false below so NixOS restarts Caddy instead
+      # of attempting a graceful reload (which requires the admin API).
       admin off
     }
 
@@ -106,6 +105,8 @@ in
     };
 
     systemd.services.caddy.serviceConfig.EnvironmentFile = cfg.environmentFile;
+    systemd.services.caddy.reloadTriggers = lib.mkForce [];
+    systemd.services.caddy.restartTriggers = lib.mkForce [ caddyfile ];
 
     networking.hosts."127.0.0.1" =
       lib.mapAttrsToList (_name: upstream: upstream.hostname) cfg.upstreams;
