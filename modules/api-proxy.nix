@@ -8,10 +8,12 @@
 let
   cfg = config.services.api-proxy;
 
-  upstreamBlock = _name: upstream:
+  upstreamBlock =
+    _name: upstream:
     let
       envRef = "{$" + upstream.keyEnvVar + "}";
-    in ''
+    in
+    ''
       http://${upstream.hostname}:${toString cfg.port} {
         bind 127.0.0.1
         reverse_proxy ${upstream.target} {
@@ -21,17 +23,20 @@ let
       }
     '';
 
-  caddyfile = pkgs.writeText "api-proxy-caddyfile" (''
-    {
-      # Admin API disabled to prevent real API keys from being readable at
-      # localhost:2019/config/ — Caddy embeds substituted key values in its
-      # compiled JSON config, which the admin API exposes in plaintext.
-      # reloadIfChanged is set to false below so NixOS restarts Caddy instead
-      # of attempting a graceful reload (which requires the admin API).
-      admin off
-    }
+  caddyfile = pkgs.writeText "api-proxy-caddyfile" (
+    ''
+      {
+        # Admin API disabled to prevent real API keys from being readable at
+        # localhost:2019/config/ — Caddy embeds substituted key values in its
+        # compiled JSON config, which the admin API exposes in plaintext.
+        # reloadIfChanged is set to false below so NixOS restarts Caddy instead
+        # of attempting a graceful reload (which requires the admin API).
+        admin off
+      }
 
-  '' + lib.concatStringsSep "\n" (lib.mapAttrsToList upstreamBlock cfg.upstreams));
+    ''
+    + lib.concatStringsSep "\n" (lib.mapAttrsToList upstreamBlock cfg.upstreams)
+  );
 
   upstreamSubmodule = lib.types.submodule {
     options = {
@@ -105,11 +110,12 @@ in
     };
 
     systemd.services.caddy.serviceConfig.EnvironmentFile = cfg.environmentFile;
-    systemd.services.caddy.reloadTriggers = lib.mkForce [];
+    systemd.services.caddy.reloadTriggers = lib.mkForce [ ];
     systemd.services.caddy.restartTriggers = lib.mkForce [ caddyfile ];
 
-    networking.hosts."127.0.0.1" =
-      lib.mapAttrsToList (_name: upstream: upstream.hostname) cfg.upstreams;
+    networking.hosts."127.0.0.1" = lib.mapAttrsToList (
+      _name: upstream: upstream.hostname
+    ) cfg.upstreams;
 
     systemd.tmpfiles.rules = lib.optionals (cfg.secretsDirectoryOwner != null) [
       "d ${dirOf cfg.environmentFile} 750 ${cfg.secretsDirectoryOwner} caddy -"
