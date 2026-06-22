@@ -14,7 +14,6 @@ in
     bat
     borgbackup
     bottom
-    unstable.claude-code
     curl
     ddcutil
     devbox
@@ -49,7 +48,6 @@ in
     nap
     nixd
     nixfmt
-    unstable.opencode
     procs
     rclone
     python313Packages.grip
