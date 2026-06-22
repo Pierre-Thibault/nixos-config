@@ -72,6 +72,9 @@ in
   };
 
   environment = {
+    etc."geoclue/geoclue.conf" = lib.mkForce {
+      source = config.sops.templates."geoclue.conf".path;
+    };
     gnome.excludePackages = with pkgs; [
       epiphany # web browser
       gnome-calculator
@@ -263,7 +266,6 @@ in
 
     geoclue2 = {
       enable = true;
-      geoProviderUrl = "https://www.googleapis.com/geolocation/v1/geolocate?key=${lib.strings.trim (builtins.readFile /home/${userdata.username}/secrets/google-geo-location)}";
       appConfig = {
         "xdg-desktop-portal" = {
           isAllowed = true;
