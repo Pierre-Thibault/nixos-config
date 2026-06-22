@@ -9,7 +9,7 @@ in
 
   # Path to a KEY=VALUE file containing real API keys.
   # Must be readable by the caddy group (e.g. permissions: root:caddy 440).
-  secretsFile = "/home/${userdata.username}/secrets/api-proxy.env";
+  secretsFile = "/run/secrets/rendered/api-proxy.env";
 
   # Local port shared by all providers, differentiated by hostname.
   port = 4140;

@@ -1,0 +1,9 @@
+keys:
+  - &pierre age1q3nnjq8695wpj7y9mdqk34pt5g4fsw7su5vslkh3ehf9vqynv4lsw8vey8
+  - &pierre-nixos age1cezrhe643ls5msqductpyrd7yc5s534yqheta6df2u75s6u8rcaqu8ceka
+creation_rules:
+  - path_regex: sops/.*\.yaml$
+    key_groups:
+      - age:
+          - *pierre
+          - *pierre-nixos

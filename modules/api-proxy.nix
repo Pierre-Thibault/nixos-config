@@ -11,7 +11,7 @@ let
   upstreamBlock =
     _name: upstream:
     let
-      envRef = "{$" + upstream.keyEnvVar + "}";
+      envRef = "{env." + upstream.keyEnvVar + "}";
     in
     ''
       http://${upstream.hostname}:${toString cfg.port} {
@@ -24,18 +24,7 @@ let
     '';
 
   caddyfile = pkgs.writeText "api-proxy-caddyfile" (
-    ''
-      {
-        # Admin API disabled to prevent real API keys from being readable at
-        # localhost:2019/config/ — Caddy embeds substituted key values in its
-        # compiled JSON config, which the admin API exposes in plaintext.
-        # reloadIfChanged is set to false below so NixOS restarts Caddy instead
-        # of attempting a graceful reload (which requires the admin API).
-        admin off
-      }
-
-    ''
-    + lib.concatStringsSep "\n" (lib.mapAttrsToList upstreamBlock cfg.upstreams)
+    lib.concatStringsSep "\n" (lib.mapAttrsToList upstreamBlock cfg.upstreams)
   );
 
   upstreamSubmodule = lib.types.submodule {
@@ -110,8 +99,8 @@ in
     };
 
     systemd.services.caddy.serviceConfig.EnvironmentFile = cfg.environmentFile;
-    systemd.services.caddy.reloadTriggers = lib.mkForce [ ];
-    systemd.services.caddy.restartTriggers = lib.mkForce [ caddyfile ];
+    systemd.services.caddy.reloadTriggers = lib.mkForce [ caddyfile ];
+    systemd.services.caddy.restartTriggers = lib.mkForce [ ];
 
     networking.hosts."127.0.0.1" = lib.mapAttrsToList (
       _name: upstream: upstream.hostname

@@ -26,7 +26,6 @@ in
     enable = true;
     port = cfg.port;
     environmentFile = cfg.secretsFile;
-    secretsDirectoryOwner = cfg.username;
     upstreams = lib.mapAttrs toUpstream cfg.providers;
   };
 
