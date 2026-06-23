@@ -10,8 +10,11 @@
       TOGETHER_API_KEY = { };
       OPENAI_API_KEY = { };
       HF_TOKEN = { };
-      GOOGLE_API_GEO_KEY = { };
+      GOOGLE_API_GEO_KEY = {
+        sopsFile = ../sops/secrets.yaml;
+      };
       ICLOUD_PASSWORD = {
+        sopsFile = ../sops/secrets.yaml;
         owner = "pierre";
         path = "/run/secrets/icloud-password";
       };
