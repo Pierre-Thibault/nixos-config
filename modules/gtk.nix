@@ -66,6 +66,10 @@ in
     style = "adwaita";
   };
 
+  users.users.${username}.packages = with pkgs; [
+    kdePackages.breeze-icons
+  ];
+
   # Run setup script on activation
   system.activationScripts.gtk-slate-accent = {
     text = ''

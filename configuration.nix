@@ -166,6 +166,7 @@ in
             accent-color = "slate";
             gtk-enable-primary-paste = true;
             gtk-theme = "adw-gtk3";
+            icon-theme = "breeze";
           };
         };
         locks = [
