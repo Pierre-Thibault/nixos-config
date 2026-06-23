@@ -11,6 +11,10 @@
       OPENAI_API_KEY = { };
       HF_TOKEN = { };
       GOOGLE_API_GEO_KEY = { };
+      ICLOUD_PASSWORD = {
+        owner = "pierre";
+        path = "/run/secrets/icloud-password";
+      };
     };
 
     templates."geoclue.conf" = {
