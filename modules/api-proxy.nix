@@ -8,16 +8,19 @@
 let
   cfg = config.services.api-proxy;
 
+  bindAddr = "127.0.0.1";
+  port = toString cfg.port;
+
   upstreamBlock =
     _name: upstream:
     let
       envRef = "{env." + upstream.keyEnvVar + "}";
     in
     ''
-      http://${upstream.hostname}:${toString cfg.port} {
-        bind 127.0.0.1
+      http://${upstream.hostname}:${port} {
+        bind ${bindAddr}
         reverse_proxy ${upstream.target} {
-          header_up -x-api-key
+          header_up -${upstream.keyHeader}
           header_up ${upstream.keyHeader} "${upstream.keyScheme}${envRef}"
         }
       }
@@ -102,7 +105,7 @@ in
     systemd.services.caddy.reloadTriggers = lib.mkForce [ caddyfile ];
     systemd.services.caddy.restartTriggers = lib.mkForce [ ];
 
-    networking.hosts."127.0.0.1" = lib.mapAttrsToList (
+    networking.hosts.${bindAddr} = lib.mapAttrsToList (
       _name: upstream: upstream.hostname
     ) cfg.upstreams;
 

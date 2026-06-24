@@ -3,6 +3,8 @@
 # ai.nix and api-proxy.nix are generic and do not need to be modified.
 let
   userdata = import ./userdata.nix;
+  port = 4140;
+  portStr = toString port;
 in
 {
   inherit (userdata) username;
@@ -12,7 +14,7 @@ in
   secretsFile = "/run/secrets/rendered/api-proxy.env";
 
   # Local port shared by all providers, differentiated by hostname.
-  port = 4140;
+  inherit port;
 
   # API providers to proxy. Each entry requires:
   #   hostname    — local virtual hostname resolving to 127.0.0.1
@@ -32,7 +34,7 @@ in
     #   keyScheme = "";
     #   keyEnvVar = "ANTHROPIC_API_KEY";
     #   sessionVars = {
-    #     ANTHROPIC_BASE_URL = "http://anthropic.proxy:4140";
+    #     ANTHROPIC_BASE_URL = "http://anthropic.proxy:${portStr}";
     #     ANTHROPIC_API_KEY = "proxy";
     #   };
     # };
@@ -42,7 +44,7 @@ in
       target = "https://api.groq.com";
       keyEnvVar = "GROQ_API_KEY";
       sessionVars = {
-        GROQ_API_BASE = "http://groq.proxy:4140";
+        GROQ_API_BASE = "http://groq.proxy:${portStr}";
         GROQ_API_KEY = "proxy";
       };
     };
@@ -52,7 +54,7 @@ in
       target = "https://api.x.ai";
       keyEnvVar = "XAI_API_KEY";
       sessionVars = {
-        XAI_API_BASE = "http://xai.proxy:4140";
+        XAI_API_BASE = "http://xai.proxy:${portStr}";
         XAI_API_KEY = "proxy";
       };
     };
@@ -62,7 +64,7 @@ in
       target = "https://api.together.xyz";
       keyEnvVar = "TOGETHER_API_KEY";
       sessionVars = {
-        TOGETHERAI_API_BASE = "http://togetherai.proxy:4140";
+        TOGETHERAI_API_BASE = "http://togetherai.proxy:${portStr}";
         TOGETHERAI_API_KEY = "proxy";
       };
     };
@@ -72,7 +74,7 @@ in
       target = "https://api.openai.com";
       keyEnvVar = "OPENAI_API_KEY";
       sessionVars = {
-        OPENAI_BASE_URL = "http://openai.proxy:4140/v1";
+        OPENAI_BASE_URL = "http://openai.proxy:${portStr}/v1";
         OPENAI_API_KEY = "proxy";
       };
     };
@@ -82,7 +84,7 @@ in
       target = "https://huggingface.co";
       keyEnvVar = "HF_TOKEN";
       sessionVars = {
-        HF_ENDPOINT = "http://huggingface.proxy:4140";
+        HF_ENDPOINT = "http://huggingface.proxy:${portStr}";
         HF_TOKEN = "proxy";
       };
     };
