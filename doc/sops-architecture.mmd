@@ -1,0 +1,64 @@
+%%{init: {"theme": "base", "themeVariables": {
+  "primaryColor": "#dbeafe",
+  "primaryBorderColor": "#3b82f6",
+  "primaryTextColor": "#1e3a5f",
+  "lineColor": "#64748b",
+  "edgeLabelBackground": "#f8fafc"
+}}}%%
+flowchart LR
+    subgraph tools["AI Coding Tools"]
+        note1["no API keys stored"]:::note
+        cc[Claude Code]:::tool
+        oc[OpenCode]:::tool
+        ai[Aider]:::tool
+    end
+
+    subgraph proxy["Local Caddy Proxy"]
+        caddy["Caddy\nAPI key injection"]:::proxy
+    end
+
+    subgraph external["External AI Services"]
+        openai[OpenAI]:::service
+        groq[Groq]:::service
+        xai[xAI]:::service
+        together[Together AI]:::service
+        hf[Hugging Face]:::service
+    end
+
+    cc -->|"HTTP · no key"| caddy
+    oc -->|"HTTP · no key"| caddy
+    ai -->|"HTTP · no key"| caddy
+
+    caddy -->|"injects API key"| openai
+    caddy -->|"injects API key"| groq
+    caddy -->|"injects API key"| xai
+    caddy -->|"injects API key"| together
+    caddy -->|"injects API key"| hf
+
+    subgraph sops["Secret Management — sops-nix"]
+        encrypted["🔒 Encrypted secrets\ngit repository\n(age encryption)"]:::secret
+        activation["NixOS activation\nat boot"]:::secret
+        ram["/run/secrets/\nRAM tmpfs\nnever written to disk"]:::secret
+        template["/run/secrets/rendered/\napi-proxy.env"]:::secret
+
+        encrypted -->|"host SSH key\ndecrypts at boot"| activation
+        activation --> ram
+        ram --> template
+    end
+
+    template -->|"systemd EnvironmentFile"| caddy
+
+    subgraph other["Other Secret Consumers"]
+        geoclue["geoclue\ngeo-location API key"]:::consumer
+        scripts["User scripts\nagenda / agenda-mcp\niCloud password"]:::consumer
+    end
+
+    ram -->|"rendered template"| geoclue
+    ram -->|"secret file"| scripts
+
+    classDef tool     fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef proxy    fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef service  fill:#fef9c3,stroke:#eab308,color:#713f12
+    classDef secret   fill:#fce7f3,stroke:#ec4899,color:#831843
+    classDef consumer fill:#ede9fe,stroke:#8b5cf6,color:#3b0764
+    classDef note     fill:#f1f5f9,stroke:#94a3b8,color:#475569,font-size:11px
