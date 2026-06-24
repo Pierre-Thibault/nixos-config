@@ -1,7 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, userdata, ... }:
 
 let
-  userdata = import ../userdata.nix;
   icloudDir = "/home/${userdata.username}/icloud";
   protonDir = "/home/${userdata.username}/proton";
 in

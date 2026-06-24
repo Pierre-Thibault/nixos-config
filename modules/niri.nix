@@ -1,5 +1,6 @@
 {
   pkgs,
+  self,
   ...
 }:
 
@@ -123,10 +124,13 @@
     wantedBy = [ "graphical-session.target" ];
     wants = [ "graphical-session.target" ];
     after = [ "graphical-session.target" ];
-    path = [ pkgs.python3 pkgs.niri ];
+    path = [
+      pkgs.python3
+      pkgs.niri
+    ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "/home/pierre/nixos-config/bin/niri-workspace-mru-daemon";
+      ExecStart = "${self}/bin/niri-workspace-mru-daemon";
       Restart = "on-failure";
       RestartSec = 2;
     };
@@ -172,11 +176,11 @@
     requires = [ "polkit.service" ];
     after = [ "systemd-modules-load.service" ];
     serviceConfig = {
-      Type       = "dbus";
-      BusName    = "org.clightd.clightd";
-      User       = "root";
-      ExecStart  = "${pkgs.clightd}/libexec/clightd";
-      Restart    = "on-failure";
+      Type = "dbus";
+      BusName = "org.clightd.clightd";
+      User = "root";
+      ExecStart = "${pkgs.clightd}/libexec/clightd";
+      Restart = "on-failure";
       RestartSec = 5;
       Environment = [
         "CLIGHTD_BL_VCP=0x10"

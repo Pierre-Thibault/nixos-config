@@ -1,6 +1,4 @@
-{ config, pkgs, lib, ... }:
-
-let userdata = import ../userdata.nix; in
+{ config, pkgs, lib, userdata, ... }:
 {
   # Enable input-remapper service
   services.input-remapper.enable = true;

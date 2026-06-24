@@ -1,11 +1,8 @@
 {
   pkgs,
+  userdata,
   ...
 }:
-
-let
-  userdata = import ../userdata.nix;
-in
 {
   users.users.${userdata.username}.packages = with pkgs; [
     # General dev tools that I want available all the times

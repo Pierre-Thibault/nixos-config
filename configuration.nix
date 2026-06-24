@@ -7,6 +7,7 @@
   pkgs,
   lib,
   unstable,
+  userdata,
   ...
 }:
 
@@ -15,7 +16,6 @@ let
   inherit (lib) pipe;
   inherit (lib.filesystem) listFilesRecursive;
   inherit (lib.strings) hasSuffix;
-  userdata = import ./userdata.nix;
   inherit (userdata) username;
   modules = pipe ./modules [
     listFilesRecursive

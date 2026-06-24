@@ -1,10 +1,10 @@
 {
   pkgs,
+  userdata,
   ...
 }:
 
 let
-  userdata = import ../userdata.nix;
   username = userdata.username;
   homeDir = "/home/${username}";
 

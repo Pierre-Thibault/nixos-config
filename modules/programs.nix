@@ -1,12 +1,11 @@
 {
   pkgs,
   unstable,
+  userdata,
   ...
 }:
 
 let
-  userdata = import ../userdata.nix;
-
   # CopyQ sans le plugin de chiffrement GnuPG (cause un timeout de 10s au démarrage)
   copyq-no-encrypt = pkgs.copyq.overrideAttrs (oldAttrs: {
     cmakeFlags = oldAttrs.cmakeFlags ++ [ "-DWITH_ITEM_ENCRYPT=OFF" ];

@@ -8,8 +8,9 @@
 let
   cfg = config.services.api-proxy;
 
-  bindAddr = "127.0.0.1";
+  bindAddr = cfg.bindAddr;
   port = toString cfg.port;
+  inherit (lib) mkForce mkOption types;
 
   upstreamBlock =
     _name: upstream:
@@ -29,28 +30,28 @@ let
     lib.concatStringsSep "\n" (lib.mapAttrsToList upstreamBlock cfg.upstreams)
   );
 
-  upstreamSubmodule = lib.types.submodule {
+  upstreamSubmodule = types.submodule {
     options = {
-      hostname = lib.mkOption {
-        type = lib.types.str;
+      hostname = mkOption {
+        type = types.str;
         description = "Local hostname for this upstream (e.g. groq.proxy). Must resolve to 127.0.0.1 via networking.hosts.";
       };
-      target = lib.mkOption {
-        type = lib.types.str;
+      target = mkOption {
+        type = types.str;
         description = "Upstream API base URL (e.g. https://api.anthropic.com).";
       };
-      keyHeader = lib.mkOption {
-        type = lib.types.str;
+      keyHeader = mkOption {
+        type = types.str;
         default = "Authorization";
         description = "Header used to authenticate with the upstream.";
       };
-      keyScheme = lib.mkOption {
-        type = lib.types.str;
+      keyScheme = mkOption {
+        type = types.str;
         default = "Bearer ";
         description = "Prefix before the API key value (e.g. \"Bearer \" or \"\").";
       };
-      keyEnvVar = lib.mkOption {
-        type = lib.types.str;
+      keyEnvVar = mkOption {
+        type = types.str;
         description = "Name of the environment variable holding the real API key.";
       };
     };
@@ -60,26 +61,32 @@ in
   options.services.api-proxy = {
     enable = lib.mkEnableOption "Caddy-based API key proxy";
 
-    port = lib.mkOption {
-      type = lib.types.port;
+    bindAddr = mkOption {
+      type = types.str;
+      default = "127.0.0.1";
+      description = "Address to bind to. Defaults to localhost only.";
+    };
+
+    port = mkOption {
+      type = types.port;
       default = 4140;
       description = "Single local port shared by all upstream proxies, differentiated by hostname.";
     };
 
-    environmentFile = lib.mkOption {
-      type = lib.types.str;
+    environmentFile = mkOption {
+      type = types.str;
       description = "Path to a KEY=value file containing the real API keys. Must be readable by the caddy group.";
       example = "/home/user/secrets/api-proxy.env";
     };
 
-    secretsDirectoryOwner = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
+    secretsDirectoryOwner = mkOption {
+      type = types.nullOr types.str;
       default = null;
       description = "If set, ensures the parent directory of environmentFile has permissions 750 <owner>:caddy so the Caddy service can traverse it.";
     };
 
-    upstreams = lib.mkOption {
-      type = lib.types.attrsOf upstreamSubmodule;
+    upstreams = mkOption {
+      type = types.attrsOf upstreamSubmodule;
       default = { };
       description = "API providers to proxy, keyed by an arbitrary name.";
       example = {
@@ -100,16 +107,19 @@ in
       configFile = caddyfile;
     };
 
-    systemd.services.caddy.serviceConfig.EnvironmentFile = cfg.environmentFile;
-    systemd.services.caddy.reloadTriggers = lib.mkForce [ caddyfile ];
-    systemd.services.caddy.restartTriggers = lib.mkForce [ ];
+    systemd = {
+      services.caddy = {
+        serviceConfig.EnvironmentFile = cfg.environmentFile;
+        reloadTriggers = mkForce [ caddyfile ];
+        restartTriggers = mkForce [ ];
+      };
+      tmpfiles.rules = lib.optionals (cfg.secretsDirectoryOwner != null) [
+        "d ${dirOf cfg.environmentFile} 750 ${cfg.secretsDirectoryOwner} caddy -"
+      ];
+    };
 
     networking.hosts.${bindAddr} = lib.mapAttrsToList (
       _name: upstream: upstream.hostname
     ) cfg.upstreams;
-
-    systemd.tmpfiles.rules = lib.optionals (cfg.secretsDirectoryOwner != null) [
-      "d ${dirOf cfg.environmentFile} 750 ${cfg.secretsDirectoryOwner} caddy -"
-    ];
   };
 }

@@ -1,23 +1,9 @@
-{ config, ... }:
+# sops-nix configuration for geoclue geo-location.
+{ config, self, ... }:
 {
   sops = {
-    defaultSopsFile = ../sops/api-proxy.yaml;
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-
-    secrets = {
-      GROQ_API_KEY = { };
-      XAI_API_KEY = { };
-      TOGETHER_API_KEY = { };
-      OPENAI_API_KEY = { };
-      HF_TOKEN = { };
-      GOOGLE_API_GEO_KEY = {
-        sopsFile = ../sops/secrets.yaml;
-      };
-      ICLOUD_PASSWORD = {
-        sopsFile = ../sops/secrets.yaml;
-        owner = "pierre";
-        path = "/run/secrets/icloud-password";
-      };
+    secrets.GOOGLE_API_GEO_KEY = {
+      sopsFile = self + "/sops/secrets.yaml";
     };
 
     templates."geoclue.conf" = {
@@ -83,18 +69,6 @@
         users=
       '';
       group = "geoclue";
-      mode = "0440";
-    };
-
-    templates."api-proxy.env" = {
-      content = ''
-        GROQ_API_KEY=${config.sops.placeholder.GROQ_API_KEY}
-        XAI_API_KEY=${config.sops.placeholder.XAI_API_KEY}
-        TOGETHER_API_KEY=${config.sops.placeholder.TOGETHER_API_KEY}
-        OPENAI_API_KEY=${config.sops.placeholder.OPENAI_API_KEY}
-        HF_TOKEN=${config.sops.placeholder.HF_TOKEN}
-      '';
-      group = "caddy";
       mode = "0440";
     };
   };

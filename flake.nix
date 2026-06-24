@@ -18,6 +18,7 @@
   };
   outputs =
     {
+      self,
       nixpkgs,
       nix-flatpak,
       nixpkgs-unstable,
@@ -34,6 +35,8 @@
           ./configuration.nix
         ];
         specialArgs = {
+          inherit self;
+          userdata = import ./userdata.nix;
           unstable = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
