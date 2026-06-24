@@ -20,7 +20,6 @@ let
       http://${upstream.hostname}:${port} {
         bind ${bindAddr}
         reverse_proxy ${upstream.target} {
-          header_up -${upstream.keyHeader}
           header_up ${upstream.keyHeader} "${upstream.keyScheme}${envRef}"
         }
       }
