@@ -1,28 +1,40 @@
 #!/usr/bin/env bash
 
 # Generic run-or-raise script for Niri
-# Usage: run_or_raise_niri <app_id> <launch_command>
+# Usage: run_or_raise_niri <app_id> <launch_command> [new_window_command]
 #
-# Example: run_or_raise_niri "waterfox" "flatpak run net.waterfox.waterfox"
+# new_window_command is used when the app is already running (on another workspace)
+# but has no window on the current one. Useful for singleton apps like Nautilus.
+#
+# Examples:
+#   run_or_raise_niri "waterfox" "flatpak run net.waterfox.waterfox"
+#   run_or_raise_niri "org.gnome.Nautilus" "nautilus" "nautilus --new-window"
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <app_id> <launch_command>"
+    echo "Usage: $0 <app_id> <launch_command> [new_window_command]"
     exit 1
 fi
 
 APP_ID="$1"
-shift  # Remove first argument
-LAUNCH_CMD="$@"  # All remaining arguments are the launch command
+LAUNCH_CMD="$2"
+NEW_WINDOW_CMD="${3:-$2}"
 
 # Get the currently focused workspace ID
 current_workspace=$(niri msg --json workspaces | jq -r '.[] | select(.is_focused) | .id')
+
+all_windows=($(niri msg --json windows | jq -r ".[] | select(.app_id | ascii_downcase | contains(\"${APP_ID,,}\")) | .id" | sort -n))
 
 # Get all windows matching the app_id on current workspace, sorted by id
 windows=($(niri msg --json windows | jq -r ".[] | select(.app_id | ascii_downcase | contains(\"${APP_ID,,}\")) | select(.workspace_id == $current_workspace) | .id" | sort -n))
 
 if [ ${#windows[@]} -eq 0 ]; then
-    # No windows found on current workspace, launch a new instance
-    $LAUNCH_CMD &
+    if [ ${#all_windows[@]} -gt 0 ]; then
+        # App is running on another workspace — open a new window here
+        $NEW_WINDOW_CMD &
+    else
+        # No windows anywhere, launch a new instance
+        $LAUNCH_CMD &
+    fi
 else
     # At least one window exists
     # Check if one of our app windows is currently focused
