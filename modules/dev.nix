@@ -9,6 +9,8 @@
     bash-language-server
     lsp-ai
     marksman
+    mermaid-cli
+    plantuml
     taplo
     typescript-language-server
     vscode-langservers-extracted # Gives  vscode-html-language-server vscode-css-language-server vscode-json-language-server vscode-eslint-language-server
