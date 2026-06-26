@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+if [ "$scheme" = "prefer-dark" ]; then
+    exec env GTK_THEME=adw-gtk3-dark /etc/profiles/per-user/pierre/bin/gthumb "$@"
+else
+    exec env GTK_THEME=adw-gtk3:light /etc/profiles/per-user/pierre/bin/gthumb "$@"
+fi
