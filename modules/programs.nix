@@ -1,6 +1,5 @@
 {
   pkgs,
-  unstable,
   userdata,
   ...
 }:
@@ -71,9 +70,6 @@ in
     telegram-desktop
     tesseract
     vesktop
-    (vivaldi.override {
-      commandLineArgs = "--enable-features=VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization --enable-gpu-rasterization --ozone-platform=wayland";
-    })
     vlc
     vscodium
     warp-terminal
