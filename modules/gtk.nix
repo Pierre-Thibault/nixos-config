@@ -51,6 +51,10 @@ let
         background-color: #6f8396;
         color: #ffffff;
     }
+
+    popover.menu modelbutton:hover:not(:focus) {
+        background-color: transparent;
+    }
   '';
 
   waterfox-user-js = pkgs.writeText "waterfox-user.js" ''
