@@ -10,10 +10,10 @@ let
 
   gtk3-slate-css = pkgs.writeText "gtk3-slate.css" ''
     /* Slate accent color override */
-    @define-color accent_bg_color #6e808c;
+    @define-color accent_bg_color #6f8396;
     @define-color accent_fg_color #ffffff;
     @define-color accent_color #5c6c76;
-    @define-color theme_selected_bg_color #6e808c;
+    @define-color theme_selected_bg_color #6f8396;
     @define-color theme_selected_fg_color #ffffff;
 
     *:selected,
@@ -26,8 +26,21 @@ let
     menu menuitem:hover,
     menubar > menuitem:hover,
     .context-menu menuitem:hover {
-        background-color: #6e808c;
+        background-color: #6f8396;
         color: #ffffff;
+    }
+  '';
+
+  gtk4-slate-css = pkgs.writeText "gtk4-slate.css" ''
+    /* Slate accent color for GTK4 apps (Nautilus, portal file picker) */
+    @define-color accent_bg_color #6f8396;
+    @define-color accent_fg_color #ffffff;
+    @define-color accent_color #5c6c76;
+
+    row:selected,
+    row:selected:focus {
+        background-color: #6f8396 !important;
+        color: #ffffff !important;
     }
   '';
 
@@ -77,6 +90,11 @@ in
       mkdir -p "${homeDir}/.config/gtk-3.0"
       cp -f ${gtk3-slate-css} "${homeDir}/.config/gtk-3.0/gtk.css"
       chown ${username}:users "${homeDir}/.config/gtk-3.0/gtk.css"
+
+      # GTK4 config for Nautilus, portal file picker, etc.
+      mkdir -p "${homeDir}/.config/gtk-4.0"
+      cp -f ${gtk4-slate-css} "${homeDir}/.config/gtk-4.0/gtk.css"
+      chown ${username}:users "${homeDir}/.config/gtk-4.0/gtk.css"
 
       # GTK3 config for Flatpak Waterfox
       mkdir -p "${homeDir}/.var/app/net.waterfox.waterfox/config/gtk-3.0"
