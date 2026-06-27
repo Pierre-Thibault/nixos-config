@@ -38,9 +38,18 @@ let
     @define-color accent_color #5c6c76;
 
     row:selected,
-    row:selected:focus {
+    row:selected:focus,
+    item:selected,
+    item:selected:focus,
+    child:selected,
+    child:selected:focus {
         background-color: #6f8396 !important;
         color: #ffffff !important;
+    }
+
+    popover.menu modelbutton:focus {
+        background-color: #6f8396;
+        color: #ffffff;
     }
   '';
 
