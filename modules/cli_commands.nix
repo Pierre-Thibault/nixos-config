@@ -32,6 +32,7 @@
     gnome-epub-thumbnailer
     gnumake
     gnupg
+    go-grip
     helix
     hx-lsp
     home-manager
