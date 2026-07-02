@@ -25,6 +25,7 @@
     fish
     fzf
     gcc
+    gh
     git
     gitleaks
     gitui
