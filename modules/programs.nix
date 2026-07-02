@@ -43,6 +43,7 @@ in
     gnome-screenshot
     gnome-terminal
     gnome-tweaks
+    go-grip
     google-chrome
     gthumb
     keepass
