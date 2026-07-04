@@ -47,6 +47,7 @@
     nap
     nixd
     nixfmt
+    pandoc
     procs
     rclone
     python313Packages.grip
