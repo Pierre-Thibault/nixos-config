@@ -44,6 +44,7 @@ in
       "vboxnetflt"
       "vboxnetadp"
       "vboxpci"
+      "nct6683" # Super I/O chip (Nuvoton NCT6687D) - fan/temp sensors
     ];
 
     # For using Droidcam:
