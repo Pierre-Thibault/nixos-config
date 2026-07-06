@@ -11,7 +11,6 @@
   };
 
   inputs = {
-    helix-master.url = "github:helix-editor/helix";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
@@ -27,7 +26,6 @@
   outputs =
     {
       self,
-      helix-master,
       nixpkgs,
       nix-flatpak,
       nixpkgs-unstable,
@@ -38,11 +36,6 @@
     {
       nixosConfigurations.pierre-nixos = nixpkgs.lib.nixosSystem {
         modules = [
-          {
-            nixpkgs.overlays = [
-              helix-master.overlays.default
-            ];
-          }
           sops-nix.nixosModules.sops
           nix-flatpak.nixosModules.nix-flatpak
           nix-index-database.nixosModules.default
