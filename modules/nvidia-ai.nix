@@ -29,4 +29,8 @@
     cudatoolkit # nvcc + headers, needed if you build CUDA kernels from source (flash-attn, triton, ...)
     nvtopPackages.full # GPU usage monitor
   ];
+
+  # cudatoolkit only ships a stub libcuda.so for linking; without this,
+  # CUDA binaries fail at runtime with "CUDA driver version is insufficient".
+  environment.sessionVariables.LD_LIBRARY_PATH = [ "/run/opengl-driver/lib" ];
 }
