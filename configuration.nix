@@ -153,6 +153,8 @@ in
       "flakes"
     ];
     trusted-users = [ username ];
+    # Hard-link identical files across store paths as they're added.
+    auto-optimise-store = true;
   };
 
   programs = {
