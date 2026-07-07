@@ -23,6 +23,9 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
     modesetting.enable = true;
     nvidiaPersistenced = true;
+    # Saves/restores GPU state across suspend so resume doesn't hang or
+    # leave the card in a broken state.
+    powerManagement.enable = true;
   };
 
   environment.systemPackages = with pkgs; [
