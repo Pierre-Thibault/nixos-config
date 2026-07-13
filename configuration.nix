@@ -12,7 +12,7 @@
 }:
 
 let
-  inherit (builtins) filter map toString;
+  inherit (builtins) filter;
   inherit (lib) pipe;
   inherit (lib.filesystem) listFilesRecursive;
   inherit (lib.strings) hasSuffix;
@@ -37,10 +37,6 @@ in
 
     initrd.luks.devices."luks-56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6".device =
       "/dev/disk/by-uuid/56c4e47f-3ebd-4fac-afd8-d5c92c0e90d6";
-
-    # 6.18 hits a kernel NULL pointer deref in folio_lruvec_lock_irqsave (memcg/mm),
-    # causing soft lockups and freezes. Pin to LTS 6.12 until fixed upstream.
-    kernelPackages = pkgs.linuxPackages_6_12;
 
     kernelModules = [
       "v4l2loopback"
