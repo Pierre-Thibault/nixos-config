@@ -4,7 +4,7 @@
 }:
 
 let
-  cfg = import ../ai-config.nix;
+  cfg = import ../../config/ai-config.nix;
 
   # Strip sessionVars before passing to api-proxy.
   toUpstream =

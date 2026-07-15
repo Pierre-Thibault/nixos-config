@@ -5,7 +5,7 @@
 }:
 
 let
-  cfg = import ../ai-config.nix;
+  cfg = import ../../config/ai-config.nix;
 in
 {
   services.open-webui = {

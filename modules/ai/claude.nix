@@ -5,12 +5,12 @@
 }:
 
 let
-  cfg = import ../ai-config.nix;
+  cfg = import ../../config/ai-config.nix;
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
-      pyyaml            # YAML frontmatter parsing
+      pyyaml # YAML frontmatter parsing
       python-frontmatter # Markdown + YAML frontmatter parsing
-      rich              # Terminal output formatting
+      rich # Terminal output formatting
     ]
   );
 in

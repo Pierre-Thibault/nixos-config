@@ -2,7 +2,7 @@
 # Copy and adjust this file to match your own setup.
 # ai.nix and api-proxy.nix are generic and do not need to be modified.
 let
-  userdata = import ./userdata.nix;
+  userdata = import ../userdata.nix;
   port = 4140;
   portStr = toString port;
 in
