@@ -49,7 +49,7 @@
         specialArgs = {
           inherit self;
           my-lib = my-lib.lib;
-          userdata = userdata;
+          inherit userdata;
           unstable = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
