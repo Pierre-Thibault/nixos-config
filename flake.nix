@@ -1,5 +1,3 @@
-# This is not a file using the Nix language so I can not define variables
-# pierre-nixos must be changed manually.
 {
   description = "My NixOS's flake";
 
@@ -22,6 +20,9 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    my-lib.url = "github:Pierre-Thibault/nix-lib";
+    my-lib.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs =
     {
@@ -31,10 +32,14 @@
       nixpkgs-unstable,
       nix-index-database,
       sops-nix,
+      my-lib,
       ...
     }:
+    let
+      hostname = (import config/userdata.nix).hostname;
+    in
     {
-      nixosConfigurations.pierre-nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
         modules = [
           sops-nix.nixosModules.sops
           nix-flatpak.nixosModules.nix-flatpak
@@ -43,7 +48,8 @@
         ];
         specialArgs = {
           inherit self;
-          userdata = import ./userdata.nix;
+          my-lib = my-lib.lib;
+          userdata = import config/userdata.nix;
           unstable = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;

@@ -8,23 +8,15 @@
   lib,
   unstable,
   userdata,
+  my-lib,
   ...
 }:
 
 let
-  inherit (builtins) filter;
-  inherit (lib) pipe;
-  inherit (lib.filesystem) listFilesRecursive;
-  inherit (lib.strings) hasSuffix;
   inherit (userdata) username;
-  modules = pipe ./modules [
-    listFilesRecursive
-    (map toString)
-    (filter (hasSuffix ".nix"))
-  ];
 in
 {
-  imports = modules;
+  imports = (my-lib.modules ./modules);
 
   boot = {
     loader = {

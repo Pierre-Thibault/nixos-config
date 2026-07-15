@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "my-lib": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784149412,
+        "narHash": "sha256-YHzOvNWb1gi9YqdRUewDAC4wTJheZBQWSFSZZESq5y8=",
+        "owner": "Pierre-Thibault",
+        "repo": "nix-lib",
+        "rev": "de45ac4e8847b5749353bbc1920d3a7aafa10fd6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Pierre-Thibault",
+        "repo": "nix-lib",
+        "type": "github"
+      }
+    },
     "nix-flatpak": {
       "locked": {
         "lastModified": 1767983141,
@@ -70,6 +90,7 @@
     },
     "root": {
       "inputs": {
+        "my-lib": "my-lib",
         "nix-flatpak": "nix-flatpak",
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs",
