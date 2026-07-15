@@ -36,10 +36,10 @@
       ...
     }:
     let
-      hostname = (import config/userdata.nix).hostname;
+      userdata = import config/userdata.nix;
     in
     {
-      nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.${userdata.hostname} = nixpkgs.lib.nixosSystem {
         modules = [
           sops-nix.nixosModules.sops
           nix-flatpak.nixosModules.nix-flatpak
@@ -49,7 +49,7 @@
         specialArgs = {
           inherit self;
           my-lib = my-lib.lib;
-          userdata = import config/userdata.nix;
+          userdata = userdata;
           unstable = import nixpkgs-unstable {
             system = "x86_64-linux";
             config.allowUnfree = true;
