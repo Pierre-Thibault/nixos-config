@@ -17,5 +17,7 @@
     typos-lsp
 
     ffmpeg
+
+    libsecret
   ];
 }

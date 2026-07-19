@@ -61,7 +61,6 @@ in
     obsidian
     ocrfeeder
     openvpn
-    pika-backup
     polari
     proton-vpn
     qalculate-gtk
