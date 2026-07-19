@@ -6,7 +6,6 @@ ln -sf wezterm-dark.lua ~/.config/wezterm/wezterm.lua
 ln -sf config-dark.kdl ~/.config/zellij/config.kdl
 ln -sf theme-dark.toml ~/.config/yazi/theme.toml
 ln -sf starship-dark.toml ~/.config/starship/starship.toml
-ln -sf style-dark.css ~/.config/waybar/style.css
 ln -sf catppuccin-mocha.rasi ~/.config/rofi/catppuccin.rasi
 ln -sf default-dark.jpg "$HOME/Images/Fonds d'écran/default.jpg"
 
@@ -14,6 +13,9 @@ gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark'
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 12'
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+
+# Enable gnome-pomodoro dark-theme plugin
+dconf write /org/gnome/pomodoro/preferences/enabled-plugins "['sounds', 'dark-theme']" 2>/dev/null || true
 
 systemctl --user start redland.service 2>/dev/null || true
 systemctl --user restart swaybg
