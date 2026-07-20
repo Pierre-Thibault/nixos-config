@@ -22,6 +22,40 @@ let
     '';
   };
 
+  # Discord's bundled MediaPipe library opens its segmentation model file
+  # O_RDWR, which fails against the read-only Nix store since nixpkgs stages
+  # discord_voice as a plain symlink there. This breaks video background
+  # effects (camera renders black). See
+  # https://github.com/NixOS/nixpkgs/issues/543857
+  # Workaround: poll in the background right after launch and, as soon as
+  # nixpkgs' own discord-stage-modules script (re)creates the discord_voice
+  # symlink, replace it with a writable copy.
+  discord-wrapped = pkgs.symlinkJoin {
+    name = "discord-wrapped";
+    paths = [ pkgs.discord ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/discord --run '
+        (
+          for _ in $(seq 1 50); do
+            for d in "$HOME"/.config/discord/*/modules/discord_voice; do
+              if [ -L "$d" ]; then
+                target=$(readlink -f "$d")
+                rm -f "$d"
+                cp -rL "$target" "$d"
+                chmod -R u+w "$d"
+              fi
+            done
+            sleep 0.2
+          done
+        ) &
+        disown
+      '
+      rm -f $out/bin/Discord
+      ln -s discord $out/bin/Discord
+    '';
+  };
+
 in
 {
   users.users.${userdata.username}.packages = with pkgs; [
@@ -32,6 +66,7 @@ in
     })
     code-cursor-fhs
     copyq-wrapped
+    discord-wrapped
     droidcam
     file-roller
     gedit
