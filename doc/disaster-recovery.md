@@ -171,8 +171,9 @@ D-Bus n'y tourne.
    ```sh
    git clone https://github.com/Pierre-Thibault/bin.git ~/bin
    ```
-   (ce répertoire sera fusionné avec le contenu restauré par borg à la
-   phase 7 — aucun conflit, `backup-home` et `restore-home` y sont déjà)
+   `~/bin` porte lui aussi un `.nobackup` depuis le 2026-07-21 (comme
+   `nixos-config` et `dotfiles`) : borg ne le sauvegarde jamais, donc rien
+   à la phase 7 ne viendra écraser ce clone avec une copie plus ancienne.
 6. Cloner `dotfiles` (public, HTTPS anonyme aussi) — nécessaire séparément
    puisque borg ne le sauvegarde jamais (`.nobackup`) :
    ```sh
