@@ -7,7 +7,10 @@
 {
   sops = {
     defaultSopsFile = self + "/sops/api-proxy.yaml";
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    # Self-generated, independent of sshd (services.openssh.enable = false
+    # on this host, so /etc/ssh/ssh_host_ed25519_key never exists).
+    age.keyFile = "/var/lib/sops-nix/key.txt";
+    age.generateKey = true;
 
     secrets = {
       GROQ_API_KEY = { };
