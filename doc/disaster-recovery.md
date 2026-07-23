@@ -179,6 +179,21 @@ D-Bus n'y tourne.
    ```sh
    git clone https://github.com/Pierre-Thibault/dotfiles.git ~/dotfiles
    ```
+7. **Initialiser les sous-modules** — `oh-my-zsh` (`oh-my-zsh/.oh-my-zsh`)
+   est un vrai sous-module git, jamais peuplé par un simple `git clone` ;
+   sans cette étape, zsh échoue au démarrage (`source: aucun fichier ou
+   dossier de ce nom: .../oh-my-zsh.sh`). Son URL déclarée est en SSH
+   (`git@github.com:...`), donc inutilisable avant la phase 7 (clé
+   `~/.ssh/id_rsa` pas encore restaurée) — on force un remplacement HTTPS
+   à la volée pour l'initialiser dès maintenant, sans clé :
+   ```sh
+   cd ~/dotfiles
+   git -c url."https://github.com/".insteadOf="git@github.com:" \
+       submodule update --init --recursive
+   ```
+   (`.gitmodules` déclare aussi `yazelix`, une entrée orpheline sans
+   contenu réel dans l'arbre git actuel — `git submodule status` ne le
+   liste pas ; rien à en attendre, `zellij` fonctionne sans lui.)
 
 ## Phase 6 — Reconstituer les secrets (manuel, avant le script)
 
