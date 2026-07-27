@@ -25,5 +25,6 @@ SEARCH_URL="${SEARCH_URL/\{channel\}/$CHANNEL}"
 # URL encode the query using jq
 ENCODED_QUERY=$(jq -rn --arg str "$QUERY" '$str | @uri')
 
-# Open browser with search URL (detached from current process)
-setsid -f xdg-open "${SEARCH_URL}${ENCODED_QUERY}" >/dev/null 2>&1
+# Open in a new browser window (detached from current process) — never
+# a tab silently added to some existing window on another workspace.
+setsid -f ~/nixos-config/bin/open-new-browser-window "${SEARCH_URL}${ENCODED_QUERY}" >/dev/null 2>&1

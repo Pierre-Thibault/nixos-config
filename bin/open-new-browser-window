@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Opens a URL or local file in a genuinely new browser window (never a
+# tab silently added to some existing window on another workspace).
+# Resolves the current default browser dynamically via xdg-mime, so it
+# keeps working if the default browser changes — nothing to edit here.
+# Falls back to plain xdg-open if resolution fails for any reason (e.g.
+# a browser with no --new-window support).
+#
+# Usage: open-new-browser-window <url-or-path>
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <url-or-path>" >&2
+    exit 1
+fi
+target="$1"
+
+desktop_file=$(xdg-mime query default text/html)
+browser_cmd=$(grep -m1 '^Exec=' \
+    $(find /run/current-system/sw/share/applications \
+           /etc/profiles/per-user/"$USER"/share/applications \
+           "$HOME/.local/share/applications" \
+           -name "$desktop_file" 2>/dev/null | head -1) \
+    2>/dev/null | sed -E 's/^Exec=//; s/ ?%[a-zA-Z]//g')
+
+if [ -n "$browser_cmd" ]; then
+    eval "$browser_cmd --new-window \"\$target\""
+else
+    xdg-open "$target"
+fi
