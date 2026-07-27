@@ -19,6 +19,14 @@
     };
 
   boot.initrd.luks.devices."luks-d88f0d6b-ab68-4657-9664-b58addf7efed".device = "/dev/disk/by-uuid/d88f0d6b-ab68-4657-9664-b58addf7efed";
+  # nixos-generate-config only auto-detects LUKS devices backing a mounted
+  # filesystem (root, /boot) — a LUKS partition used purely for swap is
+  # invisible to it and must be added by hand, or swapDevices below points
+  # to a /dev/mapper/ path nothing ever unlocks. Missing since the NVMe
+  # migration (2026-07-22) until found via "Dependency failed for Swaps" /
+  # LUKS device timeout in the boot log (2026-07-23) — no swap had been
+  # active since, silently (58 GiB RAM masked it).
+  boot.initrd.luks.devices."luks-d976a064-f8ba-4a71-9fd8-2538f7b9d03a".device = "/dev/disk/by-uuid/d976a064-f8ba-4a71-9fd8-2538f7b9d03a";
 
   fileSystems."/boot" =
     { device = "/dev/disk/by-uuid/1AF6-8619";
