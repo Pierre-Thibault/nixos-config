@@ -1,7 +1,7 @@
 # sops-nix configuration for geoclue geo-location.
-{ config, self, ... }:
+{ config, self, userdata, lib, ... }:
 {
-  sops = {
+  sops = lib.optionalAttrs userdata.enableSops {
     secrets.GOOGLE_API_GEO_KEY = {
       sopsFile = self + "/sops/secrets.yaml";
     };

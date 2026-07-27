@@ -1,5 +1,6 @@
 {
   lib,
+  userdata,
   ...
 }:
 
@@ -23,7 +24,7 @@ let
 in
 {
   services.api-proxy = {
-    enable = true;
+    enable = userdata.enableCaddyProxy;
     port = cfg.port;
     environmentFile = cfg.secretsFile;
     upstreams = lib.mapAttrs toUpstream cfg.providers;

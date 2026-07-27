@@ -29,10 +29,12 @@ in
 
     kernelModules = [
       "v4l2loopback"
-      "vboxdrv"
-      "vboxnetflt"
-      "vboxnetadp"
-      "vboxpci"
+      # vboxdrv/vboxnetflt/vboxnetadp removed 2026-07-23: already declared
+      # automatically by virtualisation.virtualbox.host.enable (see
+      # modules/virtualization/virtual_box.nix) — this was a harmless
+      # duplicate. vboxpci also removed: not provided by that module at
+      # all here, hence "Failed to find module 'vboxpci'" every boot;
+      # it's for PCI passthrough, unused.
       "nct6683" # Super I/O chip (Nuvoton NCT6687D) - fan/temp sensors
     ];
 
@@ -62,9 +64,9 @@ in
   };
 
   environment = {
-    etc."geoclue/geoclue.conf" = lib.mkForce {
+    etc."geoclue/geoclue.conf" = lib.mkIf userdata.enableSops (lib.mkForce {
       source = config.sops.templates."geoclue.conf".path;
-    };
+    });
     gnome.excludePackages = with pkgs; [
       epiphany # web browser
       gnome-calculator
@@ -122,7 +124,7 @@ in
     firewall =
       let
         ssh-port-list =
-          if userdata.ssh_enable then
+          if userdata.sshEnable then
             [
               22
             ]
@@ -192,6 +194,12 @@ in
     rtkit.enable = true;
     polkit.enable = true;
     pam.services.gtklock = { };
+    # Without this, kmscon has no /etc/pam.d/kmscon and falls through to
+    # /etc/pam.d/other, whose account stack unconditionally denies
+    # (pam_deny) — every kmsconvt@ttyN.service then fails at the PAM
+    # step (224/PAM) before it can even render a login prompt. Found
+    # 2026-07-23: Ctrl+Alt+F3 showed only a blinking cursor on black.
+    pam.services.kmscon = { };
   };
 
   services = {
@@ -255,7 +263,7 @@ in
     pcscd.enable = true;
 
     # Enable the OpenSSH daemon.
-    openssh.enable = userdata.ssh_enable;
+    openssh.enable = userdata.sshEnable;
 
     geoclue2 = {
       enable = true;
