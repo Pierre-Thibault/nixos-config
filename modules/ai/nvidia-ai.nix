@@ -21,7 +21,14 @@
     # the proprietary driver doesn't support this generation at all.
     open = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    modesetting.enable = true;
+    # Off: CUDA compute (via /dev/nvidia*) doesn't need DRM/KMS, only
+    # display output does — and none is attached to this card. With
+    # modesetting on, this card registered as a second, output-less DRM
+    # device (/sys/class/drm/card1) alongside amdgpu; kmscon/GDM's VT
+    # console allocation apparently got confused by the ambiguity,
+    # hanging hard on VT switch (found + confirmed 2026-07-23, survived
+    # a full system update). Off removes the second DRM device outright.
+    modesetting.enable = false;
     nvidiaPersistenced = true;
     # Saves/restores GPU state across suspend so resume doesn't hang or
     # leave the card in a broken state.
