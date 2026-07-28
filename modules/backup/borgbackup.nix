@@ -21,6 +21,22 @@ let
   sshAskpass = pkgs.writeShellScript "borgbackup-ssh-askpass" ''
     exec cat ${secrets."borgbackup/borgbase-ssh-key-passphrase".path}
   '';
+  # The declarative ACL below (systemd.tmpfiles A+) recurses into the whole
+  # home tree, including the rclone FUSE mounts at ~/icloud and ~/proton --
+  # those don't support POSIX ACLs ("Operation not supported"), which can
+  # leave the walk incomplete and the ACL mask on /home/pierre itself
+  # reset to nothing (observed in practice: NixOS's own user-activation
+  # step chmods the home dir on every switch, which rewrites the ACL mask
+  # and silently defeats the grant to borgbackup). `-xdev` skips crossing
+  # into those mounts, mirroring backup-home's own --one-file-system, so
+  # this never needed them anyway. Re-run as an ExecStartPre (root, via
+  # the `+` prefix) right before every backup, rather than trusting
+  # activation ordering to get this right on its own.
+  fixHomeAcl = pkgs.writeShellScript "borgbackup-fix-home-acl" ''
+    set -eu
+    find /home/pierre -xdev -exec setfacl -m u:borgbackup:rX {} + || true
+    find /home/pierre -xdev -type d -exec setfacl -d -m u:borgbackup:rX {} + || true
+  '';
 in
 {
   users.groups.borgbackup = { };
@@ -79,6 +95,9 @@ in
       Type = "oneshot";
       User = "borgbackup";
       Group = "borgbackup";
+      # "+" runs this specific step as root regardless of User=/Group=
+      # above -- see fixHomeAcl comment for why this is needed every run.
+      ExecStartPre = "+${fixHomeAcl}";
       ExecStart = "/etc/borgbackup/backup-home";
     };
     environment = {
