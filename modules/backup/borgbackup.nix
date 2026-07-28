@@ -35,9 +35,14 @@ in
   };
 
   # /home/pierre is mode 700; borgbackup can only read into it via a
-  # targeted ACL (setfacl -R -m u:borgbackup:rX,d:u:borgbackup:rX
-  # /home/pierre), applied out-of-band since NixOS has no declarative ACL
-  # support. See doc/disaster-recovery.md / the borgbackup design notes.
+  # targeted ACL. `A+` = set POSIX ACL entries recursively, keeping
+  # everything else about the base 700 mode unchanged; the `d:` entry is a
+  # default ACL so files created later inherit the same read grant.
+  # Re-applied idempotently by systemd-tmpfiles at every activation/boot.
+  systemd.tmpfiles.rules = [
+    "A+ /home/pierre - - - - u:borgbackup:rX,d:u:borgbackup:rX"
+  ];
+
   environment.etc."borgbackup/backup-home" = {
     source = self + "/bin/backup-home";
     mode = "0555";
