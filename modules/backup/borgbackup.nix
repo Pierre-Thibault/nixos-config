@@ -43,7 +43,11 @@ let
       pkgs.findutils
     ];
     text = ''
-      find /home/pierre -xdev -exec setfacl -m u:borgbackup:rX {} + || true
+      # -not -type l: setfacl follows symlinks by default and applies the
+      # ACL to their *target* -- a stray symlink under /home/pierre
+      # pointing at /dev/null once caused this to silently restrict
+      # /dev/null itself to read-only for borgbackup, system-wide.
+      find /home/pierre -xdev -not -type l -exec setfacl -m u:borgbackup:rX {} + || true
       find /home/pierre -xdev -type d -exec setfacl -d -m u:borgbackup:rX {} + || true
     '';
   };
