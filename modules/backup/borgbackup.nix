@@ -32,11 +32,21 @@ let
   # this never needed them anyway. Re-run as an ExecStartPre (root, via
   # the `+` prefix) right before every backup, rather than trusting
   # activation ordering to get this right on its own.
-  fixHomeAcl = pkgs.writeShellScript "borgbackup-fix-home-acl" ''
-    set -eu
-    find /home/pierre -xdev -exec setfacl -m u:borgbackup:rX {} + || true
-    find /home/pierre -xdev -type d -exec setfacl -d -m u:borgbackup:rX {} + || true
-  '';
+  fixHomeAcl = pkgs.writeShellApplication {
+    name = "borgbackup-fix-home-acl";
+    # ExecStartPre scripts don't inherit an interactive shell's PATH --
+    # this silently no-op'd via "find: 'setfacl': No such file or
+    # directory" the first time. runtimeInputs makes the dependency
+    # explicit instead of relying on the ambient environment.
+    runtimeInputs = [
+      pkgs.acl
+      pkgs.findutils
+    ];
+    text = ''
+      find /home/pierre -xdev -exec setfacl -m u:borgbackup:rX {} + || true
+      find /home/pierre -xdev -type d -exec setfacl -d -m u:borgbackup:rX {} + || true
+    '';
+  };
 in
 {
   users.groups.borgbackup = { };
@@ -97,7 +107,7 @@ in
       Group = "borgbackup";
       # "+" runs this specific step as root regardless of User=/Group=
       # above -- see fixHomeAcl comment for why this is needed every run.
-      ExecStartPre = "+${fixHomeAcl}";
+      ExecStartPre = "+${fixHomeAcl}/bin/borgbackup-fix-home-acl";
       ExecStart = "/etc/borgbackup/backup-home";
     };
     environment = {
