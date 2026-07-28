@@ -2,7 +2,7 @@
 
 Procédure pour récupérer les données de cette machine en formatant le
 disque : réinstallation complète à partir de `nixos-config` (git) et
-d'une sauvegarde borg (voir `~/bin/backup-home`).
+d'une sauvegarde borg (voir `~/nixos-config/bin/backup-home`).
 
 ## Prérequis avant de commencer
 
@@ -373,10 +373,12 @@ restaure) :
 1. Lancer la restauration, dans le même terminal niri qu'à la phase 4
    (services d'indexation déjà masqués) :
    ```sh
-   ~/bin/restore-home
+   ~/nixos-config/bin/restore-home
    ```
-   Voir l'en-tête du script pour le choix de la source (`disque2` ou
-   `borgbase`) et de l'archive.
+   Restaure depuis Disque2 uniquement (la source BorgBase n'est plus
+   accessible depuis la session de pierre — voir l'utilisateur système
+   `borgbackup`). Voir l'en-tête du script pour le choix de l'archive ;
+   la passphrase est demandée au clavier (`borg-ask-passphrase`).
 2. **Réactiver les services masqués en phase 4** une fois la restauration
    terminée :
    ```sh

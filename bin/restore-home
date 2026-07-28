@@ -1,0 +1,34 @@
+#!/usr/bin/env nix-shell
+#!nix-shell -i bash -p borgbackup openssh
+# Restore /home/pierre from a borg repo, meant to run right after a fresh
+# NixOS install — before backup-home's packages exist system-wide.
+# See ~/nixos-config/doc/disaster-recovery.md, phase 6, for the manual
+# prerequisites this script depends on.
+#
+# Off-site (BorgBase) restore is no longer available from pierre's own
+# session -- that repo's credentials live exclusively with the borgbackup
+# system user now (see ~/nixos-config/modules/backup/). Disque2 stays the
+# primary, local recovery path and needs no network/SSH key at all.
+set -euo pipefail
+
+SOURCE=disque2   # only disque2 is available to pierre
+ARCHIVE=         # empty = restore the most recent archive in the repo
+
+case "$SOURCE" in
+    disque2)
+        export BORG_REPO='/run/media/pierre/Disque2/BorgBackup/backup-pierre-pierre-nixos'
+        export BORG_PASSCOMMAND="$HOME/bin/borg-ask-passphrase"
+        ;;
+    *)
+        echo "Error: SOURCE must be disque2" >&2
+        exit 1
+        ;;
+esac
+
+if [ -z "$ARCHIVE" ]; then
+    ARCHIVE=$(borg list --short --last 1)
+    echo "Using most recent archive: $ARCHIVE" >&2
+fi
+
+cd /
+borg extract --progress "::$ARCHIVE"

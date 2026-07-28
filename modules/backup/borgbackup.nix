@@ -6,11 +6,12 @@
 # gives real UID-based isolation instead.
 #
 # See doc/disaster-recovery.md for the manual restore path (still pierre,
-# Disque2 only -- see ~/bin/restore-home).
+# Disque2 only -- see bin/restore-home in this repo).
 {
   config,
   pkgs,
   lib,
+  self,
   userdata,
   ...
 }:
@@ -38,7 +39,7 @@ in
   # /home/pierre), applied out-of-band since NixOS has no declarative ACL
   # support. See doc/disaster-recovery.md / the borgbackup design notes.
   environment.etc."borgbackup/backup-home" = {
-    source = /home/pierre/bin/backup-home;
+    source = self + "/bin/backup-home";
     mode = "0555";
   };
 
