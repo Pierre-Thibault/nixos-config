@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Backup GNUPG at $1
+
+rsync -a --exclude='*.lock' --exclude='.#lk*' ~/.gnupg/ "$1"
