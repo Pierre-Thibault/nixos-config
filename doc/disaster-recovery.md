@@ -6,29 +6,68 @@ d'une sauvegarde borg (voir `~/nixos-config/bin/backup-home`).
 
 ## Prérequis avant de commencer
 
+Depuis l'isolation des secrets borg dans l'utilisateur système
+`borgbackup` (voir `modules/backup/borgbackup.nix`), pierre n'a plus
+d'accès direct à BorgBase — ni la clé SSH ni les passphrases ne
+transitent plus par son compte. Tout ce qui concerne BorgBase (clé SSH,
+sa passphrase, passphrase du dépôt) vit exclusivement dans
+`sops/borgbackup.yaml` (chiffré, versionné avec `nixos-config`),
+déchiffrable avec la clé age personnelle ci-dessous — plus besoin de
+porter une copie séparée de la clé SSH BorgBase sur la clé USB.
+
 Sur la clé USB externe :
 
-- `borg-local.key` (export de la clé du dépôt local, protection contre la
-  corruption — pas indispensable au démarrage à froid)
-- `borgbase-home.key` (idem, pour le dépôt distant)
-- `borgbase-appendonly` (**clé privée SSH**, indispensable : sans elle,
-  impossible de joindre le dépôt BorgBase) — protégée par sa propre
-  phrase de passe (aucune clé privée locale ne reste sans phrase sur
-  cette machine, y compris celles dédiées à un script)
+- `borg-local.key` / `borgbase-home.key` (exports des clés des deux
+  dépôts, protection contre la corruption d'en-tête — pas indispensable
+  au démarrage à froid). **À régénérer périodiquement** après toute
+  rotation de passphrase ou recréation de dépôt (`borg key export`) —
+  un export périmé ne sert à rien.
 - `keys.txt.age` (clé age personnelle pour sops — le fichier chiffré tel
-  quel, pas une version en clair)
+  quel, pas une version en clair). C'est elle qui donne accès, entre
+  autres, aux secrets BorgBase via `sops/borgbackup.yaml` une fois
+  `nixos-config` cloné (phase 3).
 - `github-pat.txt` (jeton d'accès personnel GitHub, voir plus bas)
+- Copie de `~/.ssh` et `~/.gnupg` — voir « `.ssh`/`.gnupg` : pas de copie
+  hors site automatique » ci-dessous.
 
-Chacun des quatre premiers fichiers est protégé par sa propre phrase de
-passe (borg, borg, SSH, scrypt), donc aucun n'a besoin d'un contenant
-chiffré supplémentaire. Le jeton GitHub, lui, n'a pas de protection
-propre — décision délibérée : un jeton *fine-grained*, lecture seule,
-restreint aux trois dépôts publics ci-dessous n'a rien à protéger que la
-sécurité physique de la clé USB ne couvre déjà (portée = source de la
-protection, pas chiffrement).
+Les exports de clé borg et `keys.txt.age` sont protégés par leur propre
+phrase de passe, donc aucun n'a besoin d'un contenant chiffré
+supplémentaire. Le jeton GitHub, lui, n'a pas de protection propre —
+décision délibérée : un jeton *fine-grained*, lecture seule, restreint
+aux trois dépôts publics ci-dessous n'a rien à protéger que la sécurité
+physique de la clé USB ne couvre déjà (portée = source de la protection,
+pas chiffrement). Les clés SSH personnelles dans la copie de `~/.ssh`
+sont, comme sur la machine elle-même, protégées par leur propre
+passphrase individuelle.
 
 En tête, mémorisées, jamais écrites : les phrases de passe des deux
-dépôts borg, celle de la clé SSH BorgBase, et celle de `keys.txt.age`.
+dépôts borg, celle de `keys.txt.age`, et celle de ta session utilisateur
+(`passwd`).
+
+### `.ssh`/`.gnupg` : pas de copie hors site automatique
+
+Ni le service automatisé (`borgbackup-nightly`, seul à atteindre
+BorgBase) ni un `backup-home` manuel de pierre (Disque2 seulement,
+`BORG_REMOTE_*` retiré de `.zshrc`) ne donnent aux deux ensemble une
+copie *hors site* de `~/.ssh` et `~/.gnupg` :
+
+- Le service automatisé les **exclut explicitement**
+  (`BORG_EXCLUDE_CREDENTIALS`, dans `modules/backup/borgbackup.nix`) —
+  accorder à `borgbackup` l'accès ACL nécessaire pour les lire fait
+  apparaître leurs fichiers comme lisibles par groupe (`640` au lieu de
+  `600`, effet de bord du recalcul du masque ACL POSIX), ce que
+  `ssh`/`gpg` refusent ou signalent.
+- Un `backup-home` manuel les inclut, mais seulement sur **Disque2**
+  (local, pas BorgBase).
+
+Concrètement, une archive Disque2 récente peut très bien **ne pas**
+contenir `~/.ssh`/`~/.gnupg` à jour si elle vient d'un run automatisé
+plutôt que d'un `backup-home` manuel — `restore-home` prend toujours
+l'archive la plus récente, sans distinguer les deux. D'où la
+recommandation de garder une copie de ces deux dossiers sur la clé USB,
+tenue raisonnablement à jour, plutôt que de compter sur borg pour eux.
+(`~/.gnupg` ne contient actuellement aucune clé privée — rien à copier
+tant que ça reste le cas, voir `private-keys-v1.d/`.)
 
 Note : `nixos-config`, `bin` (qui contient `backup-home` et
 `restore-home`) et `dotfiles` sont tous des dépôts **publics** sur GitHub
@@ -228,9 +267,11 @@ en plus de tout ce que l'installeur fournit déjà (`nixos-generate-config`,
 ## Phase 4 — Premier démarrage
 
 Tout se fait ici en ligne de commande, dans un terminal — pas de
-gestionnaire de fichiers. La connexion graphique (niri) est nécessaire :
-c'est elle (via PAM) qui démarre la session D-Bus et déverrouille
-`gnome-keyring-daemon`, dont `secret-tool` dépend à la phase 5.
+gestionnaire de fichiers. La connexion graphique (niri) reste le point de
+départ le plus simple (c'est ce que l'installeur propose nativement, voir
+phase 1) et évite d'avoir à recréer manuellement une session D-Bus depuis
+une console texte brute — voir aussi l'avertissement ci-dessous sur les
+risques à basculer vers une console texte sur cette machine.
 
 **Ne pas basculer vers une console texte** (`Ctrl+Alt+F<n>`) sur cette
 machine : la bascule de VT peut provoquer une instabilité sérieuse
@@ -322,51 +363,27 @@ cette étape en conséquence.
 
 ## Phase 5 — Reconstituer les secrets (manuel, avant le script)
 
-Le script de restauration a besoin de trois choses que la restauration
-borg elle-même ne peut pas fournir (elles sont *dans* le home qu'on
-restaure) :
+Depuis l'isolation des secrets borg dans l'utilisateur système
+`borgbackup`, `restore-home` (chemin Disque2, le seul accessible à
+pierre) ne dépend plus de rien du trousseau GNOME — la passphrase est
+demandée directement au clavier (`borg-ask-passphrase`, phase 6). Une
+seule chose à reconstituer manuellement ici :
 
-1. **Clé SSH BorgBase** — elle est protégée par sa propre phrase de passe
-   (aucune clé privée locale ne doit rester sans phrase, y compris celles
-   dédiées à un script) :
-   ```sh
-   mkdir -p ~/.ssh
-   cp /chemin/vers/clé-usb/borgbase-appendonly ~/.ssh/
-   chmod 600 ~/.ssh/borgbase-appendonly
-   ```
-2. **Trousseau GNOME** — recréer les trois entrées avec les phrases
-   mémorisées (elles seront demandées de façon interactive et masquée) :
-   ```sh
-   secret-tool store --label='Borg local (Disque2)' \
-       repo-id 1dd9e1100359cab671f26037e17ba538cdeee0b2fa47181fd4c29e51204a66ac
-   secret-tool store --label='BorgBase home' repo-id borgbase-home
-   secret-tool store --label='BorgBase SSH key passphrase' \
-       ssh-key borgbase-appendonly
-   ```
-   La troisième entrée alimente `~/bin/ssh-askpass-borgbase` (déjà cloné
-   avec `~/bin` à l'étape précédente), qui permet à `restore-home` et
-   `backup-home` d'ouvrir la clé SSH sans invite interactive — le même
-   principe que `BORG_PASSCOMMAND` pour les phrases des dépôts.
-3. Vérifier que les trois fonctionnent avant de lancer le script :
-   ```sh
-   secret-tool lookup repo-id 1dd9e1100359cab671f26037e17ba538cdeee0b2fa47181fd4c29e51204a66ac | wc -c
-   secret-tool lookup repo-id borgbase-home | wc -c
-   secret-tool lookup ssh-key borgbase-appendonly | wc -c
-   ```
-   (juste vérifier qu'un nombre d'octets non nul sort, sans afficher la
-   phrase elle-même)
-4. **Clé age personnelle (sops)** — remettre en place le fichier chiffré
-   par phrase de passe tel quel (pas une version en clair : c'est le
-   fichier que `~/dotfiles/zsh/.zshrc` attend déjà à cet emplacement via
-   `SOPS_AGE_KEY_CMD`, aucun autre changement nécessaire) :
-   ```sh
-   mkdir -p ~/.config/sops/age
-   cp /chemin/vers/clé-usb/keys.txt.age ~/.config/sops/age/
-   chmod 600 ~/.config/sops/age/keys.txt.age
-   ```
-   Ne débloque que la clé **personnelle** (`pierre` dans `.sops.yaml`) —
-   voir phase 7 pour la clé **machine**, qui ne peut pas être restaurée de
-   la même façon.
+**Clé age personnelle (sops)** — remettre en place le fichier chiffré
+par phrase de passe tel quel (pas une version en clair : c'est le
+fichier que `~/dotfiles/zsh/.zshrc` attend déjà à cet emplacement via
+`SOPS_AGE_KEY_CMD`, aucun autre changement nécessaire) :
+```sh
+mkdir -p ~/.config/sops/age
+cp /chemin/vers/clé-usb/keys.txt.age ~/.config/sops/age/
+chmod 600 ~/.config/sops/age/keys.txt.age
+```
+Ne débloque que la clé **personnelle** (`pierre` dans `.sops.yaml`) —
+voir phase 7 pour la clé **machine**, qui ne peut pas être restaurée de
+la même façon. Cette clé personnelle est aussi ce qui permettra, plus
+tard si besoin, d'accéder à `sops/borgbackup.yaml` (secrets BorgBase) via
+`sops -d`, sans que pierre n'ait besoin d'un accès permanent à ces
+identifiants.
 
 ## Phase 6 — Restauration et finalisation
 
@@ -379,14 +396,27 @@ restaure) :
    accessible depuis la session de pierre — voir l'utilisateur système
    `borgbackup`). Voir l'en-tête du script pour le choix de l'archive ;
    la passphrase est demandée au clavier (`borg-ask-passphrase`).
-2. **Réactiver les services masqués en phase 4** une fois la restauration
+2. **Remplacer `~/.ssh` et `~/.gnupg` par la copie de la clé USB**, en
+   écrasant ce que l'étape précédente a pu restaurer (voir
+   « `.ssh`/`.gnupg` : pas de copie hors site automatique » en
+   prérequis — l'archive Disque2 la plus récente peut être incomplète ou
+   absente pour ces deux dossiers si elle vient d'un run automatisé) :
+   ```sh
+   rm -rf ~/.ssh ~/.gnupg
+   cp -r /chemin/vers/clé-usb/ssh ~/.ssh
+   cp -r /chemin/vers/clé-usb/gnupg ~/.gnupg
+   chmod 700 ~/.ssh ~/.gnupg
+   chmod 600 ~/.ssh/*
+   chmod 644 ~/.ssh/*.pub 2>/dev/null || true
+   ```
+3. **Réactiver les services masqués en phase 4** une fois la restauration
    terminée :
    ```sh
    systemctl --user unmask --now \
        localsearch-3.service localsearch-control-3.service \
        localsearch-writeback-3.service gvfs-metadata.service
    ```
-3. `~/.ssh/id_rsa` est maintenant restauré — pousser le commit laissé en
+4. `~/.ssh/id_rsa` est maintenant restauré — pousser le commit laissé en
    attente depuis la phase 4. **D'abord corriger `origin`** : `nixos-config`
    a été cloné en phase 3 depuis Disque2 ou avec le jeton (voir
    « Prérequis »), jamais depuis GitHub directement — `origin` pointe
@@ -399,7 +429,7 @@ restaure) :
    git remote set-url origin git@github.com:Pierre-Thibault/nixos-config.git
    git push
    ```
-4. Presque rien d'autre à faire pour les dotfiles : les liens
+5. Presque rien d'autre à faire pour les dotfiles : les liens
    symboliques (`~/.zshrc`, `~/.config/niri`, etc.) étaient déjà dans
    l'archive borg et viennent d'être restaurés à l'étape 6.1 ; avec
    `~/dotfiles` cloné au bon endroit (phase 4), ils se résolvent tout
@@ -409,7 +439,7 @@ restaure) :
    volontairement gitignorés (préférence locale, pas versionnée) donc
    jamais dans l'archive borg non plus — les régénérer avec
    `set-dark-theme` ou `set-light-theme` selon la préférence du moment.
-5. **Corriger aussi `origin` pour `bin` et `dotfiles`**, pour la même
+6. **Corriger aussi `origin` pour `bin` et `dotfiles`**, pour la même
    raison — ils ont été clonés en phase 4 de la même façon que
    `nixos-config` en phase 3, jamais depuis GitHub directement. Rien à
    pousser tout de suite dans ces deux dépôts, mais un futur `git push`
@@ -445,7 +475,8 @@ ensemble** (« Activation script snippet 'setupSecrets' failed »), pas
 seulement le service concerné. `userdata.enableSops` neutralise
 justement tous les points qui déclarent des secrets d'un coup (gate
 chaque `sops.secrets`/`sops.templates` de `sops-icloud.nix`,
-`sops-geoclue.nix`, `sops-proxy.nix`, ainsi que la référence à
+`sops-geoclue.nix`, `sops-proxy.nix`, `sops-borgbackup.nix`, ainsi que la
+référence à
 `config.sops.templates."geoclue.conf".path` dans `configuration.nix` —
 sans toucher à `defaultSopsFile`/`age.keyFile`/`age.generateKey`, qui
 doivent justement s'exécuter à ce bootstrap) — déjà à `false`, avec
@@ -478,7 +509,7 @@ doivent justement s'exécuter à ce bootstrap) — déjà à `false`, avec
    qui échoue silencieusement sans TTY réel) :
    ```sh
    cd ~/nixos-config
-   sops updatekeys -y sops/api-proxy.yaml sops/secrets.yaml sops/grip.yaml sops/ovh.yaml
+   sops updatekeys -y sops/api-proxy.yaml sops/secrets.yaml sops/grip.yaml sops/ovh.yaml sops/borgbackup.yaml
    ```
 6. **Remettre `userdata.enableSops = true;` et
    `userdata.enableCaddyProxy = true;`**, revérifier l'évaluation
@@ -548,5 +579,15 @@ doivent justement s'exécuter à ce bootstrap) — déjà à `false`, avec
    base elle-même (`~/Documents/.../*.kdbx`) est un fichier ordinaire,
    sauvegardée normalement. Juste la rouvrir une fois à la main après la
    restauration.
-5. Lancer `backup-home` pour confirmer que les deux dépôts (Disque2 et
-   BorgBase) acceptent encore les écritures depuis la machine reconstruite.
+5. Lancer `backup-home` pour confirmer que le dépôt Disque2 accepte
+   encore les écritures depuis la machine reconstruite (pierre n'a plus
+   accès à BorgBase directement — voir l'étape suivante).
+6. Confirmer que le service automatisé fonctionne (créé déclarativement
+   par le rebuild de la phase 7, aucune étape manuelle de configuration
+   nécessaire) — c'est lui qui couvre BorgBase :
+   ```sh
+   sudo systemctl start borgbackup-nightly.service
+   journalctl -u borgbackup-nightly -e
+   ```
+   Vérifier que les deux dépôts (Disque2 et BorgBase) apparaissent dans
+   le journal sans erreur de permission ni de passphrase.
