@@ -21,17 +21,18 @@ let
   sshAskpass = pkgs.writeShellScript "borgbackup-ssh-askpass" ''
     exec cat ${secrets."borgbackup/borgbase-ssh-key-passphrase".path}
   '';
-  # The declarative ACL below (systemd.tmpfiles A+) recurses into the whole
-  # home tree, including the rclone FUSE mounts at ~/icloud and ~/proton --
-  # those don't support POSIX ACLs ("Operation not supported"), which can
-  # leave the walk incomplete and the ACL mask on /home/pierre itself
-  # reset to nothing (observed in practice: NixOS's own user-activation
-  # step chmods the home dir on every switch, which rewrites the ACL mask
-  # and silently defeats the grant to borgbackup). `-xdev` skips crossing
-  # into those mounts, mirroring backup-home's own --one-file-system, so
-  # this never needed them anyway. Re-run as an ExecStartPre (root, via
-  # the `+` prefix) right before every backup, rather than trusting
-  # activation ordering to get this right on its own.
+  # A previous version of this used a declarative systemd.tmpfiles `A+`
+  # rule instead, applied at every activation/boot. Dropped in favor of
+  # the ExecStartPre below: the tmpfiles version recurses into the whole
+  # home tree unconditionally at boot time regardless of whether a backup
+  # ever runs, including the two problem spots below, and separately its
+  # walk into the rclone FUSE mounts at ~/icloud and ~/proton ("Operation
+  # not supported" for ACLs there) could leave things incomplete and the
+  # ACL mask on /home/pierre itself reset to nothing (NixOS's own
+  # user-activation chmods the home dir on every switch, rewriting the
+  # mask and silently defeating the grant). An ExecStartPre (root, via
+  # the `+` prefix) right before every backup sidesteps activation-order
+  # dependence entirely.
   fixHomeAcl = pkgs.writeShellApplication {
     name = "borgbackup-fix-home-acl";
     # ExecStartPre scripts don't inherit an interactive shell's PATH --
@@ -43,12 +44,31 @@ let
       pkgs.findutils
     ];
     text = ''
+      # -xdev: mirrors backup-home's own --one-file-system, so this never
+      # needs the rclone FUSE mounts (~/icloud, ~/proton -- ACLs
+      # unsupported there anyway).
+      #
       # -not -type l: setfacl follows symlinks by default and applies the
       # ACL to their *target* -- a stray symlink under /home/pierre
       # pointing at /dev/null once caused this to silently restrict
       # /dev/null itself to read-only for borgbackup, system-wide.
-      find /home/pierre -xdev -not -type l -exec setfacl -m u:borgbackup:rX {} + || true
-      find /home/pierre -xdev -type d -exec setfacl -d -m u:borgbackup:rX {} + || true
+      #
+      # ~/.ssh and ~/.gnupg excluded: granting borgbackup a named ACL
+      # entry forces POSIX ACL to recalculate the file's mask, and that
+      # mask is what stat() reports as the "group" permission bits -- so
+      # ssh/gpg would see e.g. 640 instead of 600 on private keys and
+      # refuse/warn. backup-home mirrors this exclusion (BORG_EXCLUDE_CREDENTIALS
+      # below) so these still get backed up normally via pierre's own
+      # manual runs, just not the automated one.
+      find /home/pierre -xdev \
+        -not -type l \
+        -not \( -path /home/pierre/.ssh -o -path '/home/pierre/.ssh/*' \) \
+        -not \( -path /home/pierre/.gnupg -o -path '/home/pierre/.gnupg/*' \) \
+        -exec setfacl -m u:borgbackup:rX {} + || true
+      find /home/pierre -xdev -type d \
+        -not \( -path /home/pierre/.ssh -o -path '/home/pierre/.ssh/*' \) \
+        -not \( -path /home/pierre/.gnupg -o -path '/home/pierre/.gnupg/*' \) \
+        -exec setfacl -d -m u:borgbackup:rX {} + || true
     '';
   };
 in
@@ -65,13 +85,8 @@ in
   };
 
   # /home/pierre is mode 700; borgbackup can only read into it via a
-  # targeted ACL. `A+` = set POSIX ACL entries recursively, keeping
-  # everything else about the base 700 mode unchanged; the `d:` entry is a
-  # default ACL so files created later inherit the same read grant.
-  # Re-applied idempotently by systemd-tmpfiles at every activation/boot.
-  systemd.tmpfiles.rules = [
-    "A+ /home/pierre - - - - u:borgbackup:rX,d:u:borgbackup:rX"
-  ];
+  # targeted ACL -- see fixHomeAcl above (applied per-run via
+  # ExecStartPre, not declaratively here; see its comment for why).
 
   environment.etc."borgbackup/backup-home" = {
     source = self + "/bin/backup-home";
@@ -115,6 +130,10 @@ in
       ExecStart = "/etc/borgbackup/backup-home";
     };
     environment = {
+      # See fixHomeAcl comment: keeps ~/.ssh and ~/.gnupg out of both the
+      # ACL grant and this automated backup, since granting the ACL is
+      # what breaks their permissions as seen by ssh/gpg.
+      BORG_EXCLUDE_CREDENTIALS = "1";
       BORG_REPO = "/mnt/disque2/BorgBackup/backup-pierre-pierre-nixos";
       BORG_PASSCOMMAND = "cat ${secrets."borgbackup/local-repo-passphrase".path}";
       BORG_REMOTE_REPO = "ssh://wsw5tfhn@wsw5tfhn.repo.borgbase.com/./repo";

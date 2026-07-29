@@ -24,9 +24,19 @@ fi
 archive="fd822b-$(date +%Y-%m-%d_%H-%M)"
 
 # Subshell body: the BORG_* overrides stay local to each call.
+# BORG_EXCLUDE_CREDENTIALS: set (by the borgbackup service only -- see
+# modules/backup/borgbackup.nix) to also skip ~/.ssh and ~/.gnupg. The
+# borgbackup user's ACL grant on the rest of /home/pierre, needed so it
+# can read anything at all, has a side effect on these two: POSIX ACL
+# recalculates the file's mask when a named entry is added, and that
+# mask is what stat() reports as the "group" permission bits -- so
+# ssh/gpg see e.g. 640 instead of 600 and refuse/warn. Excluding these
+# from the automated run's ACL walk and backup avoids the problem;
+# pierre's own manual backup-home runs (native ownership, no ACL needed)
+# still capture them normally.
 backup_to() (
     export BORG_REPO="$1" BORG_PASSCOMMAND="$2"
-    borg create \
+    set -- \
         --progress --stats \
         --one-file-system \
         --compression zstd \
@@ -37,9 +47,13 @@ backup_to() (
         --exclude 'pp:/home/pierre/.local/share/Trash' \
         --exclude 'pp:/home/pierre/nixos-config/.git' \
         --exclude 'pp:/home/pierre/bin/.git' \
-        --exclude 'pp:/home/pierre/dotfiles/.git' \
-        "::$archive" \
-        /home/pierre
+        --exclude 'pp:/home/pierre/dotfiles/.git'
+    if [ -n "${BORG_EXCLUDE_CREDENTIALS:-}" ]; then
+        set -- "$@" \
+            --exclude 'pp:/home/pierre/.ssh' \
+            --exclude 'pp:/home/pierre/.gnupg'
+    fi
+    borg create "$@" "::$archive" /home/pierre
 )
 
 # borg exits 1 for mere warnings (e.g. unreadable files); only >1 is fatal
