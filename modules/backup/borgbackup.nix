@@ -106,9 +106,11 @@ in
     ];
   };
 
-  # Manually triggerable for now (`systemctl start borgbackup-nightly`);
-  # the nightly timer is a separate follow-up once this is validated.
-  systemd.services.borgbackup-nightly = lib.mkIf userdata.enableSops {
+  # Core backup action -- just this, nothing else. Triggerable manually
+  # (`systemctl start borgbackup.service`) for testing without any of the
+  # email/suspend side effects that come with the scheduled wrapper; see
+  # borgbackup-nightly.nix for the timer that drives this automatically.
+  systemd.services.borgbackup = lib.mkIf userdata.enableSops {
     description = "Home backup (borg) as the isolated borgbackup user";
     after = [
       "mnt-disque2.mount"

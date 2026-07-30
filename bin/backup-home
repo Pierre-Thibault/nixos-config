@@ -37,7 +37,7 @@ archive="fd822b-$(date +%Y-%m-%d_%H-%M)"
 backup_to() (
     export BORG_REPO="$1" BORG_PASSCOMMAND="$2"
     set -- \
-        --progress --stats \
+        --stats \
         --one-file-system \
         --compression zstd \
         --exclude-caches \
@@ -48,6 +48,13 @@ backup_to() (
         --exclude 'pp:/home/pierre/nixos-config/.git' \
         --exclude 'pp:/home/pierre/bin/.git' \
         --exclude 'pp:/home/pierre/dotfiles/.git'
+    # --progress only when attached to a terminal: each update becomes its
+    # own line once redirected to a file/log (no tty to carriage-return
+    # over in place), which would flood the automated service's captured
+    # output (and the email built from it) with thousands of lines.
+    if [ -t 1 ]; then
+        set -- "$@" --progress
+    fi
     if [ -n "${BORG_EXCLUDE_CREDENTIALS:-}" ]; then
         set -- "$@" \
             --exclude 'pp:/home/pierre/.ssh' \

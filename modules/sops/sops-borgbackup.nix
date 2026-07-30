@@ -31,5 +31,23 @@
       owner = "borgbackup";
       mode = "0400";
     };
+    "borgbackup/smtp-password" = {
+      sopsFile = self + "/sops/borgbackup.yaml";
+      key = "smtp_password";
+      owner = "borgbackup";
+      mode = "0400";
+    };
+    "borgbackup/smtp-user" = {
+      sopsFile = self + "/sops/borgbackup.yaml";
+      key = "smtp_user";
+      owner = "borgbackup";
+      mode = "0400";
+    };
+    "borgbackup/notify-email" = {
+      sopsFile = self + "/sops/borgbackup.yaml";
+      key = "notify_email";
+      owner = "borgbackup";
+      mode = "0400";
+    };
   };
 }

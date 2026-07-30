@@ -46,8 +46,9 @@ dépôts borg, celle de `keys.txt.age`, et celle de ta session utilisateur
 
 ### `.ssh`/`.gnupg` : pas de copie hors site automatique
 
-Ni le service automatisé (`borgbackup-nightly`, seul à atteindre
-BorgBase) ni un `backup-home` manuel de pierre (Disque2 seulement,
+Ni le service automatisé (`borgbackup.service`, seul à atteindre
+BorgBase — déclenché nocturnement par `borgbackup-nightly.timer`) ni un
+`backup-home` manuel de pierre (Disque2 seulement,
 `BORG_REMOTE_*` retiré de `.zshrc`) ne donnent aux deux ensemble une
 copie *hors site* de `~/.ssh` et `~/.gnupg` :
 
@@ -584,10 +585,12 @@ doivent justement s'exécuter à ce bootstrap) — déjà à `false`, avec
    accès à BorgBase directement — voir l'étape suivante).
 6. Confirmer que le service automatisé fonctionne (créé déclarativement
    par le rebuild de la phase 7, aucune étape manuelle de configuration
-   nécessaire) — c'est lui qui couvre BorgBase :
+   nécessaire) — c'est lui qui couvre BorgBase. Tester `borgbackup.service`
+   directement (pas `borgbackup-nightly.service`, qui ajoute un courriel
+   et une mise en veille en plus — pas utile ici) :
    ```sh
-   sudo systemctl start borgbackup-nightly.service
-   journalctl -u borgbackup-nightly -e
+   sudo systemctl start borgbackup.service
+   journalctl -u borgbackup.service -e
    ```
    Vérifier que les deux dépôts (Disque2 et BorgBase) apparaissent dans
    le journal sans erreur de permission ni de passphrase.

@@ -12,4 +12,12 @@
   # decryption fail and *nixos-rebuild switch* fails outright, not just
   # the affected service.
   enableSops = true;
+
+  # SMTP relay for scripted notifications (currently just
+  # borgbackup-nightly.nix). Host/port aren't personal data, kept here;
+  # smtp_user/notify_email (email addresses) and the password all went to
+  # sops/borgbackup.yaml instead -- this file is committed to a public
+  # repo.
+  smtpHost = "smtp.protonmail.ch";
+  smtpPort = 587;
 }
