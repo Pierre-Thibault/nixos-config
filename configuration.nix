@@ -54,6 +54,18 @@ in
     ];
   };
 
+  hardware.printers = {
+    ensurePrinters = [
+      {
+        name = "HL2240";
+        description = "Brother HL-2240";
+        deviceUri = "usb://Brother/HL-2240%20series?serial=L3N624879";
+        model = "drv:///brlaser.drv/br2240.ppd";
+      }
+    ];
+    ensureDefaultPrinter = "HL2240";
+  };
+
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "radeonsi";
   };
