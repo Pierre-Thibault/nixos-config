@@ -243,6 +243,7 @@ in
 
     # Enable CUPS to print documents.
     printing.enable = true;
+    printing.drivers = [ pkgs.brlaser ]; # Brother HL-2240
 
     # Enable sound with pipewire.
     pulseaudio.enable = false;
