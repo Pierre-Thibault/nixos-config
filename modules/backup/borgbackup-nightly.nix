@@ -34,6 +34,11 @@ let
 
       rc=0
       systemctl start --wait borgbackup.service || rc=$?
+      # Scope the emailed log to just this run -- systemd assigns a fresh
+      # InvocationID on every start, and keeps it queryable via `show`
+      # until the next start, so this is race-free even though the
+      # service already exited by the time we read it.
+      invocation_id=$(systemctl show borgbackup.service -p InvocationID --value)
 
       if [ "$rc" -eq 0 ]; then
         subject="[borgbackup] Succès - $(date +%Y-%m-%d)"
@@ -46,7 +51,7 @@ let
         echo "From: $smtp_user"
         echo "To: $notify_email"
         echo
-        journalctl -u borgbackup.service -n 200 --no-pager
+        journalctl "_SYSTEMD_INVOCATION_ID=$invocation_id" --no-pager
       } | msmtp \
             --host=${userdata.smtpHost} --port=${toString userdata.smtpPort} \
             --tls=on --tls-starttls=on \
