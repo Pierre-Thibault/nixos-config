@@ -106,6 +106,19 @@ in
     ];
   };
 
+  # Also bind-mount at the conventional udisks2 path so it shows up in
+  # Nautilus like any other drive, without giving up the system-level
+  # mount above that borgbackup depends on.
+  fileSystems."/run/media/pierre/Disque2" = {
+    device = "/mnt/disque2";
+    fsType = "none";
+    options = [
+      "bind"
+      "nofail"
+      "x-systemd.requires-mounts-for=/mnt/disque2"
+    ];
+  };
+
   # Core backup action -- just this, nothing else. Triggerable manually
   # (`systemctl start borgbackup.service`) for testing without any of the
   # email/suspend side effects that come with the scheduled wrapper; see
