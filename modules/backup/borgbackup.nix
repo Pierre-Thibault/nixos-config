@@ -69,6 +69,23 @@ let
         -not \( -path /home/pierre/.ssh -o -path '/home/pierre/.ssh/*' \) \
         -not \( -path /home/pierre/.gnupg -o -path '/home/pierre/.gnupg/*' \) \
         -exec setfacl -d -m u:borgbackup:rX {} + || true
+
+      # open-webui (chat history, connections, RAG docs) lives outside
+      # /home -- see DATA_DIR in modules/ai/ai-tools.nix -- under systemd's
+      # DynamicUser convention: real state in /var/lib/private/<name>
+      # (0700 root:root), with a compatibility symlink at /var/lib/<name>.
+      # Grant borgbackup bare traversal on /var/lib/private itself (not
+      # recursive, so sibling services like ollama stay hidden), then
+      # resolve the symlink and grant read access on its real target --
+      # backup-home needs that same resolved path too, since `borg create`
+      # archives a symlink source argument as a symlink entry rather than
+      # descending into it (verified directly, not documented behavior).
+      setfacl -m u:borgbackup:X /var/lib/private
+      open_webui_data=$(readlink -f /var/lib/open-webui)
+      find "$open_webui_data" -xdev -not -type l \
+        -exec setfacl -m u:borgbackup:rX {} + || true
+      find "$open_webui_data" -xdev -type d \
+        -exec setfacl -d -m u:borgbackup:rX {} + || true
     '';
   };
 in

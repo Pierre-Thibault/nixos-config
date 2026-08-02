@@ -23,6 +23,13 @@ fi
 
 archive="fd822b-$(date +%Y-%m-%d_%H-%M)"
 
+# open-webui's data (connections, chat history, RAG docs) lives outside
+# /home under systemd's DynamicUser convention -- resolve the compatibility
+# symlink since `borg create` archives a symlink source argument as a
+# symlink entry rather than descending into it (see the matching ACL grant
+# in modules/backup/borgbackup.nix for why borgbackup can even read this).
+open_webui_data=$(readlink -f /var/lib/open-webui 2>/dev/null || true)
+
 # Subshell body: the BORG_* overrides stay local to each call.
 # BORG_EXCLUDE_CREDENTIALS: set (by the borgbackup service only -- see
 # modules/backup/borgbackup.nix) to also skip ~/.ssh and ~/.gnupg. The
@@ -45,6 +52,7 @@ backup_to() (
         --exclude 'pp:/home/pierre/.cache' \
         --exclude 're:^home/pierre/\.var/app/[^/]+/cache/' \
         --exclude 'pp:/home/pierre/.local/share/Trash' \
+        --exclude 'pp:/home/pierre/.local/share/gnome-boxes/images' \
         --exclude 'pp:/home/pierre/nixos-config/.git' \
         --exclude 'pp:/home/pierre/bin/.git' \
         --exclude 'pp:/home/pierre/dotfiles/.git'
@@ -60,7 +68,8 @@ backup_to() (
             --exclude 'pp:/home/pierre/.ssh' \
             --exclude 'pp:/home/pierre/.gnupg'
     fi
-    borg create "$@" "::$archive" /home/pierre
+    # shellcheck disable=SC2086 # deliberately unquoted: empty -> zero args
+    borg create "$@" "::$archive" /home/pierre ${open_webui_data:+"$open_webui_data"}
 )
 
 # borg exits 1 for mere warnings (e.g. unreadable files); only >1 is fatal
