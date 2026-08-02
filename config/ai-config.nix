@@ -91,10 +91,13 @@ in
 
     openrouter = {
       hostname = "openrouter.proxy";
-      target = "https://openrouter.ai/api";
+      # Caddy's reverse_proxy upstream only supports scheme/host/port (no
+      # path), so the /api prefix must live in the client-facing base URL
+      # instead of here.
+      target = "https://openrouter.ai";
       keyEnvVar = "OPEN_ROUTER";
       sessionVars = {
-        OPENROUTER_BASE_URL = "http://openrouter.proxy:${portStr}/v1";
+        OPENROUTER_BASE_URL = "http://openrouter.proxy:${portStr}/api/v1";
         OPENROUTER_API_KEY = "proxy";
       };
     };
