@@ -32,13 +32,16 @@ let
       smtp_user=$(cat ${secrets."borgbackup/smtp-user".path})
       notify_email=$(cat ${secrets."borgbackup/notify-email".path})
 
+      # Scope the emailed log to just this run. A prior attempt used the
+      # service's InvocationID via `systemctl show`, but that property
+      # reads back empty once the (Type=oneshot) unit has already
+      # exited -- confirmed empty even moments after a run finishes, not
+      # just after the next one starts. A timestamp captured just before
+      # starting is simpler and doesn't depend on state systemd doesn't
+      # actually keep around.
+      run_start=$(date '+%Y-%m-%d %H:%M:%S')
       rc=0
       systemctl start --wait borgbackup.service || rc=$?
-      # Scope the emailed log to just this run -- systemd assigns a fresh
-      # InvocationID on every start, and keeps it queryable via `show`
-      # until the next start, so this is race-free even though the
-      # service already exited by the time we read it.
-      invocation_id=$(systemctl show borgbackup.service -p InvocationID --value)
 
       if [ "$rc" -eq 0 ]; then
         subject="[borgbackup] Succès - $(date +%Y-%m-%d)"
@@ -51,7 +54,7 @@ let
         echo "From: $smtp_user"
         echo "To: $notify_email"
         echo
-        journalctl "_SYSTEMD_INVOCATION_ID=$invocation_id" --no-pager
+        journalctl -u borgbackup.service --since "$run_start" --no-pager
       } | msmtp \
             --host=${userdata.smtpHost} --port=${toString userdata.smtpPort} \
             --tls=on --tls-starttls=on \
