@@ -88,5 +88,15 @@ in
         HF_TOKEN = "proxy";
       };
     };
+
+    openrouter = {
+      hostname = "openrouter.proxy";
+      target = "https://openrouter.ai/api";
+      keyEnvVar = "OPEN_ROUTER";
+      sessionVars = {
+        OPENROUTER_BASE_URL = "http://openrouter.proxy:${portStr}/v1";
+        OPENROUTER_API_KEY = "proxy";
+      };
+    };
   };
 }

@@ -23,6 +23,7 @@
       TOGETHER_API_KEY = { };
       OPENAI_API_KEY = { };
       HF_TOKEN = { };
+      OPEN_ROUTER = { };
     };
 
     templates = lib.optionalAttrs userdata.enableSops {
@@ -33,6 +34,7 @@
           TOGETHER_API_KEY=${config.sops.placeholder.TOGETHER_API_KEY}
           OPENAI_API_KEY=${config.sops.placeholder.OPENAI_API_KEY}
           HF_TOKEN=${config.sops.placeholder.HF_TOKEN}
+          OPEN_ROUTER=${config.sops.placeholder.OPEN_ROUTER}
         '';
         # The "caddy" group only exists while userdata.enableCaddyProxy
         # creates the caddy service; matching it here to that same flag
