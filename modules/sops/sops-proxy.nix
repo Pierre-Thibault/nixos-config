@@ -40,7 +40,14 @@
         # creates the caddy service; matching it here to that same flag
         # keeps both dependents in sync instead of two separate switches.
         mode = "0440";
-      } // lib.optionalAttrs userdata.enableCaddyProxy { group = "caddy"; };
+      }
+      // lib.optionalAttrs userdata.enableCaddyProxy {
+        group = "caddy";
+        # EnvironmentFile is only read by systemd when the unit starts, not
+        # on the Caddyfile-triggered reload in api-proxy.nix — without this,
+        # a new or rotated key silently never reaches the running process.
+        restartUnits = [ "caddy.service" ];
+      };
     };
   };
 }
