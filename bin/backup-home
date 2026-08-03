@@ -50,6 +50,7 @@ backup_to() (
         --exclude-caches \
         --exclude-if-present .nobackup \
         --exclude 'pp:/home/pierre/.cache' \
+        --exclude 'pp:/home/pierre/.config/discord/Cache' \
         --exclude 're:^home/pierre/\.var/app/[^/]+/cache/' \
         --exclude 'pp:/home/pierre/.local/share/Trash' \
         --exclude 'pp:/home/pierre/.local/share/gnome-boxes/images' \
