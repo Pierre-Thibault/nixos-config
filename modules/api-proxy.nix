@@ -10,16 +10,22 @@ let
 
   bindAddr = cfg.bindAddr;
   port = toString cfg.port;
+  httpsPort = toString cfg.httpsPort;
   inherit (lib) mkForce mkOption types;
 
   upstreamBlock =
     _name: upstream:
     let
       envRef = "{env." + upstream.keyEnvVar + "}";
+      scheme = if upstream.useTls then "https" else "http";
+      # Caddy cannot multiplex HTTP and HTTPS on the same listening port, so
+      # TLS upstreams get their own dedicated port.
+      upstreamPort = if upstream.useTls then httpsPort else port;
     in
     ''
-      http://${upstream.hostname}:${port} {
+      ${scheme}://${upstream.hostname}:${upstreamPort} {
         bind ${bindAddr}
+        ${lib.optionalString upstream.useTls "tls internal"}
         reverse_proxy ${upstream.target} {
           header_up ${upstream.keyHeader} "${upstream.keyScheme}${envRef}"
         }
@@ -54,6 +60,11 @@ let
         type = types.str;
         description = "Name of the environment variable holding the real API key.";
       };
+      useTls = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Serve this upstream over HTTPS using Caddy's internal CA instead of plain HTTP. Needed for clients that require an https:// scheme (e.g. `pulumi login`).";
+      };
     };
   };
 in
@@ -70,7 +81,13 @@ in
     port = mkOption {
       type = types.port;
       default = 4140;
-      description = "Single local port shared by all upstream proxies, differentiated by hostname.";
+      description = "Local port shared by all plain-HTTP upstream proxies, differentiated by hostname.";
+    };
+
+    httpsPort = mkOption {
+      type = types.port;
+      default = 4141;
+      description = "Local port shared by all HTTPS (useTls) upstream proxies, differentiated by hostname. Separate from `port` because Caddy cannot multiplex HTTP and HTTPS on the same listening port.";
     };
 
     environmentFile = mkOption {
@@ -83,6 +100,20 @@ in
       type = types.nullOr types.str;
       default = null;
       description = "If set, ensures the parent directory of environmentFile has permissions 750 <owner>:caddy so the Caddy service can traverse it.";
+    };
+
+    tlsTrustFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = ''
+        Path to Caddy's internal CA root certificate (PEM), added to the
+        system trust store so HTTPS clients (e.g. `pulumi login`) accept
+        `useTls` upstreams without an insecure/skip-verify flag. Caddy
+        generates this certificate itself on first run at
+        /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt —
+        copy it into the repo once and point this option at that copy.
+        Only needed if at least one upstream sets useTls = true.
+      '';
     };
 
     upstreams = mkOption {
@@ -121,5 +152,7 @@ in
     networking.hosts.${bindAddr} = lib.mapAttrsToList (
       _name: upstream: upstream.hostname
     ) cfg.upstreams;
+
+    security.pki.certificateFiles = lib.optional (cfg.tlsTrustFile != null) cfg.tlsTrustFile;
   };
 }
