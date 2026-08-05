@@ -25,7 +25,6 @@
       HF_TOKEN = { };
       OPEN_ROUTER = { };
       DIGITALOCEAN_TOKEN = { sopsFile = self + "/sops/digital-ocean.yaml"; };
-      PULUMI_ACCESS_TOKEN = { sopsFile = self + "/sops/pulumi.yaml"; };
     };
 
     templates = lib.optionalAttrs userdata.enableSops {
@@ -38,7 +37,6 @@
           HF_TOKEN=${config.sops.placeholder.HF_TOKEN}
           OPEN_ROUTER=${config.sops.placeholder.OPEN_ROUTER}
           DIGITALOCEAN_TOKEN=${config.sops.placeholder.DIGITALOCEAN_TOKEN}
-          PULUMI_ACCESS_TOKEN=${config.sops.placeholder.PULUMI_ACCESS_TOKEN}
         '';
         # The "caddy" group only exists while userdata.enableCaddyProxy
         # creates the caddy service; matching it here to that same flag

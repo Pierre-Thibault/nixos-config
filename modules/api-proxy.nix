@@ -26,6 +26,9 @@ let
       ${scheme}://${upstream.hostname}:${upstreamPort} {
         bind ${bindAddr}
         ${lib.optionalString upstream.useTls "tls internal"}
+        log {
+          output stdout
+        }
         reverse_proxy ${upstream.target} {
           header_up ${upstream.keyHeader} "${upstream.keyScheme}${envRef}"
         }

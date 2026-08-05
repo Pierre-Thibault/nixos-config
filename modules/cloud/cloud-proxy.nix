@@ -1,6 +1,6 @@
 # Wires cloud-proxy-config.nix's providers into the shared api-proxy service
 # (enable/port/environmentFile are set once in modules/ai/ai.nix).
-{ lib, self, ... }:
+{ lib, ... }:
 
 let
   cfg = import ../../config/cloud-proxy-config.nix;
@@ -21,7 +21,6 @@ let
 in
 {
   services.api-proxy.upstreams = lib.mapAttrs toUpstream cfg.providers;
-  services.api-proxy.tlsTrustFile = self + "/certs/caddy-local-ca.crt";
 
   environment.sessionVariables = sessionVars;
 }
