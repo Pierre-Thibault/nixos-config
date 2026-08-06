@@ -122,4 +122,9 @@ in
       wlrobs # For Wayland (recommended)
     ];
   };
+
+  services.espanso = {
+    enable = true;
+    package = pkgs.espanso-wayland;
+  };
 }
