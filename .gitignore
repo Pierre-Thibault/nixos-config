@@ -4,3 +4,4 @@ cspell.json
 secrets/
 .aider.*
 .aider*
+/result
