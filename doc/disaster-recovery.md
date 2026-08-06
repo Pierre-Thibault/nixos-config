@@ -580,10 +580,34 @@ doivent justement s'exécuter à ce bootstrap) — déjà à `false`, avec
    base elle-même (`~/Documents/.../*.kdbx`) est un fichier ordinaire,
    sauvegardée normalement. Juste la rouvrir une fois à la main après la
    restauration.
-5. Lancer `backup-home` pour confirmer que le dépôt Disque2 accepte
+5. **Reconnecter `pulumi-runner`** (voir `modules/pulumi-runner.nix`).
+   L'utilisateur système, le wrapper `pulumi`, la règle sudo et les ACL
+   sur `~/Projets/pulumi/` reviennent automatiquement au rebuild de la
+   phase 7 — déclaratif, rien à faire. Sa **session de connexion**
+   Pulumi Cloud, elle, ne revient pas : `/var/lib/pulumi-runner` est un
+   état local (`/var`, pas `/home`), jamais couvert par `backup-home`
+   (qui ne sauvegarde que le home de pierre) — même situation que la clé
+   machine sops (phase 7) ou le jeton de confiance iCloud (étape 3
+   ci-dessus). De plus, contrairement au token DigitalOcean
+   (`sops/digital-ocean.yaml`, revient via le re-chiffrement de la
+   phase 7), le token d'accès personnel Pulumi n'est **stocké nulle
+   part** dans `nixos-config` — il ne vit que dans ce
+   `credentials.json` local. Il faut en générer un nouveau sur
+   https://app.pulumi.com/account/tokens et reconnecter — **interactif,
+   dans ton propre terminal, jamais via un agent** (le token ne doit
+   jamais transiter par un outil IA, voir l'incident documenté dans
+   l'historique du projet `nixos-anywhere-flake`) :
+   ```sh
+   sudo -u pulumi-runner /run/current-system/sw/bin/pulumi login
+   ```
+   Vérifier ensuite sans exposer le token :
+   ```sh
+   sudo -u pulumi-runner /run/current-system/sw/bin/pulumi whoami
+   ```
+6. Lancer `backup-home` pour confirmer que le dépôt Disque2 accepte
    encore les écritures depuis la machine reconstruite (pierre n'a plus
    accès à BorgBase directement — voir l'étape suivante).
-6. Confirmer que le service automatisé fonctionne (créé déclarativement
+7. Confirmer que le service automatisé fonctionne (créé déclarativement
    par le rebuild de la phase 7, aucune étape manuelle de configuration
    nécessaire) — c'est lui qui couvre BorgBase. Tester `borgbackup.service`
    directement (pas `borgbackup-nightly.service`, qui ajoute un courriel
