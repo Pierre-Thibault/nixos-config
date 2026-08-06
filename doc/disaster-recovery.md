@@ -618,3 +618,8 @@ doivent justement s'exécuter à ce bootstrap) — déjà à `false`, avec
    ```
    Vérifier que les deux dépôts (Disque2 et BorgBase) apparaissent dans
    le journal sans erreur de permission ni de passphrase.
+
+Si Brave perdait ces signets ou ses mots de passe, l'archive `~/brave.zip`
+contient ceux-ci. Elle n'est pas souvent mise à jour et elle ne doit être
+employée qu'en dernier recours. Elle est présente parce qu'elle représente
+la méthode officielle recommandée par Brave.
