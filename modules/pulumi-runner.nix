@@ -107,20 +107,29 @@ in
     }
   ];
 
-  # Convention directory for Pulumi projects: pulumi-runner needs to read
-  # (never write — state lives in Pulumi Cloud, not locally) anything
-  # created underneath, without a config change per new project. A default
-  # ACL on the directory covers future subdirectories automatically;
-  # traversal-only (--x) ACLs on the ancestors let pulumi-runner reach it
-  # without being able to list or read anything else in pierre's home.
+  # Convention directory for Pulumi projects: pulumi-runner needs to write
+  # here too (stack init, config set, and pulumi new all create/modify
+  # project files -- state alone lives in Pulumi Cloud, but plenty else is
+  # local), without a config change per new project. A default ACL on the
+  # directory covers future subdirectories automatically; traversal-only
+  # (--x) ACLs on the ancestors let pulumi-runner reach it without being
+  # able to list or read anything else in pierre's home.
+  #
+  # Both pulumi-runner's and pierre's ACL entries are set as *default*
+  # (inherited), reciprocally: whichever of the two creates a file, the
+  # other still gets rwX on it automatically. Without pierre's own default
+  # entry here, a file pulumi-runner creates (e.g. a fresh
+  # Pulumi.<stack>.yaml) would be owned by pulumi-runner and pierre
+  # wouldn't be able to read or edit it directly on disk (git itself
+  # doesn't care about ownership, but pierre's editor/shell does).
   system.activationScripts.pulumiRunnerAcls = {
     text = ''
       mkdir -p ${cfg.projectsDirectory}
       chown ${userdata.username}:users ${cfg.projectsDirectory}
       ${pkgs.acl}/bin/setfacl -m u:${cfg.username}:--x /home/${userdata.username}
       ${pkgs.acl}/bin/setfacl -m u:${cfg.username}:--x /home/${userdata.username}/Projets
-      ${pkgs.acl}/bin/setfacl -R -m u:${cfg.username}:rX ${cfg.projectsDirectory}
-      ${pkgs.acl}/bin/setfacl -R -d -m u:${cfg.username}:rX ${cfg.projectsDirectory}
+      ${pkgs.acl}/bin/setfacl -R -m u:${cfg.username}:rwX,u:${userdata.username}:rwX ${cfg.projectsDirectory}
+      ${pkgs.acl}/bin/setfacl -R -d -m u:${cfg.username}:rwX,u:${userdata.username}:rwX ${cfg.projectsDirectory}
     '';
     deps = [ ];
   };
