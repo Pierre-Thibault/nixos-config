@@ -3,9 +3,9 @@
 # gradually between civil twilight and sunrise/sunset (100 during the day,
 # 70 at night, smooth transition across each twilight window).
 
-THEME_TOGGLE_SCRIPT="/home/pierre/.config/waybar/theme-toggle.sh"
-STATE_FILE="/home/pierre/.config/waybar/theme-state"
-SET_BRIGHTNESS="/home/pierre/nixos-config/bin/set-brightness"
+THEME_TOGGLE_SCRIPT="$HOME/.config/waybar/theme-toggle.sh"
+STATE_FILE="$HOME/.config/waybar/theme-state"
+SET_BRIGHTNESS="$HOME/nixos-config/bin/set-brightness"
 BRIGHTNESS_STATE_FILE="/tmp/brightness-state"
 SUNTIMES_CACHE="/tmp/suntimes-cache"
 SUNTIMES_LOCK="/tmp/suntimes-cache.lock"

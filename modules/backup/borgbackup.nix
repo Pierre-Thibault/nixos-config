@@ -17,6 +17,7 @@
 }:
 
 let
+  inherit (userdata) username;
   secrets = config.sops.secrets;
   sshAskpass = pkgs.writeShellScript "borgbackup-ssh-askpass" ''
     exec cat ${secrets."borgbackup/borgbase-ssh-key-passphrase".path}
@@ -60,14 +61,14 @@ let
       # refuse/warn. backup-home mirrors this exclusion (BORG_EXCLUDE_CREDENTIALS
       # below) so these still get backed up normally via pierre's own
       # manual runs, just not the automated one.
-      find /home/pierre -xdev \
+      find /home/${username} -xdev \
         -not -type l \
-        -not \( -path /home/pierre/.ssh -o -path '/home/pierre/.ssh/*' \) \
-        -not \( -path /home/pierre/.gnupg -o -path '/home/pierre/.gnupg/*' \) \
+        -not \( -path /home/${username}/.ssh -o -path '/home/${username}/.ssh/*' \) \
+        -not \( -path /home/${username}/.gnupg -o -path '/home/${username}/.gnupg/*' \) \
         -exec setfacl -m u:borgbackup:rX {} + || true
-      find /home/pierre -xdev -type d \
-        -not \( -path /home/pierre/.ssh -o -path '/home/pierre/.ssh/*' \) \
-        -not \( -path /home/pierre/.gnupg -o -path '/home/pierre/.gnupg/*' \) \
+      find /home/${username} -xdev -type d \
+        -not \( -path /home/${username}/.ssh -o -path '/home/${username}/.ssh/*' \) \
+        -not \( -path /home/${username}/.gnupg -o -path '/home/${username}/.gnupg/*' \) \
         -exec setfacl -d -m u:borgbackup:rX {} + || true
 
       # open-webui (chat history, connections, RAG docs) lives outside
@@ -126,7 +127,7 @@ in
   # Also bind-mount at the conventional udisks2 path so it shows up in
   # Nautilus like any other drive, without giving up the system-level
   # mount above that borgbackup depends on.
-  fileSystems."/run/media/pierre/Disque2" = {
+  fileSystems."/run/media/${username}/Disque2" = {
     device = "/mnt/disque2";
     fsType = "none";
     options = [
@@ -166,7 +167,7 @@ in
       # ACL grant and this automated backup, since granting the ACL is
       # what breaks their permissions as seen by ssh/gpg.
       BORG_EXCLUDE_CREDENTIALS = "1";
-      BORG_REPO = "/mnt/disque2/BorgBackup/backup-pierre-pierre-nixos";
+      BORG_REPO = "/mnt/disque2/BorgBackup/backup-${username}-${userdata.hostname}";
       BORG_PASSCOMMAND = "cat ${secrets."borgbackup/local-repo-passphrase".path}";
       BORG_REMOTE_REPO = "ssh://wsw5tfhn@wsw5tfhn.repo.borgbase.com/./repo";
       BORG_REMOTE_PASSCOMMAND = "cat ${secrets."borgbackup/borgbase-repo-passphrase".path}";

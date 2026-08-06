@@ -10,6 +10,10 @@
 # PATH entries for ~/bin and ~/.local/bin are handled separately via the
 # dedicated environment.homeBinInPath / environment.localBinInPath options;
 # this file only adds the extra directories those options don't cover.
+{ userdata }:
+let
+  inherit (userdata) username;
+in
 {
   libva_driver_name = "radeonsi";
 
@@ -23,10 +27,10 @@
   # user (see modules/backup/) -- pierre's session no longer has passive
   # access to that repo's passphrase or SSH key. These variables are for
   # pierre's own local/manual borg usage against Disque2 only.
-  borg_repo = "/run/media/pierre/Disque2/BorgBackup/backup-pierre-pierre-nixos";
+  borg_repo = "/run/media/${username}/Disque2/BorgBackup/backup-${username}-${userdata.hostname}";
   borg_passcommand = "$HOME/bin/borg-ask-passphrase";
 
-  git_mirror_dir = "/run/media/pierre/Disque2/GitMirrors";
+  git_mirror_dir = "/run/media/${username}/Disque2/GitMirrors";
 
   path = [
     "$HOME/nixos-config/bin"

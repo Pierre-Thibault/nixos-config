@@ -70,7 +70,7 @@ in
     let
       # config/environment-variables.nix uses lowercase names for easier
       # editing; uppercase them here to get real env var names.
-      staticEnvVars = import ./config/environment-variables.nix;
+      staticEnvVars = import ./config/environment-variables.nix { inherit userdata; };
     in
     lib.foldlAttrs (acc: name: value: acc // { ${lib.toUpper name} = value; }) { } staticEnvVars;
 
