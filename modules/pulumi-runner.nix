@@ -85,7 +85,13 @@ in
       runAs = cfg.username;
       commands = [
         {
-          command = "${pulumiWrapped}/bin/pulumi";
+          # Must be this literal string, not "${pulumiWrapped}/bin/pulumi":
+          # sudo matches the invoked command against the sudoers entry as an
+          # exact string, without resolving symlinks — so the entry has to
+          # be whatever path gets typed at invocation time. This one never
+          # changes across generations (only what it points to does), so it
+          # stays valid without needing to track the current store hash.
+          command = "/run/current-system/sw/bin/pulumi";
           options = [
             "NOPASSWD"
             "SETENV"
