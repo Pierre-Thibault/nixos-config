@@ -66,9 +66,16 @@ in
     ensureDefaultPrinter = "HL2240";
   };
 
-  environment.sessionVariables = {
-    LIBVA_DRIVER_NAME = "radeonsi";
-  };
+  environment.sessionVariables =
+    let
+      # config/environment-variables.nix uses lowercase names for easier
+      # editing; uppercase them here to get real env var names.
+      staticEnvVars = import ./config/environment-variables.nix;
+    in
+    lib.foldlAttrs (acc: name: value: acc // { ${lib.toUpper name} = value; }) { } staticEnvVars;
+
+  environment.homeBinInPath = true;
+  environment.localBinInPath = true;
 
   # Configure console keymap to use the xserver config
   console = {
