@@ -77,6 +77,12 @@ in
   # or anything that could hijack another command's dynamic linking.
   security.sudo.extraConfig = ''
     Defaults env_keep += "${lib.concatStringsSep " " (lib.attrNames cfg.environmentPassthrough)}"
+    # NixOS doesn't set secure_path by default, so sudo otherwise passes the
+    # caller's own $PATH straight through. Found the hard way: a stale nix
+    # store path earlier in an interactive shell's $PATH shadowed the
+    # correct pulumi-language-python and got picked up by pulumi-runner's
+    # invocation instead of the one baked into the wrapper.
+    Defaults secure_path = "/run/current-system/sw/bin:/run/wrappers/bin"
   '';
 
   security.sudo.extraRules = [
