@@ -6,7 +6,6 @@
   config,
   pkgs,
   lib,
-  unstable,
   userdata,
   my-lib,
   ...
@@ -219,93 +218,6 @@ in
     # step (224/PAM) before it can even render a login prompt. Found
     # 2026-07-23: Ctrl+Alt+F3 showed only a blinking cursor on black.
     pam.services.kmscon = { };
-  };
-
-  services = {
-    displayManager = {
-      gdm.enable = true;
-      defaultSession = "niri";
-    };
-    desktopManager.gnome = {
-      enable = true;
-      extraGSettingsOverrides = ''
-        [org.gnome.shell]
-        enabled-extensions=[]
-      '';
-    };
-
-    xserver = {
-      # Configure keymap in X11
-      xkb = {
-        layout = "ca";
-        variant = "multix";
-      };
-    };
-
-    # Replace the default console
-    kmscon = {
-      enable = true;
-      package = unstable.kmscon;
-      hwRender = false;
-      fonts = [
-        {
-          name = "JetBrainsMono Nerd Font";
-          package = pkgs.nerd-fonts.jetbrains-mono;
-        }
-      ];
-      extraConfig = builtins.concatStringsSep "\n" [
-        "font-size=12"
-        "xkb-layout=ca"
-        "xkb-variant=multix"
-      ];
-    };
-
-    # Enable CUPS to print documents.
-    printing.enable = true;
-    printing.drivers = [ pkgs.brlaser ]; # Brother HL-2240
-
-    # Enable sound with pipewire.
-    pulseaudio.enable = false;
-    pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      wireplumber.enable = true;
-
-      # If you want to use JACK applications, uncomment this
-      #jack.enable = true;
-
-      # use the example session manager (no others are packaged yet so this is enabled by default,
-      # no need to redefine it in your config for now)
-      #media-session.enable = true;
-    };
-    pcscd.enable = true;
-
-    # Enable the OpenSSH daemon.
-    openssh.enable = userdata.sshEnable;
-
-    geoclue2 = {
-      enable = true;
-      appConfig = {
-        "xdg-desktop-portal" = {
-          isAllowed = true;
-          isSystem = true;
-        };
-        "get-location" = {
-          isAllowed = true;
-          isSystem = true;
-        };
-      };
-    };
-
-    earlyoom = {
-      enable = true;
-      freeMemThreshold = 5;
-      freeSwapThreshold = 10;
-      enableNotifications = true; # notifie via systemd-oomd/notify
-    };
-
   };
 
   # Hack to make OBS work on Niri:
