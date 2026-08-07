@@ -96,6 +96,26 @@
     redland-wayland
   ];
 
+  # gcr-ssh-agent (from services.desktopManager.gnome) depends on
+  # org.gnome.keyring.SystemPrompter, a legacy X11-only prompter from gcr
+  # 3.41.2 -- it fails with "cannot open display" under Niri regardless of
+  # WAYLAND_DISPLAY/DISPLAY being set, and gcr-ssh-agent's retry fallback
+  # then spins ssh-add at ~100% CPU forever instead of prompting. No newer
+  # gcr_4 fixes this (checked nixos-unstable: still 4.4.0.1, same bug).
+  # Replaced with plain OpenSSH ssh-agent + a rofi-based askpass.
+  # Found 2026-08-06.
+  services.gnome.gcr-ssh-agent.enable = false;
+
+  # Battle-tested built-in replacement (nixos/modules/programs/ssh.nix):
+  # spawns systemd.user.services.ssh-agent, wires SSH_AUTH_SOCK into shells
+  # via environment.extraInit, and sets SSH_ASKPASS globally -- only used
+  # by ssh/ssh-add when no controlling terminal is attached.
+  programs.ssh = {
+    startAgent = true;
+    enableAskPassword = true;
+    askPassword = "${self}/bin/ssh-askpass-rofi";
+  };
+
   # Enable polkit for privilege escalation
   security.polkit.enable = true;
 

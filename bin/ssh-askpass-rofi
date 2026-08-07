@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# SSH_ASKPASS implementation: ssh/ssh-add invoke this with the prompt text
+# as $1 when no controlling terminal is available, and read the passphrase
+# from stdout. rofi's Wayland layer-shell backend avoids the X11-only
+# gcr-prompter path, which fails under Niri (see modules/gui/niri.nix).
+
+rofi -dmenu -password -p "${1:-Passphrase}"

@@ -194,7 +194,11 @@ in
 
     gnupg.agent = {
       enable = true;
-      enableSSHSupport = true;
+      # SSH support disabled: conflicts with programs.ssh.startAgent (see
+      # modules/gui/niri.nix), which replaced the broken gcr-ssh-agent as
+      # the actual SSH agent. gpg-agent wasn't the active SSH_AUTH_SOCK
+      # holder anyway (gcr-ssh-agent was), so no functional loss.
+      enableSSHSupport = false;
     };
 
     steam = {
