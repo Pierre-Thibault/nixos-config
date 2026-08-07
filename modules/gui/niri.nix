@@ -114,20 +114,6 @@
     };
   };
 
-  # gcr-ssh-agent.socket (WantedBy=sockets.target) starts listening before
-  # niri finishes importing WAYLAND_DISPLAY into the systemd --user
-  # environment, so the first SSH connection can instantiate
-  # gcr-ssh-agent.service without WAYLAND_DISPLAY -- it then runs for the
-  # whole session unable to open its GTK4 passphrase-unlock dialog, and
-  # ssh-add spins retrying forever instead. Delaying only the *service*
-  # (not the socket) until graphical-session.target is reached fixes this;
-  # early connection attempts just queue, they aren't dropped.
-  # Found 2026-08-06: askpass never showed, ssh-add pinned CPU at 97%.
-  systemd.user.services.gcr-ssh-agent = {
-    wants = [ "graphical-session.target" ];
-    after = [ "graphical-session.target" ];
-  };
-
   # Workspace MRU daemon — tracks workspace focus history for niri-workspace-switch
   systemd.user.services.niri-workspace-mru-daemon = {
     description = "Niri workspace MRU tracker";
