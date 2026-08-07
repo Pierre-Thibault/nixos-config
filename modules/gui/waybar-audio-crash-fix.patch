@@ -1,0 +1,70 @@
+--- a/include/util/audio_backend.hpp
++++ b/include/util/audio_backend.hpp
+@@ -23,10 +23,17 @@
+   static void serverInfoCb(pa_context*, const pa_server_info*, void*);
+   static void volumeModifyCb(pa_context*, int, void*);
+   void connectContext();
++  // Non-throwing reconnect used from the PulseAudio callback thread. Throwing
++  // across the libpulse C callback boundary calls std::terminate, so this
++  // swallows any failure and reports it via the return value instead.
++  bool reconnectContext() noexcept;
+
+   pa_threaded_mainloop* mainloop_;
+   pa_mainloop_api* mainloop_api_;
+   pa_context* context_;
++  // Guards against the FAILED -> connect -> FAILED recursion / busy loop when a
++  // reconnect attempt fails synchronously inside pa_context_connect().
++  bool reconnecting_{false};
+   pa_cvolume pa_volume_;
+
+   // SINK
+--- a/src/util/audio_backend.cpp
++++ b/src/util/audio_backend.cpp
+@@ -69,6 +69,22 @@
+   }
+ }
+
++// Reconnect the context without ever throwing. This is safe to call from within
++// a PulseAudio state callback (which runs in pure C libpulse frames), where an
++// escaping C++ exception cannot be unwound and would abort the process.
++bool AudioBackend::reconnectContext() noexcept {
++  try {
++    connectContext();
++    return true;
++  } catch (const std::exception& e) {
++    spdlog::error("PulseAudio reconnect failed: {}", e.what());
++    return false;
++  } catch (...) {
++    spdlog::error("PulseAudio reconnect failed: unknown error");
++    return false;
++  }
++}
++
+ void AudioBackend::contextStateCb(pa_context* c, void* data) {
+   auto* backend = static_cast<AudioBackend*>(data);
+   switch (pa_context_get_state(c)) {
+@@ -91,10 +107,23 @@
+       // When pulseaudio server restarts, the connection is "failed". Try to reconnect.
+       // pa_threaded_mainloop_lock is already acquired in callback threads.
+       // So there is no need to lock it again.
++      //
++      // Guard against re-entrancy: pa_context_connect() can fire this callback
++      // synchronously with PA_CONTEXT_FAILED again, which would otherwise
++      // recurse (FAILED -> connect -> FAILED -> ...) and busy-loop.
++      if (backend->reconnecting_) {
++        break;
++      }
+       if (backend->context_ != nullptr) {
+         pa_context_disconnect(backend->context_);
+       }
+-      backend->connectContext();
++      backend->reconnecting_ = true;
++      // Never throw across the libpulse C callback boundary: a failed reconnect
++      // is logged and left for a later PA event to retry instead of aborting.
++      if (!backend->reconnectContext()) {
++        spdlog::warn("PulseAudio context reconnect failed; will retry on next event");
++      }
++      backend->reconnecting_ = false;
+       break;
+     case PA_CONTEXT_CONNECTING:
+     case PA_CONTEXT_AUTHORIZING:

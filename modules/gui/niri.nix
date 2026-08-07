@@ -10,6 +10,24 @@
     enable = true;
   };
 
+  # waybar's pulseaudio module throws std::runtime_error from inside a
+  # libpulse C callback when pipewire-pulse restarts (e.g. during a
+  # nixos-rebuild switch reload), which std::terminate()s the whole bar.
+  # This SIGABRTs waybar.service, and since it has KillMode=mixed, that
+  # SIGKILLs any process left in its cgroup -- including an active gtklock
+  # instance, corrupting the screen (found + fixed 2026-08-06/07).
+  # Fixed upstream on master (Alexays/Waybar@3831524, closes #5141) but not
+  # yet in a tagged release; nixpkgs pins the 0.15.0 tag. Upstream's diff
+  # doesn't apply to 0.15.0 (later commits changed the surrounding code), so
+  # this patch reimplements the same fix against the 0.15.0 source.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      waybar = prev.waybar.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./waybar-audio-crash-fix.patch ];
+      });
+    })
+  ];
+
   # Enable XWayland for X11 apps (gparted, etc.)
   programs.xwayland.enable = true;
 
