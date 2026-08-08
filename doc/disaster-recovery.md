@@ -623,3 +623,6 @@ Si Brave perdait ces signets ou ses mots de passe, l'archive `~/brave.zip`
 contient ceux-ci. Elle n'est pas souvent mise à jour et elle ne doit être
 employée qu'en dernier recours. Elle est présente parce qu'elle représente
 la méthode officielle recommandée par Brave.
+
+Entrez à nouveau le mot passe pour la synchronisation des voutes Obsidian.
+Autrement, la synchronisation ne se fait plus.
