@@ -17,7 +17,6 @@ if os.environ.get("OCR_LD_FIXED") != "1":
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 HOME = Path.home()
-CAPTURE_DIR = HOME / ".local/share/ocr-screenshot/captures"
 LOG_FILE = HOME / ".local/share/ocr-screenshot/ocr-screenshot.log"
 
 
@@ -29,8 +28,6 @@ def notify(body: str, urgency: str | None = None) -> None:
 
 
 def main() -> None:
-    CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
-
     selection: subprocess.CompletedProcess[str] = subprocess.run(["slurp"], capture_output=True, text=True)
     if selection.returncode != 0:
         sys.exit(1)
@@ -68,12 +65,10 @@ def main() -> None:
         text, engine = tess_text, "tesseract"
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
-    saved_img: Path = CAPTURE_DIR / f"ocr-{timestamp}.png"
-    temp_img.replace(saved_img)
+    temp_img.unlink()
 
     with open(LOG_FILE, "a") as log_fh:
         log_fh.write(f"=== {timestamp} ===\n")
-        log_fh.write(f"Image: {saved_img}\n")
         log_fh.write(f"Selection: {selection_geom}\n")
         log_fh.write(f"Winner: {engine}\n")
         log_fh.write(f"Tesseract ({len(tess_text)} chars): {tess_text}\n")
@@ -88,7 +83,7 @@ def main() -> None:
         subprocess.run(["wl-copy"], input=text, text=True)
         notify(f"Texte copié dans le presse-papiers ({engine})")
     else:
-        notify(f"Aucun texte détecté (image conservée : {saved_img})", urgency="critical")
+        notify("Aucun texte détecté", urgency="critical")
 
 
 if __name__ == "__main__":
