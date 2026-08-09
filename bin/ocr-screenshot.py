@@ -38,6 +38,9 @@ temp_img = Path(f"/tmp/ocr-screenshot-{os.getpid()}.png")
 if subprocess.run(["grim", "-g", selection_geom, str(temp_img)]).returncode != 0:
     sys.exit(1)
 
+subprocess.Popen(["pw-play", str(Path(__file__).resolve().parent / "camera-shutter.oga")])
+notify("Analyse en cours…")
+
 tess = subprocess.run(
     ["tesseract", str(temp_img), "-", "-l", "fra+eng+spa"],
     capture_output=True,
@@ -79,7 +82,6 @@ with open(LOG_FILE, "a") as f:
 
 if text:
     subprocess.run(["wl-copy"], input=text, text=True)
-    subprocess.Popen(["pw-play", str(Path(__file__).resolve().parent / "camera-shutter.oga")])
     notify(f"Texte copié dans le presse-papiers ({engine})")
 else:
     notify(f"Aucun texte détecté (image conservée : {saved_img})", urgency="critical")
