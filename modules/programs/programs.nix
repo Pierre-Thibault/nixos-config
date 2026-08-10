@@ -85,7 +85,9 @@ in
     kdePackages.kdenlive
     frei0r # Video effects (zoom, text, transitions)
     movit # High-quality effects (GPU)
-    rubberband # To adjust audio speed without pitch    keepass
+    libheif.out # ships share/thumbnailers/heif.thumbnailer for Nautilus grid thumbnails
+    libheif.bin # heif-thumbnailer binary referenced by the .thumbnailer above; keeps it from being GC'd
+    rubberband # To adjust audio speed without pitch
     keepassxc
     keymapp
     libreoffice
