@@ -113,6 +113,10 @@ in
     zoom-us
   ];
 
+  # Registers the HEIC/HEIF gdk-pixbuf loader so gThumb/Nemo/etc. can open
+  # HEIC photos (e.g. straight from an iPhone).
+  programs.gdk-pixbuf.modulePackages = [ pkgs.libheif.lib ];
+
   programs.obs-studio = {
     enable = true;
     plugins = with pkgs.obs-studio-plugins; [
