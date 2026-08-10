@@ -73,6 +73,7 @@ in
     ghostty
     gimp
     gitg
+    glycin-loaders # HEIF/AVIF/JXL support for Nautilus & Loupe (GTK4 image loading)
     gnome-browser-connector
     gnome-pomodoro
     gnome-screenshot
