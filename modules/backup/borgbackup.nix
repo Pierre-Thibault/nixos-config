@@ -174,6 +174,13 @@ in
       BORG_RSH = "env SSH_ASKPASS=${sshAskpass} SSH_ASKPASS_REQUIRE=force ssh -i ${
         secrets."borgbackup/borgbase-ssh-key".path
       } -o StrictHostKeyChecking=accept-new";
+      # Offline bare git mirrors + a plain copy of the disaster-recovery
+      # runbook, kept on Disque2 itself so they're readable from any live
+      # OS without borg/sops tooling -- see backup-home's header comment.
+      # /mnt/disque2/GitMirrors was pre-created with an ACL grant for the
+      # borgbackup user (same pattern as BorgBackup/ above; /mnt/disque2
+      # itself doesn't grant borgbackup write access).
+      GIT_MIRROR_DIR = "/mnt/disque2/GitMirrors";
     };
   };
 }
