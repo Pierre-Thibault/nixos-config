@@ -41,7 +41,15 @@ let
       # actually keep around.
       run_start=$(date '+%Y-%m-%d %H:%M:%S')
       rc=0
-      systemctl start --wait borgbackup.service || rc=$?
+      # Block sleep for the duration of the backup. Without this, an idle
+      # timer unrelated to this script (hypridle) can suspend the machine
+      # mid-run -- happened on 2026-08-10, killing the SSH connection to
+      # the off-site BorgBase repo partway through the upload. The
+      # inhibitor must NOT cover the intentional suspend at the end of this
+      # script (below) -- it would block its own suspend call, since the
+      # lock is global regardless of who requests the sleep.
+      systemd-inhibit --what=sleep --why="borgbackup-nightly run in progress" --mode=block \
+        systemctl start --wait borgbackup.service || rc=$?
 
       if [ "$rc" -eq 0 ]; then
         subject="[borgbackup] Succès - $(date +%Y-%m-%d)"
