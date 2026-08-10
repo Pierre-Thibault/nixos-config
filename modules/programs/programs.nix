@@ -58,14 +58,22 @@ let
 
 in
 {
-  # Sushi (Nautilus spacebar preview) bakes its GDK_PIXBUF_MODULE_FILE via
-  # wrapGAppsHook3 from its own buildInputs at build time, ignoring the
-  # session-wide cache from programs.gdk-pixbuf.modulePackages below. Add
-  # libheif to its buildInputs so its HEIC loader gets baked in too.
+  # Sushi (Nautilus spacebar preview) bakes GDK_PIXBUF_MODULE_FILE at build
+  # time via wrapGAppsHook3's findGdkPixbufLoaders hook, which only compares
+  # loaders.cache files that dependencies ship pre-built (only librsvg does;
+  # libheif ships just the raw .so, so adding it to buildInputs alone does
+  # nothing). Force the right merged cache after wrapGAppsHook3 has run.
   nixpkgs.overlays = [
     (_final: prev: {
       sushi = prev.sushi.overrideAttrs (old: {
-        buildInputs = old.buildInputs ++ [ prev.libheif.lib ];
+        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
+        postFixup = (old.postFixup or "") + ''
+          for f in $out/bin/sushi $out/libexec/org.gnome.NautilusPreviewer; do
+            wrapProgram "$f" --set GDK_PIXBUF_MODULE_FILE "${
+              prev.gnome._gdkPixbufCacheBuilder_DO_NOT_USE { extraLoaders = [ prev.libheif.lib ]; }
+            }"
+          done
+        '';
       });
     })
   ];
