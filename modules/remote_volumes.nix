@@ -2,6 +2,7 @@
 
 let
   icloudDir = "/home/${userdata.username}/icloud";
+  icloudPhotosDir = "/home/${userdata.username}/icloud-photos";
   protonDir = "/home/${userdata.username}/proton";
 in
 {
@@ -9,6 +10,7 @@ in
 
   systemd.tmpfiles.rules = [
     "d ${icloudDir} 0755 ${userdata.username} users - -"
+    "d ${icloudPhotosDir} 0755 ${userdata.username} users - -"
     "d ${protonDir} 0755 ${userdata.username} users - -"
   ];
 
@@ -21,6 +23,20 @@ in
     serviceConfig = {
       Type = "simple";
       ExecStart = "${pkgs.rclone}/bin/rclone mount icloud: ${icloudDir} --vfs-cache-mode writes";
+      Restart = "on-failure";
+      RestartSec = 10;
+    };
+  };
+
+  systemd.user.services.rclone-icloud-photos = {
+    description = "iCloud Photos (rclone)";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    path = [ "/run/wrappers" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.rclone}/bin/rclone mount icloud: ${icloudPhotosDir} --iclouddrive-service photos --read-only --vfs-cache-mode minimal";
       Restart = "on-failure";
       RestartSec = 10;
     };
