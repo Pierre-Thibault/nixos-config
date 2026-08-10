@@ -58,6 +58,18 @@ let
 
 in
 {
+  # Sushi (Nautilus spacebar preview) bakes its GDK_PIXBUF_MODULE_FILE via
+  # wrapGAppsHook3 from its own buildInputs at build time, ignoring the
+  # session-wide cache from programs.gdk-pixbuf.modulePackages below. Add
+  # libheif to its buildInputs so its HEIC loader gets baked in too.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      sushi = prev.sushi.overrideAttrs (old: {
+        buildInputs = old.buildInputs ++ [ prev.libheif.lib ];
+      });
+    })
+  ];
+
   users.users.${userdata.username}.packages = with pkgs; [
     anki
     audacity
