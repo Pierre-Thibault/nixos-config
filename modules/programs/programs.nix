@@ -59,21 +59,30 @@ let
 in
 {
   # Sushi (Nautilus spacebar preview) bakes GDK_PIXBUF_MODULE_FILE at build
-  # time via wrapGAppsHook3's findGdkPixbufLoaders hook, which only compares
-  # loaders.cache files that dependencies ship pre-built (only librsvg does;
-  # libheif ships just the raw .so, so adding it to buildInputs alone does
-  # nothing). Force the right merged cache after wrapGAppsHook3 has run.
+  # time via wrapGAppsHook3's findGdkPixbufLoaders hook, which picks the
+  # longest pre-built loaders.cache among buildInputs (only librsvg ships
+  # one; libheif ships just the raw .so, so it's never considered). A
+  # separate wrapProgram pass doesn't work either: it wraps *around* the
+  # hook's own wrapper, which runs afterwards and re-sets the variable to
+  # its own librsvg-only value, clobbering ours. Instead, ship our own
+  # merged cache (librsvg + libheif) in the shape findGdkPixbufLoaders
+  # expects, so its own "longest cache wins" logic picks it up directly.
   nixpkgs.overlays = [
     (_final: prev: {
       sushi = prev.sushi.overrideAttrs (old: {
-        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
-        postFixup = (old.postFixup or "") + ''
-          for f in $out/bin/sushi $out/libexec/org.gnome.NautilusPreviewer; do
-            wrapProgram "$f" --set GDK_PIXBUF_MODULE_FILE "${
-              prev.gnome._gdkPixbufCacheBuilder_DO_NOT_USE { extraLoaders = [ prev.libheif.lib ]; }
-            }"
-          done
-        '';
+        buildInputs = old.buildInputs ++ [
+          (prev.runCommand "gdk-pixbuf-heif-cache" { } ''
+            mkdir -p $out/lib/gdk-pixbuf-2.0/2.10.0
+            cp ${
+              prev.gnome._gdkPixbufCacheBuilder_DO_NOT_USE {
+                extraLoaders = [
+                  prev.librsvg
+                  prev.libheif.lib
+                ];
+              }
+            } $out/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+          '')
+        ];
       });
     })
   ];
