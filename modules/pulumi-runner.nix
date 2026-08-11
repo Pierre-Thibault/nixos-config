@@ -69,7 +69,15 @@ in
     shell = "${pkgs.shadow}/bin/nologin";
   };
 
-  environment.systemPackages = [ pulumiWrapped ];
+  environment.systemPackages = [
+    pulumiWrapped
+    # pulumi-runner's sudo rule sets secure_path to /run/current-system/sw/bin
+    # only (see below), so `pulumi install`/`pulumi new` on a project with
+    # `toolchain: uv` or `toolchain: poetry` in Pulumi.yaml needs these tools
+    # available there too, not just in some project's own devShell.
+    pkgs.uv
+    pkgs.poetry
+  ];
 
   # env_keep is a global sudo Default (sudoers has no clean per-rule scoping
   # for it), so this is system-wide, not confined to the pulumi-runner rule
