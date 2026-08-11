@@ -16,11 +16,17 @@ let
   upstreamBlock =
     _name: upstream:
     let
-      envRef = "{env." + upstream.keyEnvVar + "}";
       scheme = if upstream.useTls then "https" else "http";
       # Caddy cannot multiplex HTTP and HTTPS on the same listening port, so
       # TLS upstreams get their own dedicated port.
       upstreamPort = if upstream.useTls then httpsPort else port;
+      # Most upstreams authenticate with one static header (a bearer token,
+      # say) that Caddy can inject by itself. Some (OVH) need a signature
+      # computed per request instead -- those set preProxyDirectives (e.g.
+      # `ovh_sign { ... }`, see modules/ovh-proxy) and leave keyEnvVar null.
+      headerUpLine = lib.optionalString (upstream.keyEnvVar != null) ''
+        header_up ${upstream.keyHeader} "${upstream.keyScheme}{env.${upstream.keyEnvVar}}"
+      '';
     in
     ''
       ${scheme}://${upstream.hostname}:${upstreamPort} {
@@ -29,8 +35,15 @@ let
         log {
           output stdout
         }
-        reverse_proxy ${upstream.target} {
-          header_up ${upstream.keyHeader} "${upstream.keyScheme}${envRef}"
+        # route wraps everything below so custom directives like ovh_sign
+        # (which Caddy has no implicit ordering for) run in the order
+        # written, right before reverse_proxy -- without it Caddy refuses
+        # to adapt the Caddyfile at all for any non-standard directive.
+        route {
+          ${upstream.preProxyDirectives}
+          reverse_proxy ${upstream.target} {
+            ${headerUpLine}
+          }
         }
       }
     '';
@@ -60,13 +73,19 @@ let
         description = "Prefix before the API key value (e.g. \"Bearer \" or \"\").";
       };
       keyEnvVar = mkOption {
-        type = types.str;
-        description = "Name of the environment variable holding the real API key.";
+        type = types.nullOr types.str;
+        default = null;
+        description = "Name of the environment variable holding the real API key, injected via a static header_up. Leave null when preProxyDirectives handles auth instead (e.g. ovh_sign, whose signature can't be a single static header).";
       };
       useTls = mkOption {
         type = types.bool;
         default = false;
         description = "Serve this upstream over HTTPS using Caddy's internal CA instead of plain HTTP. Needed for clients that require an https:// scheme (e.g. `pulumi login`).";
+      };
+      preProxyDirectives = mkOption {
+        type = types.lines;
+        default = "";
+        description = "Raw Caddyfile directives inserted before reverse_proxy, for upstreams whose auth can't be expressed as a single static header_up (e.g. `ovh_sign { ... }` for OVH's per-request signature). Requires a Caddy package with the matching module -- see the `package` option.";
       };
     };
   };
@@ -91,6 +110,12 @@ in
       type = types.port;
       default = 4141;
       description = "Local port shared by all HTTPS (useTls) upstream proxies, differentiated by hostname. Separate from `port` because Caddy cannot multiplex HTTP and HTTPS on the same listening port.";
+    };
+
+    package = mkOption {
+      type = types.package;
+      default = pkgs.caddy;
+      description = "Caddy package to run. Override to a custom build (see modules/ovh-proxy/custom-caddy.nix) if any upstream's preProxyDirectives needs a module beyond stock Caddy.";
     };
 
     environmentFile = mkOption {
@@ -139,6 +164,7 @@ in
     services.caddy = {
       enable = true;
       configFile = caddyfile;
+      package = cfg.package;
     };
 
     systemd = {

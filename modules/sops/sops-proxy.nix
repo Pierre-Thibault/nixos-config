@@ -4,6 +4,9 @@
 #   - secrets: one entry per key used in api-proxy.env
 #   - templates."api-proxy.env": list only the keys your proxy uses
 { config, self, lib, userdata, ... }:
+let
+  ovhSopsFile = self + "/sops/ovh.yaml";
+in
 {
   sops = {
     defaultSopsFile = self + "/sops/api-proxy.yaml";
@@ -25,6 +28,21 @@
       HF_TOKEN = { };
       OPEN_ROUTER = { };
       DIGITALOCEAN_TOKEN = { sopsFile = self + "/sops/digital-ocean.yaml"; };
+      # The Nix-side name (env var this ends up as) is uppercase to match
+      # the other secrets here, but the actual key in sops/ovh.yaml is
+      # lowercase (ovh_application_key etc.) -- key remaps to it.
+      OVH_APPLICATION_KEY = {
+        sopsFile = ovhSopsFile;
+        key = "ovh_application_key";
+      };
+      OVH_APPLICATION_SECRET = {
+        sopsFile = ovhSopsFile;
+        key = "ovh_application_secret";
+      };
+      OVH_CONSUMER_KEY = {
+        sopsFile = ovhSopsFile;
+        key = "ovh_consumer_key";
+      };
     };
 
     templates = lib.optionalAttrs userdata.enableSops {
@@ -37,6 +55,9 @@
           HF_TOKEN=${config.sops.placeholder.HF_TOKEN}
           OPEN_ROUTER=${config.sops.placeholder.OPEN_ROUTER}
           DIGITALOCEAN_TOKEN=${config.sops.placeholder.DIGITALOCEAN_TOKEN}
+          OVH_APPLICATION_KEY=${config.sops.placeholder.OVH_APPLICATION_KEY}
+          OVH_APPLICATION_SECRET=${config.sops.placeholder.OVH_APPLICATION_SECRET}
+          OVH_CONSUMER_KEY=${config.sops.placeholder.OVH_CONSUMER_KEY}
         '';
         # The "caddy" group only exists while userdata.enableCaddyProxy
         # creates the caddy service; matching it here to that same flag
