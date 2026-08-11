@@ -152,6 +152,7 @@ in
     path = [
       pkgs.borgbackup
       pkgs.openssh
+      pkgs.git
     ];
     serviceConfig = {
       Type = "oneshot";
