@@ -19,6 +19,7 @@
 let
   inherit (userdata) username;
   secrets = config.sops.secrets;
+  gitMirrorDir = "/mnt/disque2/GitMirrors";
   sshAskpass = pkgs.writeShellScript "borgbackup-ssh-askpass" ''
     exec cat ${secrets."borgbackup/borgbase-ssh-key-passphrase".path}
   '';
@@ -181,7 +182,17 @@ in
       # /mnt/disque2/GitMirrors was pre-created with an ACL grant for the
       # borgbackup user (same pattern as BorgBackup/ above; /mnt/disque2
       # itself doesn't grant borgbackup write access).
-      GIT_MIRROR_DIR = "/mnt/disque2/GitMirrors";
+      GIT_MIRROR_DIR = gitMirrorDir;
+      # The existing mirrors under GIT_MIRROR_DIR are owned by pierre (an
+      # earlier manual test run), but git here runs as borgbackup -- git's
+      # safe.directory ownership check (CVE-2022-24765) refuses to operate
+      # on a repo owned by a different user regardless of ACLs/permission
+      # bits. Whitelisting the whole tree via env vars (no dotfile needed
+      # for this system user) covers both these pre-existing mirrors and
+      # any future ones borgbackup itself creates and owns.
+      GIT_CONFIG_COUNT = "1";
+      GIT_CONFIG_KEY_0 = "safe.directory";
+      GIT_CONFIG_VALUE_0 = "${gitMirrorDir}/*";
     };
   };
 }
