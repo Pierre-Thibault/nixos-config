@@ -40,7 +40,6 @@ let
       # starting is simpler and doesn't depend on state systemd doesn't
       # actually keep around.
       run_start=$(date '+%Y-%m-%d %H:%M:%S')
-      rc=0
       # Block sleep for the duration of the backup. Without this, an idle
       # timer unrelated to this script (hypridle) can suspend the machine
       # mid-run -- happened on 2026-08-10, killing the SSH connection to
@@ -48,8 +47,40 @@ let
       # inhibitor must NOT cover the intentional suspend at the end of this
       # script (below) -- it would block its own suspend call, since the
       # lock is global regardless of who requests the sleep.
-      systemd-inhibit --what=sleep --why="borgbackup-nightly run in progress" --mode=block \
-        systemctl start --wait borgbackup.service || rc=$?
+      #
+      # Acquiring the inhibitor races logind's own wake-from-suspend
+      # handling: WakeSystem=true wakes the machine via RTC at the same
+      # moment this timer fires, and if logind hasn't finished finalizing
+      # that resume yet, it refuses a new sleep inhibitor outright
+      # ("Failed to inhibit: The operation inhibition has been requested
+      # for is already running") -- happened on 2026-08-11, and since
+      # systemd-inhibit never even starts the wrapped command when it
+      # can't get the lock, the backup silently never ran at all. Retry
+      # only that specific race, not a real backup failure -- an actual
+      # borg error should fail immediately, not run the backup up to ten
+      # times.
+      rc=1
+      started=0
+      attempt=1
+      max_attempts=10
+      while [ "$attempt" -le "$max_attempts" ]; do
+        output=$(systemd-inhibit --what=sleep --why="borgbackup-nightly run in progress" --mode=block \
+          systemctl start --wait borgbackup.service 2>&1) && cmd_rc=0 || cmd_rc=$?
+        if printf '%s' "$output" | grep -q "Failed to inhibit"; then
+          echo "Attempt $attempt/$max_attempts: could not acquire sleep inhibitor (system likely still finishing a resume); retrying..." >&2
+          printf '%s\n' "$output" >&2
+          sleep 2
+          attempt=$((attempt + 1))
+          continue
+        fi
+        printf '%s\n' "$output" >&2
+        rc=$cmd_rc
+        started=1
+        break
+      done
+      if [ "$started" -eq 0 ]; then
+        echo "Error: could not acquire sleep inhibitor after $max_attempts attempts; backup not run." >&2
+      fi
 
       if [ "$rc" -eq 0 ]; then
         subject="[borgbackup] Succès - $(date +%Y-%m-%d)"
