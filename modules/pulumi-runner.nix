@@ -57,6 +57,24 @@ let
         --prefix LD_LIBRARY_PATH : ${pkgs.stdenv.cc.cc.lib}/lib
     '';
   };
+
+  # Run by the ~/Projets/pulumi/bin/pulumi wrapper after every invocation
+  # (as pulumi-runner, via its own sudo rule below) so pierre keeps write
+  # access to files pulumi-runner just created/rewrote without waiting for
+  # a nixos-rebuild to reapply pulumiRunnerAcls below. pulumi-runner can
+  # setfacl these because it owns them -- no root needed. Reciprocal (both
+  # users get rwX) to match pulumiRunnerAcls' own default ACLs, even though
+  # only the pulumi-runner -> pierre direction is triggered automatically
+  # (the reverse would need pierre, as owner, to run an equivalent fix
+  # himself -- rare in practice since he mostly edits existing files rather
+  # than creating new ones in this tree).
+  fixAcls = pkgs.writeShellApplication {
+    name = "pulumi-runner-fix-acls";
+    runtimeInputs = [ pkgs.acl ];
+    text = ''
+      setfacl -R -m u:${cfg.username}:rwX,u:${userdata.username}:rwX ${cfg.projectsDirectory}
+    '';
+  };
 in
 {
   users.groups.${cfg.username} = { };
@@ -71,6 +89,7 @@ in
 
   environment.systemPackages = [
     pulumiWrapped
+    fixAcls
     # pulumi-runner's sudo rule sets secure_path to /run/current-system/sw/bin
     # only (see below), so `pulumi install`/`pulumi new` on a project with
     # `toolchain: uv` or `toolchain: poetry` in Pulumi.yaml needs these tools
@@ -110,6 +129,12 @@ in
             "NOPASSWD"
             "SETENV"
           ];
+        }
+        {
+          # Same stable-path reasoning as the pulumi rule above. No
+          # arguments needed -- the script takes none.
+          command = "/run/current-system/sw/bin/pulumi-runner-fix-acls";
+          options = [ "NOPASSWD" ];
         }
       ];
     }
