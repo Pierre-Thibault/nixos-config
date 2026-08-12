@@ -389,14 +389,37 @@ identifiants.
 ## Phase 6 — Restauration et finalisation
 
 1. Lancer la restauration, dans le même terminal niri qu'à la phase 4
-   (services d'indexation déjà masqués) :
+   (services d'indexation déjà masqués), **avec `sudo`** :
    ```sh
-   ~/nixos-config/bin/restore-home
+   sudo ~/nixos-config/bin/restore-home
    ```
    Restaure depuis Disque2 uniquement (la source BorgBase n'est plus
    accessible depuis la session de pierre — voir l'utilisateur système
    `borgbackup`). Voir l'en-tête du script pour le choix de l'archive ;
    la passphrase est demandée au clavier (`borg-ask-passphrase`).
+
+   `sudo` est nécessaire à cause d'`open-webui` (voir
+   `modules/backup/borgbackup.nix`) : son état vit sous
+   `/var/lib/private/open-webui`, en dehors du home, inclus dans chaque
+   archive borg mais **root:root, mode 0700, sans aucune ACL pour
+   pierre** (seul `borgbackup` a une ACL de traversée en lecture, pour la
+   sauvegarde — pas pour la restauration). Sans `sudo`, `borg extract`
+   tourne comme pierre : la portion `/home/pierre` se restaure
+   normalement, mais la portion `open-webui` échoue silencieusement en
+   permission refusée (borg continue et rapporte, sans arrêter le
+   script) — ces données ne reviennent tout simplement pas.
+
+   En root, `sudo` corrige aussi un second point, pas juste la
+   permission d'écriture : borg restaure alors l'UID/GID numérique
+   d'origine stocké dans l'archive plutôt que tout attribuer à pierre
+   (impossible sans privilège). Pour `open-webui`, utilisateur
+   `DynamicUser` de systemd, c'est justement ce qu'il faut — au
+   prochain démarrage du service, systemd réutilise l'UID déjà présent
+   sur le `StateDirectory` restauré plutôt que d'en allouer un nouveau,
+   donc pas de configuration supplémentaire à faire ici. `$HOME` reste
+   `/home/pierre` sous `sudo` (`security.sudo` de ce dépôt ne force ni
+   `set_home` ni `always_set_home`), donc `BORG_PASSCOMMAND` continue de
+   pointer au bon endroit sans changement.
 2. **Remplacer `~/.ssh` et `~/.gnupg` par la copie de la clé USB**, en
    écrasant ce que l'étape précédente a pu restaurer (voir
    « `.ssh`/`.gnupg` : pas de copie hors site automatique » en
