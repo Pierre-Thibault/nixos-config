@@ -97,6 +97,8 @@ fi
 if [ -n "${BORG_MIRROR:-}" ]; then
     rclone sync --progress --transfers 2 --timeout 1m --retries 10 \
         "$BORG_REPO" "$BORG_MIRROR"
+else
+    echo "BORG_MIRROR is not set; skipping rclone mirror." >&2
 fi
 
 if [ -n "${GIT_MIRROR_DIR:-}" ]; then
@@ -108,6 +110,10 @@ if [ -n "${GIT_MIRROR_DIR:-}" ]; then
         else
             git clone --mirror "https://github.com/Pierre-Thibault/$repo.git" "$mirror"
         fi
+        # git stays silent when a fetch finds nothing new -- log a line
+        # regardless so the journal/email shows this step ran even when
+        # the mirror was already up to date, not just when it changed.
+        echo "Git mirror synced: $repo" >&2
     done
 
     # Plain, directly readable copy at the disk's root: usable from any
@@ -115,6 +121,9 @@ if [ -n "${GIT_MIRROR_DIR:-}" ]; then
     runbook="$HOME/nixos-config/doc/disaster-recovery.md"
     if [ -f "$runbook" ]; then
         cp "$runbook" "$(dirname "$GIT_MIRROR_DIR")/disaster-recovery.md"
+        echo "Disaster-recovery runbook copied to $(dirname "$GIT_MIRROR_DIR")." >&2
+    else
+        echo "Warning: $runbook not found; runbook copy skipped." >&2
     fi
 else
     echo "GIT_MIRROR_DIR is not set; skipping offline git mirrors." >&2
