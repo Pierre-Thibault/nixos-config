@@ -32,6 +32,16 @@ in
 
   git_mirror_dir = "/run/media/${username}/Disque2/GitMirrors";
 
+  # Placeholders so ovhcloud-cli/pulumi_ovh see all 4 expected env vars and
+  # skip straight to requests instead of prompting for `login` -- the real
+  # values live only in the ovh-proxy Caddy service's own environment
+  # (modules/ovh-proxy.nix), which overwrites these before forwarding to
+  # OVH's real API. Never real credentials, same idea as
+  # digitalocean:token = "proxy" for DO.
+  ovh_application_key = "dummy";
+  ovh_application_secret = "dummy";
+  ovh_consumer_key = "dummy";
+
   path = [
     "$HOME/nixos-config/bin"
     "$HOME/.local/share/go/bin"
