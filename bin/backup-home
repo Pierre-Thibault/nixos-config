@@ -30,6 +30,16 @@ archive="fd822b-$(date +%Y-%m-%d_%H-%M)"
 # in modules/backup/borgbackup.nix for why borgbackup can even read this).
 open_webui_data=$(readlink -f /var/lib/open-webui 2>/dev/null || true)
 
+# GDM/AccountsService login-screen avatar for pierre -- lives outside
+# /home too (see matching ACL grant in modules/backup/borgbackup.nix).
+# Both paths are only included if readable, so a run without the ACL
+# grant (e.g. a manual backup-home by pierre, who has no special access
+# to either) just quietly skips them instead of failing.
+accounts_service_paths=""
+for p in /var/lib/AccountsService/users/pierre /var/lib/AccountsService/icons/pierre; do
+    [ -r "$p" ] && accounts_service_paths="$accounts_service_paths $p"
+done
+
 # Subshell body: the BORG_* overrides stay local to each call.
 # BORG_EXCLUDE_CREDENTIALS: set (by the borgbackup service only -- see
 # modules/backup/borgbackup.nix) to also skip ~/.ssh and ~/.gnupg. The
@@ -70,7 +80,7 @@ backup_to() (
             --exclude 'pp:/home/pierre/.gnupg'
     fi
     # shellcheck disable=SC2086 # deliberately unquoted: empty -> zero args
-    borg create "$@" "::$archive" /home/pierre ${open_webui_data:+"$open_webui_data"}
+    borg create "$@" "::$archive" /home/pierre ${open_webui_data:+"$open_webui_data"} $accounts_service_paths
 )
 
 # borg exits 1 for mere warnings (e.g. unreadable files); only >1 is fatal

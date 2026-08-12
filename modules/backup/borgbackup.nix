@@ -88,6 +88,17 @@ let
         -exec setfacl -m u:borgbackup:rX {} + || true
       find "$open_webui_data" -xdev -type d \
         -exec setfacl -d -m u:borgbackup:rX {} + || true
+
+      # GDM/AccountsService login-screen avatar for pierre: an actual
+      # cached icon image at /var/lib/AccountsService/icons/pierre
+      # (already 0644 -- no ACL needed there), plus the small config
+      # file that points GDM at it, /var/lib/AccountsService/users/pierre.
+      # That file alone is unreachable by default -- its parent
+      # directory is 0700 root:root, unlike icons/ (0775). Without it
+      # the icon image is orphaned on restore and GDM falls back to the
+      # generic silhouette, as happened once on this machine already.
+      setfacl -m u:borgbackup:x /var/lib/AccountsService/users
+      setfacl -m u:borgbackup:r /var/lib/AccountsService/users/pierre
     '';
   };
 in

@@ -409,6 +409,17 @@ identifiants.
    permission refusée (borg continue et rapporte, sans arrêter le
    script) — ces données ne reviennent tout simplement pas.
 
+   Même situation pour l'icône de compte GDM/AccountsService de pierre
+   (l'avatar affiché à l'écran de connexion) : le fichier de config qui
+   pointe GDM vers l'image, `/var/lib/AccountsService/users/pierre`, est
+   dans un dossier `0700 root:root` — sans `sudo`, ce fichier ne se
+   restaure pas et GDM retombe sur la silhouette générique par défaut
+   (déjà arrivé une fois sur cette machine, sans lien avec une
+   restauration). L'image elle-même
+   (`/var/lib/AccountsService/icons/pierre`) est déjà lisible par tous
+   et reviendrait de toute façon même sans `sudo`, mais orpheline, sans
+   ce fichier de config pour la référencer.
+
    En root, `sudo` corrige aussi un second point, pas juste la
    permission d'écriture : borg restaure alors l'UID/GID numérique
    d'origine stocké dans l'archive plutôt que tout attribuer à pierre
