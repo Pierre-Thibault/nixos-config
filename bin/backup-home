@@ -128,7 +128,10 @@ if [ -n "${GIT_MIRROR_DIR:-}" ]; then
 
     # Plain, directly readable copy at the disk's root: usable from any
     # live OS, no git/borg/keyring needed to read it.
-    runbook="$HOME/nixos-config/doc/disaster-recovery.md"
+    # RUNBOOK_SRC lets the systemd service (running as borgbackup, whose
+    # $HOME is /var/lib/borgbackup, not pierre's checkout) point at the
+    # right file explicitly; pierre's own manual runs fall back to $HOME.
+    runbook="${RUNBOOK_SRC:-$HOME/nixos-config/doc/disaster-recovery.md}"
     if [ -f "$runbook" ]; then
         cp "$runbook" "$(dirname "$GIT_MIRROR_DIR")/disaster-recovery.md"
         echo "Disaster-recovery runbook copied to $(dirname "$GIT_MIRROR_DIR")." >&2

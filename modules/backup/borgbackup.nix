@@ -194,6 +194,12 @@ in
       # borgbackup user (same pattern as BorgBackup/ above; /mnt/disque2
       # itself doesn't grant borgbackup write access).
       GIT_MIRROR_DIR = gitMirrorDir;
+      # backup-home defaults to $HOME/nixos-config/... for the runbook copy,
+      # which is right for pierre's own manual runs but wrong here: this
+      # service's $HOME is /var/lib/borgbackup (see users.users.borgbackup
+      # above), not pierre's checkout -- caused a silent "not found, skipped"
+      # every automated run. Point it at the real file explicitly instead.
+      RUNBOOK_SRC = "/home/${username}/nixos-config/doc/disaster-recovery.md";
       # The existing mirrors under GIT_MIRROR_DIR are owned by pierre (an
       # earlier manual test run), but git here runs as borgbackup -- git's
       # safe.directory ownership check (CVE-2022-24765) refuses to operate
