@@ -59,27 +59,43 @@ let
       # only that specific race, not a real backup failure -- an actual
       # borg error should fail immediately, not run the backup up to ten
       # times.
+      # Also collected into run_log (not just stderr): stderr here lands in
+      # THIS script's own journal (borgbackup-nightly.service), but the
+      # email body below pulls from borgbackup.service's journal instead --
+      # a run that never gets past this loop (inhibitor exhausted) would
+      # otherwise mail out a subject saying ÉCHEC with a blank body, since
+      # borgbackup.service never started and has nothing logged.
       rc=1
       started=0
       attempt=1
       max_attempts=10
+      run_log=""
       while [ "$attempt" -le "$max_attempts" ]; do
         output=$(systemd-inhibit --what=sleep --why="borgbackup-nightly run in progress" --mode=block \
           systemctl start --wait borgbackup.service 2>&1) && cmd_rc=0 || cmd_rc=$?
         if printf '%s' "$output" | grep -q "Failed to inhibit"; then
-          echo "Attempt $attempt/$max_attempts: could not acquire sleep inhibitor (system likely still finishing a resume); retrying..." >&2
+          msg="Attempt $attempt/$max_attempts: could not acquire sleep inhibitor (system likely still finishing a resume); retrying..."
+          echo "$msg" >&2
           printf '%s\n' "$output" >&2
+          run_log="$run_log$msg
+$output
+"
           sleep 2
           attempt=$((attempt + 1))
           continue
         fi
         printf '%s\n' "$output" >&2
+        run_log="$run_log$output
+"
         rc=$cmd_rc
         started=1
         break
       done
       if [ "$started" -eq 0 ]; then
-        echo "Error: could not acquire sleep inhibitor after $max_attempts attempts; backup not run." >&2
+        msg="Error: could not acquire sleep inhibitor after $max_attempts attempts; backup not run."
+        echo "$msg" >&2
+        run_log="$run_log$msg
+"
       fi
 
       if [ "$rc" -eq 0 ]; then
@@ -93,6 +109,11 @@ let
         echo "From: $smtp_user"
         echo "To: $notify_email"
         echo
+        if [ -n "$run_log" ]; then
+          echo "=== borgbackup-nightly (sleep inhibitor, retries) ==="
+          printf '%s\n' "$run_log"
+        fi
+        echo "=== borgbackup.service journal ==="
         journalctl -u borgbackup.service --since "$run_start" --no-pager
       } | msmtp \
             --host=${userdata.smtpHost} --port=${toString userdata.smtpPort} \
