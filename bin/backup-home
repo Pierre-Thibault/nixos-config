@@ -112,8 +112,13 @@ else
 fi
 
 if [ -n "${BORG_MIRROR:-}" ]; then
-    rclone sync --progress --transfers 2 --timeout 1m --retries 10 \
-        "$BORG_REPO" "$BORG_MIRROR"
+    # Not fatal to the rest of the script -- same reasoning as check_rc
+    # above: an rclone hiccup shouldn't skip the independent git-mirror step
+    # that follows.
+    if ! rclone sync --progress --transfers 2 --timeout 1m --retries 10 \
+        "$BORG_REPO" "$BORG_MIRROR"; then
+        echo "Warning: rclone mirror sync failed." >&2
+    fi
 else
     echo "BORG_MIRROR is not set; skipping rclone mirror." >&2
 fi
@@ -122,10 +127,20 @@ if [ -n "${GIT_MIRROR_DIR:-}" ]; then
     mkdir -p "$GIT_MIRROR_DIR"
     for repo in nixos-config bin dotfiles; do
         mirror="$GIT_MIRROR_DIR/$repo.git"
+        # A failure on one repo (e.g. a transient GitHub outage) must not
+        # abort the loop under set -e -- that would skip the remaining
+        # repos AND the runbook copy below, same failure mode check_rc
+        # above was just fixed for.
         if [ -d "$mirror" ]; then
-            git -C "$mirror" remote update --prune
+            if ! git -C "$mirror" remote update --prune; then
+                echo "Warning: git mirror update failed for $repo." >&2
+                continue
+            fi
         else
-            git clone --mirror "https://github.com/Pierre-Thibault/$repo.git" "$mirror"
+            if ! git clone --mirror "https://github.com/Pierre-Thibault/$repo.git" "$mirror"; then
+                echo "Warning: git mirror clone failed for $repo." >&2
+                continue
+            fi
         fi
         # git stays silent when a fetch finds nothing new -- log a line
         # regardless so the journal/email shows this step ran even when
