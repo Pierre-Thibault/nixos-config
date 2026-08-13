@@ -83,10 +83,17 @@ backup_to() (
     borg create "$@" "::$archive" /home/pierre ${open_webui_data:+"$open_webui_data"} $accounts_service_paths
 )
 
-# borg exits 1 for mere warnings (e.g. unreadable files); only >1 is fatal
+# borg exits 1 for mere warnings (e.g. unreadable files); only >1 is fatal.
+# Records the worst fatal code seen instead of exiting immediately -- a
+# fatal error on one destination (e.g. Disque2 full) must not skip the
+# others, since the whole point of the off-site/mirror steps is to survive
+# exactly that kind of local failure. The script exits with the recorded
+# code only at the very end, once every step has had a chance to run.
+exit_rc=0
 check_rc() {
     if [ "$1" -gt 1 ]; then
-        exit "$1"
+        echo "borg create failed fatally (code $1, see above)." >&2
+        [ "$1" -gt "$exit_rc" ] && exit_rc="$1"
     elif [ "$1" -eq 1 ]; then
         echo "borg create finished with warnings (see above)." >&2
     fi
@@ -146,3 +153,9 @@ fi
 # borg prune --glob-archives 'fd822b-*' \
 #     --keep-daily 14 --keep-weekly 4 --keep-monthly 12 --keep-yearly 10
 # borg compact
+
+# Reported only now, after every step above has run regardless of earlier
+# fatal errors -- see check_rc's comment.
+if [ "$exit_rc" -gt 0 ]; then
+    exit "$exit_rc"
+fi
