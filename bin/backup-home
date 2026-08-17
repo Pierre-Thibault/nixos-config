@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Home backup with borg, replacing Pika Backup (same repo, same exclusions).
 # BORG_REPO and BORG_PASSCOMMAND must come from the shell environment.
 # Optional: BORG_REMOTE_REPO + BORG_REMOTE_PASSCOMMAND (e.g. BorgBase) run a
@@ -6,39 +6,31 @@
 # additionally mirrors the local repo; GIT_MIRROR_DIR keeps offline bare
 # mirrors of the GitHub-hosted repos (independent of GitHub itself) plus
 # a plain copy of the disaster-recovery runbook at the disk's root.
-set -eu
+#
+# Each step below is one "operation". At the end, the run is classified as
+# OK (every attempted operation succeeded), PARTIAL (some failed, some
+# didn't) or FAIL (every attempted operation failed), and that verdict is
+# printed on stderr as "BACKUP-HOME-STATUS: <OK|PARTIAL|FAIL>" -- the
+# automated pipeline (borgbackup-nightly.nix) greps this out of the journal
+# to build the notification email's subject. Steps that are simply not
+# configured (BORG_REMOTE_REPO/BORG_MIRROR/GIT_MIRROR_DIR unset) are not
+# "attempted" and don't count either way.
+set -euo pipefail
 
-missing=0
-for var in BORG_REPO BORG_PASSCOMMAND; do
-    if [ -z "$(eval "echo \${$var:-}")" ]; then
-        echo "Error: $var is not set." >&2
+require_env() {
+    local var missing=0
+    for var in BORG_REPO BORG_PASSCOMMAND; do
+        if [ -z "${!var:-}" ]; then
+            echo "Error: $var is not set." >&2
+            missing=1
+        fi
+    done
+    if [ -n "${BORG_REMOTE_REPO:-}" ] && [ -z "${BORG_REMOTE_PASSCOMMAND:-}" ]; then
+        echo "Error: BORG_REMOTE_REPO is set but BORG_REMOTE_PASSCOMMAND is not." >&2
         missing=1
     fi
-done
-if [ -n "${BORG_REMOTE_REPO:-}" ] && [ -z "${BORG_REMOTE_PASSCOMMAND:-}" ]; then
-    echo "Error: BORG_REMOTE_REPO is set but BORG_REMOTE_PASSCOMMAND is not." >&2
-    missing=1
-fi
-[ "$missing" -eq 0 ] || exit 1
-
-archive="fd822b-$(date +%Y-%m-%d_%H-%M)"
-
-# open-webui's data (connections, chat history, RAG docs) lives outside
-# /home under systemd's DynamicUser convention -- resolve the compatibility
-# symlink since `borg create` archives a symlink source argument as a
-# symlink entry rather than descending into it (see the matching ACL grant
-# in modules/backup/borgbackup.nix for why borgbackup can even read this).
-open_webui_data=$(readlink -f /var/lib/open-webui 2>/dev/null || true)
-
-# GDM/AccountsService login-screen avatar for pierre -- lives outside
-# /home too (see matching ACL grant in modules/backup/borgbackup.nix).
-# Both paths are only included if readable, so a run without the ACL
-# grant (e.g. a manual backup-home by pierre, who has no special access
-# to either) just quietly skips them instead of failing.
-accounts_service_paths=""
-for p in /var/lib/AccountsService/users/pierre /var/lib/AccountsService/icons/pierre; do
-    [ -r "$p" ] && accounts_service_paths="$accounts_service_paths $p"
-done
+    [ "$missing" -eq 0 ] || exit 1
+}
 
 # Subshell body: the BORG_* overrides stay local to each call.
 # BORG_EXCLUDE_CREDENTIALS: set (by the borgbackup service only -- see
@@ -83,94 +75,155 @@ backup_to() (
     borg create "$@" "::$archive" /home/pierre ${open_webui_data:+"$open_webui_data"} $accounts_service_paths
 )
 
-# borg exits 1 for mere warnings (e.g. unreadable files); only >1 is fatal.
-# Records the worst fatal code seen instead of exiting immediately -- a
-# fatal error on one destination (e.g. Disque2 full) must not skip the
-# others, since the whole point of the off-site/mirror steps is to survive
-# exactly that kind of local failure. The script exits with the recorded
-# code only at the very end, once every step has had a chance to run.
-exit_rc=0
-check_rc() {
-    if [ "$1" -gt 1 ]; then
-        echo "borg create failed fatally (code $1, see above)." >&2
-        [ "$1" -gt "$exit_rc" ] && exit_rc="$1"
-    elif [ "$1" -eq 1 ]; then
-        echo "borg create finished with warnings (see above)." >&2
+ops_total=0
+ops_failed=0
+
+# borg exits 1 for mere warnings (e.g. unreadable files); only >1 is a real
+# failure of the operation.
+record_borg_result() {
+    local label="$1" rc="$2"
+    ops_total=$((ops_total + 1))
+    if [ "$rc" -gt 1 ]; then
+        echo "Warning: $label failed (exit $rc, see above)." >&2
+        ops_failed=$((ops_failed + 1))
+    elif [ "$rc" -eq 1 ]; then
+        echo "$label finished with warnings (see above)." >&2
     fi
 }
 
-rc=0
-backup_to "$BORG_REPO" "$BORG_PASSCOMMAND" || rc=$?
-check_rc "$rc"
-
-if [ -n "${BORG_REMOTE_REPO:-}" ]; then
-    rc=0
-    backup_to "$BORG_REMOTE_REPO" "$BORG_REMOTE_PASSCOMMAND" || rc=$?
-    check_rc "$rc"
-else
-    echo "BORG_REMOTE_REPO is not set; skipping off-site borg backup." >&2
-fi
-
-if [ -n "${BORG_MIRROR:-}" ]; then
-    # Not fatal to the rest of the script -- same reasoning as check_rc
-    # above: an rclone hiccup shouldn't skip the independent git-mirror step
-    # that follows.
-    if ! rclone sync --progress --transfers 2 --timeout 1m --retries 10 \
-        "$BORG_REPO" "$BORG_MIRROR"; then
-        echo "Warning: rclone mirror sync failed." >&2
+# Plain pass/fail, for the non-borg steps (git, cp, rclone).
+record_result() {
+    local label="$1" rc="$2"
+    ops_total=$((ops_total + 1))
+    if [ "$rc" -ne 0 ]; then
+        echo "Warning: $label failed (exit $rc)." >&2
+        ops_failed=$((ops_failed + 1))
     fi
-else
-    echo "BORG_MIRROR is not set; skipping rclone mirror." >&2
-fi
+}
 
-if [ -n "${GIT_MIRROR_DIR:-}" ]; then
+backup_local() {
+    local rc=0
+    backup_to "$BORG_REPO" "$BORG_PASSCOMMAND" || rc=$?
+    record_borg_result "local borg backup" "$rc"
+}
+
+backup_remote() {
+    if [ -z "${BORG_REMOTE_REPO:-}" ]; then
+        echo "BORG_REMOTE_REPO is not set; skipping off-site borg backup." >&2
+        return
+    fi
+    local rc=0
+    backup_to "$BORG_REMOTE_REPO" "$BORG_REMOTE_PASSCOMMAND" || rc=$?
+    record_borg_result "off-site borg backup" "$rc"
+}
+
+mirror_rclone() {
+    if [ -z "${BORG_MIRROR:-}" ]; then
+        echo "BORG_MIRROR is not set; skipping rclone mirror." >&2
+        return
+    fi
+    local rc=0
+    rclone sync --progress --transfers 2 --timeout 1m --retries 10 \
+        "$BORG_REPO" "$BORG_MIRROR" || rc=$?
+    record_result "rclone mirror" "$rc"
+}
+
+# Plain, directly readable copy at the disk's root: usable from any live OS,
+# no git/borg/keyring needed to read it. RUNBOOK_SRC lets the systemd
+# service (running as borgbackup, whose $HOME is /var/lib/borgbackup, not
+# pierre's checkout) point at the right file explicitly; pierre's own
+# manual runs fall back to $HOME.
+copy_runbook() {
+    local runbook rc=0
+    runbook="${RUNBOOK_SRC:-$HOME/nixos-config/doc/disaster-recovery.md}"
+    if [ -f "$runbook" ]; then
+        cp "$runbook" "$(dirname "$GIT_MIRROR_DIR")/disaster-recovery.md" || rc=$?
+    else
+        echo "Warning: $runbook not found." >&2
+        rc=1
+    fi
+    record_result "runbook copy" "$rc"
+    if [ "$rc" -eq 0 ]; then
+        echo "Disaster-recovery runbook copied to $(dirname "$GIT_MIRROR_DIR")." >&2
+    fi
+}
+
+sync_git_mirrors() {
+    if [ -z "${GIT_MIRROR_DIR:-}" ]; then
+        echo "GIT_MIRROR_DIR is not set; skipping offline git mirrors." >&2
+        return
+    fi
     mkdir -p "$GIT_MIRROR_DIR"
+    local repo mirror rc
     for repo in nixos-config bin dotfiles; do
         mirror="$GIT_MIRROR_DIR/$repo.git"
-        # A failure on one repo (e.g. a transient GitHub outage) must not
-        # abort the loop under set -e -- that would skip the remaining
-        # repos AND the runbook copy below, same failure mode check_rc
-        # above was just fixed for.
+        rc=0
         if [ -d "$mirror" ]; then
-            if ! git -C "$mirror" remote update --prune; then
-                echo "Warning: git mirror update failed for $repo." >&2
-                continue
-            fi
+            git -C "$mirror" remote update --prune || rc=$?
         else
-            if ! git clone --mirror "https://github.com/Pierre-Thibault/$repo.git" "$mirror"; then
-                echo "Warning: git mirror clone failed for $repo." >&2
-                continue
-            fi
+            git clone --mirror "https://github.com/Pierre-Thibault/$repo.git" "$mirror" || rc=$?
         fi
+        record_result "git mirror ($repo)" "$rc"
         # git stays silent when a fetch finds nothing new -- log a line
         # regardless so the journal/email shows this step ran even when
         # the mirror was already up to date, not just when it changed.
-        echo "Git mirror synced: $repo" >&2
+        [ "$rc" -eq 0 ] && echo "Git mirror synced: $repo" >&2
+    done
+    copy_runbook
+}
+
+main() {
+    require_env
+
+    archive="fd822b-$(date +%Y-%m-%d_%H-%M)"
+
+    # open-webui's data (connections, chat history, RAG docs) lives outside
+    # /home under systemd's DynamicUser convention -- resolve the
+    # compatibility symlink since `borg create` archives a symlink source
+    # argument as a symlink entry rather than descending into it (see the
+    # matching ACL grant in modules/backup/borgbackup.nix for why
+    # borgbackup can even read this).
+    open_webui_data=$(readlink -f /var/lib/open-webui 2>/dev/null || true)
+
+    # GDM/AccountsService login-screen avatar for pierre -- lives outside
+    # /home too (see matching ACL grant in modules/backup/borgbackup.nix).
+    # Both paths are only included if readable, so a run without the ACL
+    # grant (e.g. a manual backup-home by pierre, who has no special access
+    # to either) just quietly skips them instead of failing.
+    accounts_service_paths=""
+    local p
+    for p in /var/lib/AccountsService/users/pierre /var/lib/AccountsService/icons/pierre; do
+        [ -r "$p" ] && accounts_service_paths="$accounts_service_paths $p"
     done
 
-    # Plain, directly readable copy at the disk's root: usable from any
-    # live OS, no git/borg/keyring needed to read it.
-    # RUNBOOK_SRC lets the systemd service (running as borgbackup, whose
-    # $HOME is /var/lib/borgbackup, not pierre's checkout) point at the
-    # right file explicitly; pierre's own manual runs fall back to $HOME.
-    runbook="${RUNBOOK_SRC:-$HOME/nixos-config/doc/disaster-recovery.md}"
-    if [ -f "$runbook" ]; then
-        cp "$runbook" "$(dirname "$GIT_MIRROR_DIR")/disaster-recovery.md"
-        echo "Disaster-recovery runbook copied to $(dirname "$GIT_MIRROR_DIR")." >&2
+    backup_local
+    backup_remote
+    mirror_rclone
+    sync_git_mirrors
+
+    # Uncomment to thin out old archives (deletes data -- review before enabling):
+    # borg prune --glob-archives 'fd822b-*' \
+    #     --keep-daily 14 --keep-weekly 4 --keep-monthly 12 --keep-yearly 10
+    # borg compact
+
+    local status
+    if [ "$ops_failed" -eq 0 ]; then
+        status=OK
+        echo "Status: succès complet ($ops_total/$ops_total opérations réussies)." >&2
+    elif [ "$ops_failed" -eq "$ops_total" ]; then
+        status=FAIL
+        echo "Status: échec total ($ops_failed/$ops_total opérations échouées)." >&2
     else
-        echo "Warning: $runbook not found; runbook copy skipped." >&2
+        status=PARTIAL
+        echo "Status: succès partiel ($((ops_total - ops_failed))/$ops_total opérations réussies)." >&2
     fi
-else
-    echo "GIT_MIRROR_DIR is not set; skipping offline git mirrors." >&2
-fi
+    echo "BACKUP-HOME-STATUS: $status" >&2
 
-# Uncomment to thin out old archives (deletes data — review before enabling):
-# borg prune --glob-archives 'fd822b-*' \
-#     --keep-daily 14 --keep-weekly 4 --keep-monthly 12 --keep-yearly 10
-# borg compact
+    case "$status" in
+        OK) exit 0 ;;
+        PARTIAL) exit 1 ;;
+        FAIL) exit 2 ;;
+    esac
+}
 
-# Reported only now, after every step above has run regardless of earlier
-# fatal errors -- see check_rc's comment.
-if [ "$exit_rc" -gt 0 ]; then
-    exit "$exit_rc"
-fi
+main "$@"

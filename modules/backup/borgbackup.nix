@@ -99,6 +99,17 @@ let
       # generic silhouette, as happened once on this machine already.
       setfacl -m u:borgbackup:x /var/lib/AccountsService/users
       setfacl -m u:borgbackup:r /var/lib/AccountsService/users/pierre
+
+      # /mnt/disque2 itself (the external disk's root) is outside /home, so
+      # none of the find loops above touch it, and it's not covered by
+      # GitMirrors/'s own separate ACL grant below it (pre-created
+      # manually, same pattern as this one). backup-home's copy_runbook
+      # step writes a plain copy of the disaster-recovery runbook directly
+      # there -- grant write access on this one directory (non-recursive)
+      # so that succeeds instead of failing with "Permission denied" (as
+      # it silently did once RUNBOOK_SRC below started pointing at a real,
+      # existing file).
+      setfacl -m u:borgbackup:rwx /mnt/disque2
     '';
   };
 in
@@ -191,8 +202,9 @@ in
       # runbook, kept on Disque2 itself so they're readable from any live
       # OS without borg/sops tooling -- see backup-home's header comment.
       # /mnt/disque2/GitMirrors was pre-created with an ACL grant for the
-      # borgbackup user (same pattern as BorgBackup/ above; /mnt/disque2
-      # itself doesn't grant borgbackup write access).
+      # borgbackup user (same pattern as BorgBackup/ above); /mnt/disque2
+      # itself gets its own grant from fixHomeAcl (see above) so the
+      # runbook copy below can write there too.
       GIT_MIRROR_DIR = gitMirrorDir;
       # backup-home defaults to $HOME/nixos-config/... for the runbook copy,
       # which is right for pierre's own manual runs but wrong here: this

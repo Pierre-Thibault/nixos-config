@@ -98,11 +98,31 @@ $output
 "
       fi
 
-      if [ "$rc" -eq 0 ]; then
-        subject="[borgbackup] Succès - $(date +%Y-%m-%d)"
-      else
-        subject="[borgbackup] ÉCHEC (code $rc) - $(date +%Y-%m-%d)"
-      fi
+      # backup-home (bin/backup-home) classifies its own run as OK/PARTIAL/
+      # FAIL depending on how many of its independent steps (local backup,
+      # off-site backup, mirrors, runbook copy) actually succeeded, and
+      # prints that verdict as "BACKUP-HOME-STATUS: <verdict>" on stderr --
+      # captured here in borgbackup.service's journal. Pulling it out gives
+      # a three-way subject instead of a plain pass/fail, so e.g. one failed
+      # git mirror doesn't read the same as a fully failed backup.
+      status_line=$(journalctl -u borgbackup.service --since "$run_start" --no-pager \
+        | grep -o 'BACKUP-HOME-STATUS: [A-Z]*' | tail -n1) || true
+      case "$status_line" in
+        *OK) subject_word="Succès complet" ;;
+        *PARTIAL) subject_word="Succès partiel" ;;
+        *FAIL) subject_word="Échec total" ;;
+        *)
+          # backup-home never got far enough to print a verdict (e.g. the
+          # inhibitor retry loop above was exhausted and borgbackup.service
+          # never even started) -- fall back to the plain rc-based call.
+          if [ "$rc" -eq 0 ]; then
+            subject_word="Succès complet"
+          else
+            subject_word="Échec total"
+          fi
+          ;;
+      esac
+      subject="[borgbackup] $subject_word - $(date +%Y-%m-%d)"
 
       {
         echo "Subject: $subject"
