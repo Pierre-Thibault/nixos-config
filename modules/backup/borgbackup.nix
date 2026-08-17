@@ -19,7 +19,8 @@
 let
   inherit (userdata) username;
   secrets = config.sops.secrets;
-  gitMirrorDir = "/mnt/disque2/GitMirrors";
+  disque2Mount = "/mnt/disque2";
+  gitMirrorDir = "${disque2Mount}/${userdata.gitMirrorSubpath}";
   sshAskpass = pkgs.writeShellScript "borgbackup-ssh-askpass" ''
     exec cat ${secrets."borgbackup/borgbase-ssh-key-passphrase".path}
   '';
@@ -109,7 +110,7 @@ let
       # so that succeeds instead of failing with "Permission denied" (as
       # it silently did once RUNBOOK_SRC below started pointing at a real,
       # existing file).
-      setfacl -m u:borgbackup:rwx /mnt/disque2
+      setfacl -m u:borgbackup:rwx ${disque2Mount}
     '';
   };
 in
@@ -138,7 +139,7 @@ in
   # of relying on pierre's session-scoped udisks2 automount at
   # /run/media/pierre/Disque2) so the borgbackup service can reach it
   # headlessly, independent of any logged-in graphical session.
-  fileSystems."/mnt/disque2" = {
+  fileSystems.${disque2Mount} = {
     device = "/dev/disk/by-uuid/77dcef31-5f83-40cf-839b-d4439adf2c6c";
     fsType = "ext4";
     options = [
@@ -151,12 +152,12 @@ in
   # Nautilus like any other drive, without giving up the system-level
   # mount above that borgbackup depends on.
   fileSystems."/run/media/${username}/Disque2" = {
-    device = "/mnt/disque2";
+    device = disque2Mount;
     fsType = "none";
     options = [
       "bind"
       "nofail"
-      "x-systemd.requires-mounts-for=/mnt/disque2"
+      "x-systemd.requires-mounts-for=${disque2Mount}"
     ];
   };
 
@@ -191,7 +192,7 @@ in
       # ACL grant and this automated backup, since granting the ACL is
       # what breaks their permissions as seen by ssh/gpg.
       BORG_EXCLUDE_CREDENTIALS = "1";
-      BORG_REPO = "/mnt/disque2/BorgBackup/backup-${username}-${userdata.hostname}";
+      BORG_REPO = "${disque2Mount}/${userdata.borgRepoSubpath}";
       BORG_PASSCOMMAND = "cat ${secrets."borgbackup/local-repo-passphrase".path}";
       BORG_REMOTE_REPO = "ssh://wsw5tfhn@wsw5tfhn.repo.borgbase.com/./repo";
       BORG_REMOTE_PASSCOMMAND = "cat ${secrets."borgbackup/borgbase-repo-passphrase".path}";

@@ -1,5 +1,5 @@
 # Update with what you need
-{
+rec {
   username = "pierre";
   userfullname = "Pierre Thibault";
   hostname = "pierre-nixos";
@@ -20,4 +20,15 @@
   # repo.
   smtpHost = "smtp.protonmail.ch";
   smtpPort = 587;
+
+  # Disque2 (external backup drive) is reachable at two different mount
+  # points -- system-wide at /mnt/disque2 (modules/backup/borgbackup.nix,
+  # so the isolated borgbackup service can reach it headlessly) and at the
+  # conventional udisks2 session path (config/environment-variables.nix,
+  # for pierre's own manual borg/git-mirror commands) -- but both refer to
+  # the same physical directories underneath. Centralizing just these
+  # subpaths here means the two mount-point-specific files each supply
+  # their own prefix instead of separately hardcoding the same suffix.
+  borgRepoSubpath = "BorgBackup/backup-${username}-${hostname}";
+  gitMirrorSubpath = "GitMirrors";
 }

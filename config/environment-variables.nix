@@ -27,10 +27,10 @@ in
   # user (see modules/backup/) -- pierre's session no longer has passive
   # access to that repo's passphrase or SSH key. These variables are for
   # pierre's own local/manual borg usage against Disque2 only.
-  borg_repo = "/run/media/${username}/Disque2/BorgBackup/backup-${username}-${userdata.hostname}";
+  borg_repo = "/run/media/${username}/Disque2/${userdata.borgRepoSubpath}";
   borg_passcommand = "$HOME/bin/borg-ask-passphrase";
 
-  git_mirror_dir = "/run/media/${username}/Disque2/GitMirrors";
+  git_mirror_dir = "/run/media/${username}/Disque2/${userdata.gitMirrorSubpath}";
 
   # Placeholders so ovhcloud-cli/pulumi_ovh see all 4 expected env vars and
   # skip straight to requests instead of prompting for `login` -- the real
