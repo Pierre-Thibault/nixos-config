@@ -174,6 +174,7 @@ in
     wants = [ "network-online.target" ];
     requires = [ "mnt-disque2.mount" ];
     path = [
+      pkgs.bash
       pkgs.borgbackup
       pkgs.openssh
       pkgs.git
