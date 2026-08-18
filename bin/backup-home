@@ -137,7 +137,13 @@ copy_runbook() {
     local runbook rc=0
     runbook="${RUNBOOK_SRC:-$HOME/nixos-config/doc/disaster-recovery.md}"
     if [ -f "$runbook" ]; then
-        cp "$runbook" "$(dirname "$GIT_MIRROR_DIR")/disaster-recovery.md" || rc=$?
+        # --remove-destination: unlink+recreate instead of open+truncate, so
+        # this only needs write permission on the directory (granted to
+        # borgbackup via fixHomeAcl in modules/backup/borgbackup.nix), not on
+        # the destination file itself -- a plain `cp` failed with Permission
+        # denied against a copy pre-existing from a manual pierre run (owner
+        # pierre, mode 644, no ACL entry for borgbackup on the file).
+        cp --remove-destination "$runbook" "$(dirname "$GIT_MIRROR_DIR")/disaster-recovery.md" || rc=$?
     else
         echo "Warning: $runbook not found." >&2
         rc=1
