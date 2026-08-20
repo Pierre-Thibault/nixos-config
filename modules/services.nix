@@ -27,9 +27,14 @@
       };
     };
 
-    # Replace the default console
+    # kmscon replaced the default console (TrueType/Nerd Font rendering
+    # via DRM) but its DRM master handoff on VT switch hangs the system
+    # hard, requiring a physical reset — confirmed 2026-08-20 by
+    # reproducing the freeze with kmscon on and it going away with it
+    # off. Plain agetty doesn't touch DRM, so it's safe. Loses the nice
+    # font/icons; no fix found yet, just disabled.
     kmscon = {
-      enable = true;
+      enable = false;
       package = unstable.kmscon;
       hwRender = false;
       fonts = [
