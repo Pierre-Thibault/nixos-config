@@ -6,6 +6,17 @@
 {
   boot.blacklistedKernelModules = [ "nouveau" ];
 
+  # CUDA compute (via /dev/nvidia*) doesn't need DRM/KMS, only display
+  # output does — and none is attached to this card. Without this, the
+  # open kernel module's compiled-in default enables modeset anyway, so
+  # this card registers as a second, output-less DRM device (card1)
+  # alongside amdgpu; kmscon/GDM's VT console allocation gets confused by
+  # the ambiguity and hangs hard on VT switch (found 2026-07-23, recurred
+  # 2026-08-20 on driver 595.71.05 despite hardware.nvidia.modesetting.enable
+  # being left at its default false — that option only skips *adding*
+  # nvidia-drm.modeset=1, it doesn't force modeset=0).
+  boot.kernelParams = [ "nvidia-drm.modeset=0" ];
+
   nixpkgs.config.allowUnfree = true;
 
   # Required to actually activate hardware.nvidia (kernel module, nvidia-persistenced, etc.)
@@ -21,14 +32,6 @@
     # the proprietary driver doesn't support this generation at all.
     open = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    # Off: CUDA compute (via /dev/nvidia*) doesn't need DRM/KMS, only
-    # display output does — and none is attached to this card. With
-    # modesetting on, this card registered as a second, output-less DRM
-    # device (/sys/class/drm/card1) alongside amdgpu; kmscon/GDM's VT
-    # console allocation apparently got confused by the ambiguity,
-    # hanging hard on VT switch (found + confirmed 2026-07-23, survived
-    # a full system update). Off removes the second DRM device outright.
-    modesetting.enable = false;
     nvidiaPersistenced = true;
     # Saves/restores GPU state across suspend so resume doesn't hang or
     # leave the card in a broken state.
