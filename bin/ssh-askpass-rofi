@@ -5,4 +5,9 @@
 # from stdout. rofi's Wayland layer-shell backend avoids the X11-only
 # gcr-prompter path, which fails under Niri (see modules/gui/niri.nix).
 
-rofi -dmenu -password -p "${1:-Passphrase}"
+prompt="${1:-Passphrase}"
+
+# Long prompts (host key confirmations) need to wrap: -p is a single-line
+# label, so route the actual text through -mesg, which wraps.
+rofi -dmenu -password -p "SSH" -mesg "$prompt" \
+    -theme-str 'window {width: 1000px; height: 250px;} listview {enabled: false;}'
