@@ -98,6 +98,7 @@ in
     discord-wrapped
     droidcam
     file-roller
+    foliate
     gedit
     ghostty
     gimp
