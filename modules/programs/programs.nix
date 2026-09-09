@@ -27,26 +27,31 @@ let
   # discord_voice as a plain symlink there. This breaks video background
   # effects (camera renders black). See
   # https://github.com/NixOS/nixpkgs/issues/543857
-  # Workaround: poll in the background right after launch and, as soon as
-  # nixpkgs' own discord-stage-modules script (re)creates the discord_voice
-  # symlink, replace it with a writable copy.
+  # Workaround: poll for the whole lifetime of the app (not just the first
+  # few seconds after launch) and, whenever discord_voice is (re)staged as a
+  # symlink -- or an existing writable copy gets its permissions reverted,
+  # which Discord's own background module updater does periodically even
+  # while the app keeps running -- replace/fix it with a writable copy.
   discord-wrapped = pkgs.symlinkJoin {
     name = "discord-wrapped";
     paths = [ pkgs.discord ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/discord --run '
+        pid=$$
         (
-          for _ in $(seq 1 50); do
+          while kill -0 "$pid" 2>/dev/null; do
             for d in "$HOME"/.config/discord/*/modules/discord_voice; do
               if [ -L "$d" ]; then
                 target=$(readlink -f "$d")
                 rm -f "$d"
                 cp -rL "$target" "$d"
                 chmod -R u+w "$d"
+              elif [ -d "$d" ] && [ ! -w "$d" ]; then
+                chmod -R u+w "$d"
               fi
             done
-            sleep 0.2
+            sleep 2
           done
         ) &
         disown
