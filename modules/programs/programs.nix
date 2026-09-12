@@ -28,10 +28,21 @@ let
   # effects (camera renders black). See
   # https://github.com/NixOS/nixpkgs/issues/543857
   # Workaround: poll for the whole lifetime of the app (not just the first
-  # few seconds after launch) and, whenever discord_voice is (re)staged as a
-  # symlink -- or an existing writable copy gets its permissions reverted,
-  # which Discord's own background module updater does periodically even
-  # while the app keeps running -- replace/fix it with a writable copy.
+  # few seconds after launch) and, whenever discord_voice ends up
+  # non-writable again, replace/fix it with a writable copy. This happens
+  # more than once per install:
+  #  - nixpkgs stages it as a plain symlink into the Nix store
+  #    (modules/discord_voice -> /nix/store/.../discord_voice)
+  #  - Discord's own module loader also periodically flags a writable copy
+  #    as "corrupt" (it doesn't match its expected symlink/manifest) and
+  #    self-repairs it -- but since the parent modules/ dir is itself
+  #    read-only, Discord can't replace the discord_voice entry, only write
+  #    inside it, so it ends up nesting another symlink one level deeper
+  #    (modules/discord_voice/discord_voice -> /nix/store/...). That nested
+  #    shape breaks Node's require() entirely ("Cannot find module
+  #    'discord_voice'"), not just the background-effects feature.
+  # Ensuring modules/ itself stays writable, and flattening either shape,
+  # covers both failure modes.
   discord-wrapped = pkgs.symlinkJoin {
     name = "discord-wrapped";
     paths = [ pkgs.discord ];
@@ -41,8 +52,16 @@ let
         pid=$$
         (
           while kill -0 "$pid" 2>/dev/null; do
-            for d in "$HOME"/.config/discord/*/modules/discord_voice; do
-              if [ -L "$d" ]; then
+            for modules_dir in "$HOME"/.config/discord/*/modules; do
+              [ -d "$modules_dir" ] && chmod u+w "$modules_dir" 2>/dev/null
+              d="$modules_dir/discord_voice"
+              inner="$d/discord_voice"
+              if [ -L "$inner" ]; then
+                real=$(readlink -f "$inner")
+                rm -rf "$d"
+                cp -rL "$real" "$d"
+                chmod -R u+w "$d"
+              elif [ -L "$d" ]; then
                 target=$(readlink -f "$d")
                 rm -f "$d"
                 cp -rL "$target" "$d"
