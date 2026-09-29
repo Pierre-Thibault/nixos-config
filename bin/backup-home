@@ -112,8 +112,23 @@ backup_remote() {
         echo "BORG_REMOTE_REPO is not set; skipping off-site borg backup." >&2
         return
     fi
-    local rc=0
-    backup_to "$BORG_REMOTE_REPO" "$BORG_REMOTE_PASSCOMMAND" || rc=$?
+    # One retry after a real failure (rc > 1): the off-site leg is a long-
+    # lived SSH transfer, and a transient network blip mid-transfer (e.g.
+    # wifi still resyncing right after a suspend-wake) kills it outright
+    # rather than just producing warnings. Seen on 2026-09-29: local backup
+    # succeeded, off-site died ~20min in with "Connection timed out". Plain
+    # warnings (rc=1, e.g. unreadable files) are not retried -- retrying
+    # wouldn't change that outcome.
+    local rc=0 attempt
+    for attempt in 1 2; do
+        rc=0
+        backup_to "$BORG_REMOTE_REPO" "$BORG_REMOTE_PASSCOMMAND" || rc=$?
+        [ "$rc" -le 1 ] && break
+        if [ "$attempt" -lt 2 ]; then
+            echo "Off-site borg backup failed (exit $rc); retrying once in 60s..." >&2
+            sleep 60
+        fi
+    done
     record_borg_result "off-site borg backup" "$rc"
 }
 
