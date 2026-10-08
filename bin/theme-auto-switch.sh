@@ -7,6 +7,8 @@ THEME_TOGGLE_SCRIPT="$HOME/.config/waybar/theme-toggle.sh"
 STATE_FILE="$HOME/.config/waybar/theme-state"
 SET_BRIGHTNESS="$HOME/nixos-config/bin/set-brightness"
 BRIGHTNESS_STATE_FILE="/tmp/brightness-state"
+# Cache and lock used by ~/.config/waybar/brightness.sh
+WAYBAR_BRIGHTNESS_STATE="${XDG_RUNTIME_DIR:-/tmp}/waybar-brightness"
 SUNTIMES_CACHE="/tmp/suntimes-cache"
 SUNTIMES_LOCK="/tmp/suntimes-cache.lock"
 DAY_BRIGHTNESS=100
@@ -163,10 +165,29 @@ else
     TARGET_BRIGHTNESS=$NIGHT_BRIGHTNESS
 fi
 
-# Only call ddcutil (slow, flaky over HDMI) when the target actually changed
+# Only call ddcutil (slow, flaky over HDMI) when the target actually changed.
+# The state file is only written once the monitor reports the target value:
+# right after a resume the monitor can ack a DDC write and then ignore it,
+# and a blindly written state would then block any retry for the whole day.
+# The lock is shared with the waybar brightness module so concurrent ddcutil
+# calls don't collide on the i2c bus.
 LAST_BRIGHTNESS=$(cat "$BRIGHTNESS_STATE_FILE" 2>/dev/null || echo "")
 if [ "$TARGET_BRIGHTNESS" != "$LAST_BRIGHTNESS" ]; then
-    if "$SET_BRIGHTNESS" "$TARGET_BRIGHTNESS" 2>/dev/null; then
-        echo "$TARGET_BRIGHTNESS" > "$BRIGHTNESS_STATE_FILE"
-    fi
+    (
+        flock -w 30 9 || { echo "brightness: lock timeout" >&2; exit 1; }
+        if ! "$SET_BRIGHTNESS" "$TARGET_BRIGHTNESS" --noverify >/dev/null; then
+            echo "brightness: setvcp $TARGET_BRIGHTNESS failed" >&2
+            exit 1
+        fi
+        sleep 2
+        ACTUAL=$(ddcutil getvcp 10 --brief 2>/dev/null | awk '/^VCP /{print $4; exit}')
+        if [ "$ACTUAL" = "$TARGET_BRIGHTNESS" ]; then
+            echo "$TARGET_BRIGHTNESS" > "$BRIGHTNESS_STATE_FILE"
+            # Keep the waybar module in sync
+            echo "$TARGET_BRIGHTNESS" > "$WAYBAR_BRIGHTNESS_STATE"
+            pkill -RTMIN+8 waybar
+        else
+            echo "brightness: wanted $TARGET_BRIGHTNESS, monitor reports '${ACTUAL}'" >&2
+        fi
+    ) 9>"$WAYBAR_BRIGHTNESS_STATE.lock"
 fi
