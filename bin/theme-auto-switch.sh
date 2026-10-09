@@ -3,6 +3,9 @@
 # gradually between civil twilight and sunrise/sunset (100 during the day,
 # 70 at night, smooth transition across each twilight window).
 
+# ddcutil lives in the per-user profile, which the systemd unit's PATH lacks
+PATH="/etc/profiles/per-user/$USER/bin:$PATH"
+
 THEME_TOGGLE_SCRIPT="$HOME/.config/waybar/theme-toggle.sh"
 STATE_FILE="$HOME/.config/waybar/theme-state"
 SET_BRIGHTNESS="$HOME/nixos-config/bin/set-brightness"
