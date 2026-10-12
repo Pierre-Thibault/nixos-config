@@ -1,0 +1,39 @@
+diff --git a/src/tecla-application.c b/src/tecla-application.c
+index 94317c1..1d20cf1 100644
+--- a/src/tecla-application.c
++++ b/src/tecla-application.c
+@@ -129,6 +129,25 @@ view_level_notify_cb (TeclaView  *view,
+ 		gtk_widget_unset_state_flags (GTK_WIDGET (button), GTK_STATE_FLAG_CHECKED);
+ }
+ 
++/* Build a human-readable label from the level bitmask:
++ * bit 0 = Shift (level 2), bit 1 = AltGr (level 3), bit 2 = level 5. */
++static char *
++level_label (int level)
++{
++	GString *str = g_string_new (NULL);
++
++	if (level == 0)
++		return g_string_free (g_string_append (str, "Base"), FALSE);
++	if (level & 1)
++		g_string_append (str, "Maj");
++	if (level & 2)
++		g_string_append_printf (str, "%sAltGr", str->len ? "+" : "");
++	if (level & 4)
++		g_string_append_printf (str, "%sNiv5", str->len ? "+" : "");
++
++	return g_string_free (str, FALSE);
++}
++
+ static void
+ num_levels_notify_cb (TeclaView  *view,
+ 		      GParamSpec *pspec,
+@@ -144,7 +163,7 @@ num_levels_notify_cb (TeclaView  *view,
+ 
+ 	for (i = 0; i < num_levels; i++) {
+ 		GtkWidget *button;
+-		g_autofree char *label = g_strdup_printf ("%d", i + 1);
++		g_autofree char *label = level_label (i);
+ 
+ 		button = gtk_button_new_with_label (label);
+ 		gtk_widget_add_css_class (button, "toggle");
