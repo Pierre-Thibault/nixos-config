@@ -188,4 +188,24 @@ in
     enable = true;
     package = pkgs.espanso-wayland;
   };
+
+  # Espanso only opens its evdev input devices at startup and never picks up
+  # hotplugged ones. When the Moonlander re-enumerates (e.g. after an xHCI
+  # reset on resume, seen 2026-10-04), espanso silently stops seeing any
+  # keystrokes. Restart it whenever the Moonlander's keyboard nodes appear.
+  # Matched by vendor/product only: espanso creates its own virtual keyboard
+  # on startup, so matching any keyboard would make it restart in a loop.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_KEYBOARD}=="1", ENV{ID_VENDOR_ID}=="3297", ENV{ID_MODEL_ID}=="1969", TAG+="systemd", ENV{SYSTEMD_USER_WANTS}+="espanso-replug.service"
+  '';
+
+  systemd.user.services.espanso-replug = {
+    description = "Restart espanso after the Moonlander is reconnected";
+    serviceConfig = {
+      Type = "oneshot";
+      # Let all of the keyboard's event nodes settle before restarting
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+      ExecStart = "${pkgs.systemd}/bin/systemctl --user try-restart espanso.service";
+    };
+  };
 }
