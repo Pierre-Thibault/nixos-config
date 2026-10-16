@@ -64,6 +64,7 @@
 
     # Status bar
     waybar # Status bar with workspace support
+    eww # Widgets (GNOME-like clock panel, ~/.config/eww)
 
     # Emoji picker
     wofi-emoji # Emoji picker for Wayland
