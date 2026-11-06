@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Rename the focused niri workspace via a rofi prompt.
+# The input is prefilled with the current name. Escape cancels;
+# submitting an empty name removes the workspace name.
+
+current=$(niri msg --json workspaces | jq -r '.[] | select(.is_focused) | .name // ""')
+
+name=$(rofi -dmenu -p "Nom du bureau" -filter "$current" -lines 0 \
+    -theme-str 'window {height: 80px;} listview {enabled: false;}' < /dev/null) || exit 0
+
+if [ -z "$name" ]; then
+    niri msg action unset-workspace-name
+else
+    niri msg action set-workspace-name "$name"
+fi
