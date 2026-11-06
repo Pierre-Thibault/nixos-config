@@ -1,5 +1,6 @@
 {
   pkgs,
+  unstable,
   userdata,
   ...
 }:
@@ -114,7 +115,7 @@ in
   users.users.${userdata.username}.packages = with pkgs; [
     anki
     audacity
-    (brave.override {
+    (unstable.brave.override {
       commandLineArgs = "--enable-features=VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization --enable-gpu-rasterization --ozone-platform=wayland";
     })
     code-cursor-fhs
