@@ -164,6 +164,9 @@ in
     trusted-users = [ username ];
     # Hard-link identical files across store paths as they're added.
     auto-optimise-store = true;
+    # Build locally when a substituter fails instead of aborting the whole
+    # rebuild (cache.nixos-cuda.org is frequently down with HTTP 502).
+    fallback = true;
   };
 
   programs = {
