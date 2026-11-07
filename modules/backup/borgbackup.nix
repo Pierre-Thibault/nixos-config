@@ -63,14 +63,23 @@ let
       # refuse/warn. backup-home mirrors this exclusion (BORG_EXCLUDE_CREDENTIALS
       # below) so these still get backed up normally via pierre's own
       # manual runs, just not the automated one.
+      #
+      # ~/Dropbox and ~/.dropbox excluded: backup-home never archives them
+      # (cloud-synced data, see its exclude list), so granting the ACL
+      # there would only be a pointless walk over the whole sync tree --
+      # and an ACL change the Dropbox client could see as local edits.
       find /home/${username} -xdev \
         -not -type l \
         -not \( -path /home/${username}/.ssh -o -path '/home/${username}/.ssh/*' \) \
         -not \( -path /home/${username}/.gnupg -o -path '/home/${username}/.gnupg/*' \) \
+        -not \( -path /home/${username}/Dropbox -o -path '/home/${username}/Dropbox/*' \) \
+        -not \( -path /home/${username}/.dropbox -o -path '/home/${username}/.dropbox/*' \) \
         -exec setfacl -m u:borgbackup:rX {} + || true
       find /home/${username} -xdev -type d \
         -not \( -path /home/${username}/.ssh -o -path '/home/${username}/.ssh/*' \) \
         -not \( -path /home/${username}/.gnupg -o -path '/home/${username}/.gnupg/*' \) \
+        -not \( -path /home/${username}/Dropbox -o -path '/home/${username}/Dropbox/*' \) \
+        -not \( -path /home/${username}/.dropbox -o -path '/home/${username}/.dropbox/*' \) \
         -exec setfacl -d -m u:borgbackup:rX {} + || true
 
       # open-webui (chat history, connections, RAG docs) lives outside

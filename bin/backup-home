@@ -58,7 +58,14 @@ backup_to() (
         --exclude 'pp:/home/pierre/.local/share/gnome-boxes/images' \
         --exclude 'pp:/home/pierre/nixos-config/.git' \
         --exclude 'pp:/home/pierre/bin/.git' \
-        --exclude 'pp:/home/pierre/dotfiles/.git'
+        --exclude 'pp:/home/pierre/dotfiles/.git' \
+        --exclude 'pp:/home/pierre/Dropbox' \
+        --exclude 'pp:/home/pierre/.dropbox' \
+        --exclude 'pp:/home/pierre/.dropbox-dist'
+    # ~/Dropbox is a local sync copy of data that already lives in the
+    # Dropbox cloud (~/.dropbox is only the client's state/auth token, and
+    # ~/.dropbox-dist its self-downloaded, re-downloadable binary):
+    # backing them up would just duplicate the cloud into borg.
     # --progress only when attached to a terminal: each update becomes its
     # own line once redirected to a file/log (no tty to carriage-return
     # over in place), which would flood the automated service's captured

@@ -55,4 +55,23 @@ in
       RestartSec = 10;
     };
   };
+
+  # Official Dropbox client: a real local sync into ~/Dropbox (unlike the
+  # rclone mounts above). The nixpkgs wrapper downloads the self-updating
+  # proprietary daemon into ~/.dropbox-dist on first run.
+  systemd.user.services.dropbox = {
+    description = "Dropbox";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.dropbox}/bin/dropbox";
+      ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
+      KillMode = "control-group";
+      Restart = "on-failure";
+      RestartSec = 10;
+      Nice = 10;
+    };
+  };
 }
