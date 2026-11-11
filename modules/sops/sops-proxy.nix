@@ -27,6 +27,7 @@ in
       OPENAI_API_KEY = { };
       HF_TOKEN = { };
       OPEN_ROUTER = { };
+      GOOGLE_GEMINI_API_KEY = { };
       DIGITALOCEAN_TOKEN = { sopsFile = self + "/sops/digital-ocean.yaml"; };
       # The Nix-side name (env var this ends up as) is uppercase to match
       # the other secrets here, but the actual key in sops/ovh.yaml is
@@ -54,6 +55,7 @@ in
           OPENAI_API_KEY=${config.sops.placeholder.OPENAI_API_KEY}
           HF_TOKEN=${config.sops.placeholder.HF_TOKEN}
           OPEN_ROUTER=${config.sops.placeholder.OPEN_ROUTER}
+          GOOGLE_GEMINI_API_KEY=${config.sops.placeholder.GOOGLE_GEMINI_API_KEY}
           DIGITALOCEAN_TOKEN=${config.sops.placeholder.DIGITALOCEAN_TOKEN}
           OVH_APPLICATION_KEY=${config.sops.placeholder.OVH_APPLICATION_KEY}
           OVH_APPLICATION_SECRET=${config.sops.placeholder.OVH_APPLICATION_SECRET}

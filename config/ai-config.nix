@@ -101,5 +101,20 @@ in
         OPENROUTER_API_KEY = "proxy";
       };
     };
+
+    gemini = {
+      hostname = "gemini.proxy";
+      target = "https://generativelanguage.googleapis.com";
+      # Native Gemini API authenticates with x-goog-api-key, not a bearer token.
+      keyHeader = "x-goog-api-key";
+      keyScheme = "";
+      keyEnvVar = "GOOGLE_GEMINI_API_KEY";
+      sessionVars = {
+        # Read by the google-genai SDKs and gemini-cli.
+        GOOGLE_GEMINI_BASE_URL = "http://gemini.proxy:${portStr}";
+        # Read by LiteLLM (Aider), google-genai and gemini-cli.
+        GEMINI_API_KEY = "proxy";
+      };
+    };
   };
 }

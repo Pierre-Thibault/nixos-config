@@ -23,6 +23,7 @@ flowchart LR
         xai[xAI]:::service
         together[Together AI]:::service
         hf[Hugging Face]:::service
+        gemini[Google Gemini]:::service
     end
 
     cc -->|"HTTP · no key"| caddy
@@ -34,6 +35,7 @@ flowchart LR
     caddy -->|"injects API key"| xai
     caddy -->|"injects API key"| together
     caddy -->|"injects API key"| hf
+    caddy -->|"injects API key"| gemini
 
     subgraph sops["Secret Management — sops-nix"]
         encrypted["🔒 Encrypted secrets\ngit repository\n(age encryption)"]:::secret
