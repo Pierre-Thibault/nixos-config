@@ -44,6 +44,25 @@ let
   #    'discord_voice'"), not just the background-effects feature.
   # Ensuring modules/ itself stays writable, and flattening either shape,
   # covers both failure modes.
+  #
+  # OpenH264: video backgrounds are H.264 clips, and Discord's libffmpeg has
+  # no built-in H.264 decoder; it dlopen()s Cisco's OpenH264 from
+  # discord_asset_cache/openh264/. The host's core.asar (1.0.159) hardcodes
+  # libopenh264-2.5.1-linux64.7.so, but the remotely-updated web client
+  # now downloads 2.7.0 and deletes 2.5.1 as "unused" on every startup,
+  # so background replacement fails with "failed to initialize decoder"
+  # (blur still works). Restore the exact 2.5.1 binary from Cisco's CDN
+  # whenever it disappears. Drop this once the host is >= 1.0.168, which
+  # expects 2.7.0.
+  openh264-discord = pkgs.runCommand "libopenh264-2.5.1-linux64.7.so" { } ''
+    ${pkgs.bzip2}/bin/bzcat ${
+      pkgs.fetchurl {
+        url = "http://ciscobinary.openh264.org/libopenh264-2.5.1-linux64.7.so.bz2";
+        hash = "sha256-guQ224YGQz4/gjx//zJpxDs7o/ElEKhR73sVa4CtGxE=";
+      }
+    } > $out
+  '';
+
   discord-wrapped = pkgs.symlinkJoin {
     name = "discord-wrapped";
     paths = [ pkgs.discord ];
@@ -71,6 +90,11 @@ let
                 chmod -R u+w "$d"
               fi
             done
+            h264_dir="$HOME/.config/discord/discord_asset_cache/openh264"
+            h264_lib="$h264_dir/libopenh264-2.5.1-linux64.7.so"
+            if [ -d "$h264_dir" ] && [ ! -e "$h264_lib" ]; then
+              ln -sf ${openh264-discord} "$h264_lib"
+            fi
             sleep 2
           done
         ) &
