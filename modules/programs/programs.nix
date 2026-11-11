@@ -63,12 +63,47 @@ let
     } > $out
   '';
 
+  # The 2.5.1 file alone isn't enough: libffmpeg only knows where OpenH264
+  # lives once ff_libopenh264_set_library_path() has been called, and only
+  # discord_voice's WebRTC H.264 decoder does that (when receiving someone's
+  # H.264 video in a call). The background MediaPlayer never sets it, so it
+  # fails with "Failed to open codec" unless a call happened to set it
+  # first. This preload sets it at startup. dlsym() returns NULL in
+  # processes without libffmpeg (anything Discord spawns), making it a no-op
+  # there.
+  openh264-path-preload =
+    pkgs.runCommandCC "discord-openh264-path-preload"
+      {
+        src = pkgs.writeText "openh264-path-preload.c" ''
+          #define _GNU_SOURCE
+          #include <dlfcn.h>
+          #include <stdlib.h>
+
+          __attribute__((constructor)) static void set_openh264_path(void)
+          {
+              void (*set_path)(const char *) =
+                  (void (*)(const char *))dlsym(RTLD_DEFAULT,
+                      "ff_libopenh264_set_library_path");
+              const char *path = getenv("DISCORD_OPENH264_PATH");
+              if (set_path && path && *path)
+                  set_path(path);
+          }
+        '';
+      }
+      ''
+        mkdir -p $out/lib
+        $CC -shared -fPIC -O2 -o $out/lib/openh264-path-preload.so $src -ldl
+      '';
+
   discord-wrapped = pkgs.symlinkJoin {
     name = "discord-wrapped";
     paths = [ pkgs.discord ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      wrapProgram $out/bin/discord --run '
+      wrapProgram $out/bin/discord \
+        --prefix LD_PRELOAD : ${openh264-path-preload}/lib/openh264-path-preload.so \
+        --set DISCORD_OPENH264_PATH ${openh264-discord} \
+        --run '
         pid=$$
         (
           while kill -0 "$pid" 2>/dev/null; do
