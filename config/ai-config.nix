@@ -119,5 +119,15 @@ in
         GEMINI_API_KEY = "proxy";
       };
     };
+
+    # Gemini's OpenAI-compatible endpoint (base URL:
+    # http://gemini-openai.proxy:<port>/v1beta/openai) requires the key as a
+    # bearer token, unlike the native API above. Same key, separate hostname
+    # so each gets the header it expects. Used by Open WebUI.
+    gemini-openai = {
+      hostname = "gemini-openai.proxy";
+      target = "https://generativelanguage.googleapis.com";
+      keyEnvVar = "GOOGLE_GEMINI_API_KEY";
+    };
   };
 }
