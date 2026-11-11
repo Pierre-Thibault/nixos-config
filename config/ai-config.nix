@@ -112,6 +112,9 @@ in
       sessionVars = {
         # Read by the google-genai SDKs and gemini-cli.
         GOOGLE_GEMINI_BASE_URL = "http://gemini.proxy:${portStr}";
+        # Read by LiteLLM (Aider), which appends /models/<model>:<method>
+        # itself, so the API version must be part of the base.
+        GEMINI_API_BASE = "http://gemini.proxy:${portStr}/v1beta";
         # Read by LiteLLM (Aider), google-genai and gemini-cli.
         GEMINI_API_KEY = "proxy";
       };
