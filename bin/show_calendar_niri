@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Get window ID that matches "Clendrier iCloud"
+window_id=$(niri msg --json windows | jq -r '.[] | select(.title | contains("Calendrier iCloud")) | .id' | head -1)
+
+if [ -n "$window_id" ]; then
+    # Window found, focus it
+    niri msg action focus-window --id "$window_id"
+else
+    # Window not found, open iCloud Calendar
+    xdg-open https://www.icloud.com/calendar/
+fi
