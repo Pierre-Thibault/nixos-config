@@ -3,7 +3,7 @@
 let
   notesSubpath = "Documents/Notes-Personnelles/Organisation/Journées";
 
-  updateScript = pkgs.writeScript "update-daily-notes-symlinks" ''
+  updateScript = pkgs.writeScript "update-daily-notes-links" ''
     #!${pkgs.python3}/bin/python3
     import datetime
     import os
@@ -52,27 +52,34 @@ let
         return sorted(candidates, key=lambda p: p.name)[0]
 
 
-    def sync_symlink(notes_dir: Path, link_name: str, target: Path | None) -> None:
+    def sync_hardlink(notes_dir: Path, link_name: str, target: Path | None) -> None:
         link_path = notes_dir / link_name
 
         if target is None:
-            if link_path.is_symlink():
+            if link_path.is_symlink() or link_path.is_file():
                 link_path.unlink()
             return
 
-        target_name = target.name
+        target_stat = target.lstat()
         if link_path.is_symlink():
-            if os.readlink(link_path) == target_name:
-                return
+            # Replace any legacy symlink left over from the previous version.
             link_path.unlink()
         elif link_path.exists():
-            print(
-                f"Skipping {link_path}: regular file already exists",
-                file=sys.stderr,
-            )
-            return
+            link_stat = link_path.lstat()
+            if (link_stat.st_dev, link_stat.st_ino) == (
+                target_stat.st_dev,
+                target_stat.st_ino,
+            ):
+                return
+            if not link_path.is_file():
+                print(
+                    f"Skipping {link_path}: exists and is not a regular file",
+                    file=sys.stderr,
+                )
+                return
+            link_path.unlink()
 
-        link_path.symlink_to(target_name)
+        os.link(target, link_path)
 
 
     def main() -> int:
@@ -83,8 +90,8 @@ let
         today = datetime.date.today()
         yesterday = today - datetime.timedelta(days=1)
 
-        sync_symlink(notes_dir, "Aujourd'hui.md", find_daily_note(notes_dir, today))
-        sync_symlink(notes_dir, "Hier.md", find_daily_note(notes_dir, yesterday))
+        sync_hardlink(notes_dir, "Aujourd'hui.md", find_daily_note(notes_dir, today))
+        sync_hardlink(notes_dir, "Hier.md", find_daily_note(notes_dir, yesterday))
         return 0
 
 
@@ -98,8 +105,8 @@ let
   };
 in
 {
-  systemd.user.services.daily-notes-symlinks = {
-    description = "Update symlinks for today's and yesterday's daily notes";
+  systemd.user.services.daily-notes-links = {
+    description = "Update hard links for today's and yesterday's daily notes";
     wantedBy = [ "default.target" ];
     unitConfig = commonUnitConfig;
     serviceConfig = {
@@ -108,7 +115,7 @@ in
     };
   };
 
-  systemd.user.paths.daily-notes-symlinks = {
+  systemd.user.paths.daily-notes-links = {
     description = "Watch daily notes directory to update Aujourd'hui.md and Hier.md";
     wantedBy = [ "default.target" ];
     unitConfig = commonUnitConfig;
@@ -117,8 +124,8 @@ in
     };
   };
 
-  systemd.user.timers.daily-notes-symlinks = {
-    description = "Refresh daily notes symlinks at midnight";
+  systemd.user.timers.daily-notes-links = {
+    description = "Refresh daily notes hard links at midnight";
     wantedBy = [ "timers.target" ];
     unitConfig = commonUnitConfig;
     timerConfig = {
