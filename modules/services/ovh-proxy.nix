@@ -8,8 +8,8 @@
 }:
 
 let
-  cfg = import ../config/ovh-proxy-config.nix;
-  customCaddy = import ../lib/ovh-proxy/custom-caddy.nix { inherit pkgs lib; };
+  cfg = import ../../config/ovh-proxy-config.nix;
+  customCaddy = import ../../lib/ovh-proxy/custom-caddy.nix { inherit pkgs lib; };
 in
 {
   services.api-proxy = {

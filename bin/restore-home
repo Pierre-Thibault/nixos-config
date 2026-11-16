@@ -7,7 +7,7 @@
 #
 # Off-site (BorgBase) restore is no longer available from pierre's own
 # session -- that repo's credentials live exclusively with the borgbackup
-# system user now (see ~/nixos-config/modules/backup/). Disque2 stays the
+# system user now (see ~/nixos-config/modules/services/backup/). Disque2 stays the
 # primary, local recovery path and needs no network/SSH key at all.
 set -euo pipefail
 

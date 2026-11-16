@@ -7,7 +7,7 @@ d'une sauvegarde borg (voir `~/nixos-config/bin/backup-home`).
 ## Prérequis avant de commencer
 
 Depuis l'isolation des secrets borg dans l'utilisateur système
-`borgbackup` (voir `modules/backup/borgbackup.nix`), pierre n'a plus
+`borgbackup` (voir `modules/services/backup/borgbackup.nix`), pierre n'a plus
 d'accès direct à BorgBase — ni la clé SSH ni les passphrases ne
 transitent plus par son compte. Tout ce qui concerne BorgBase (clé SSH,
 sa passphrase, passphrase du dépôt) vit exclusivement dans
@@ -53,7 +53,7 @@ BorgBase — déclenché nocturnement par `borgbackup-nightly.timer`) ni un
 copie *hors site* de `~/.ssh` et `~/.gnupg` :
 
 - Le service automatisé les **exclut explicitement**
-  (`BORG_EXCLUDE_CREDENTIALS`, dans `modules/backup/borgbackup.nix`) —
+  (`BORG_EXCLUDE_CREDENTIALS`, dans `modules/services/backup/borgbackup.nix`) —
   accorder à `borgbackup` l'accès ACL nécessaire pour les lire fait
   apparaître leurs fichiers comme lisibles par groupe (`640` au lieu de
   `600`, effet de bord du recalcul du masque ACL POSIX), ce que
@@ -399,7 +399,7 @@ identifiants.
    la passphrase est demandée au clavier (`borg-ask-passphrase`).
 
    `sudo` est nécessaire à cause d'`open-webui` (voir
-   `modules/backup/borgbackup.nix`) : son état vit sous
+   `modules/services/backup/borgbackup.nix`) : son état vit sous
    `/var/lib/private/open-webui`, en dehors du home, inclus dans chaque
    archive borg mais **root:root, mode 0700, sans aucune ACL pour
    pierre** (seul `borgbackup` a une ACL de traversée en lecture, pour la

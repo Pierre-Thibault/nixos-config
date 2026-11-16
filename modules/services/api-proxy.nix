@@ -23,7 +23,7 @@ let
       # Most upstreams authenticate with one static header (a bearer token,
       # say) that Caddy can inject by itself. Some (OVH) need a signature
       # computed per request instead -- those set preProxyDirectives (e.g.
-      # `ovh_sign { ... }`, see modules/ovh-proxy) and leave keyEnvVar null.
+      # `ovh_sign { ... }`, see modules/services/ovh-proxy.nix) and leave keyEnvVar null.
       headerUpLine = lib.optionalString (upstream.keyEnvVar != null) ''
         header_up ${upstream.keyHeader} "${upstream.keyScheme}{env.${upstream.keyEnvVar}}"
       '';

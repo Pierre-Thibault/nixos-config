@@ -1,4 +1,4 @@
-# Non-secret config for the OVH signing proxy (modules/ovh-proxy.nix).
+# Non-secret config for the OVH signing proxy (modules/services/ovh-proxy.nix).
 # Shares api-proxy's port/bindAddr (see config/cloud-proxy-config.nix) --
 # Caddy differentiates upstreams by hostname, not port.
 {

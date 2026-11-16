@@ -34,7 +34,7 @@ require_env() {
 
 # Subshell body: the BORG_* overrides stay local to each call.
 # BORG_EXCLUDE_CREDENTIALS: set (by the borgbackup service only -- see
-# modules/backup/borgbackup.nix) to also skip ~/.ssh and ~/.gnupg. The
+# modules/services/backup/borgbackup.nix) to also skip ~/.ssh and ~/.gnupg. The
 # borgbackup user's ACL grant on the rest of /home/pierre, needed so it
 # can read anything at all, has a side effect on these two: POSIX ACL
 # recalculates the file's mask when a named entry is added, and that
@@ -161,7 +161,7 @@ copy_runbook() {
     if [ -f "$runbook" ]; then
         # --remove-destination: unlink+recreate instead of open+truncate, so
         # this only needs write permission on the directory (granted to
-        # borgbackup via fixHomeAcl in modules/backup/borgbackup.nix), not on
+        # borgbackup via fixHomeAcl in modules/services/backup/borgbackup.nix), not on
         # the destination file itself -- a plain `cp` failed with Permission
         # denied against a copy pre-existing from a manual pierre run (owner
         # pierre, mode 644, no ACL entry for borgbackup on the file).
@@ -209,12 +209,12 @@ main() {
     # /home under systemd's DynamicUser convention -- resolve the
     # compatibility symlink since `borg create` archives a symlink source
     # argument as a symlink entry rather than descending into it (see the
-    # matching ACL grant in modules/backup/borgbackup.nix for why
+    # matching ACL grant in modules/services/backup/borgbackup.nix for why
     # borgbackup can even read this).
     open_webui_data=$(readlink -f /var/lib/open-webui 2>/dev/null || true)
 
     # GDM/AccountsService login-screen avatar for pierre -- lives outside
-    # /home too (see matching ACL grant in modules/backup/borgbackup.nix).
+    # /home too (see matching ACL grant in modules/services/backup/borgbackup.nix).
     # Both paths are only included if readable, so a run without the ACL
     # grant (e.g. a manual backup-home by pierre, who has no special access
     # to either) just quietly skips them instead of failing.

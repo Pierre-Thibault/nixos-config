@@ -24,7 +24,7 @@ in
   sops_age_key_cmd = "age -d $HOME/.config/sops/age/keys.txt.age";
 
   # Off-site BorgBase backup now runs exclusively as the borgbackup system
-  # user (see modules/backup/) -- pierre's session no longer has passive
+  # user (see modules/services/backup/) -- pierre's session no longer has passive
   # access to that repo's passphrase or SSH key. These variables are for
   # pierre's own local/manual borg usage against Disque2 only.
   borg_repo = "/run/media/${username}/Disque2/${userdata.borgRepoSubpath}";
@@ -35,7 +35,7 @@ in
   # Placeholders so ovhcloud-cli/pulumi_ovh see all 4 expected env vars and
   # skip straight to requests instead of prompting for `login` -- the real
   # values live only in the ovh-proxy Caddy service's own environment
-  # (modules/ovh-proxy.nix), which overwrites these before forwarding to
+  # (modules/services/ovh-proxy.nix), which overwrites these before forwarding to
   # OVH's real API. Never real credentials, same idea as
   # digitalocean:token = "proxy" for DO.
   ovh_application_key = "dummy";

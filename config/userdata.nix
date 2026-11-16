@@ -22,7 +22,7 @@ rec {
   smtpPort = 587;
 
   # Disque2 (external backup drive) is reachable at two different mount
-  # points -- system-wide at /mnt/disque2 (modules/backup/borgbackup.nix,
+  # points -- system-wide at /mnt/disque2 (modules/services/backup/borgbackup.nix,
   # so the isolated borgbackup service can reach it headlessly) and at the
   # conventional udisks2 session path (config/environment-variables.nix,
   # for pierre's own manual borg/git-mirror commands) -- but both refer to
