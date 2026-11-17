@@ -26,6 +26,9 @@ in
 
   users.users.${cfg.username}.packages = with pkgs; [
     aider-chat
+    unstable.herdr
+    unstable.herdr-core
+    unstable.herdr-desktop
     unstable.claude-code
     opencode
     opencode-desktop
