@@ -18,7 +18,16 @@
           ${pkgs.bluez}/bin/bluetoothctl power off
           ;;
         post)
-          ${pkgs.bluez}/bin/bluetoothctl power on
+          # Respect an rfkill soft block (Bluetooth deliberately turned off):
+          # powering on would fail with org.bluez.Error.Failed and make the
+          # hook exit 1 on every resume.
+          # Read sysfs directly: rfkill's CLI output is localized.
+          for dev in /sys/class/rfkill/rfkill*; do
+            if [ "$(cat "$dev/type")" = bluetooth ] && [ "$(cat "$dev/soft")" = 1 ]; then
+              exit 0
+            fi
+          done
+          ${pkgs.bluez}/bin/bluetoothctl power on || true
           ;;
       esac
     '';
