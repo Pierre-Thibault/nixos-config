@@ -43,8 +43,8 @@ let
     item:selected:focus,
     child:selected,
     child:selected:focus {
-        background-color: #6f8396 !important;
-        color: #ffffff !important;
+        background-color: #6f8396;
+        color: #ffffff;
     }
 
     popover.menu modelbutton:focus {
