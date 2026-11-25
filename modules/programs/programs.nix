@@ -225,7 +225,7 @@ in
     vscodium
     warp-terminal
     wezterm
-    yq
+    yq-go
     zed-editor
     zoom-us
   ];
