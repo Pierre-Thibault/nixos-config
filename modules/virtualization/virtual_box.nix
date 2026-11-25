@@ -6,7 +6,11 @@
   virtualisation.virtualbox.host.enable = true;
   users.extraGroups.vboxusers.members = [ "${userdata.username}" ];
   nixpkgs.config.allowUnfree = true;
-  virtualisation.virtualbox.host.enableExtensionPack = true;
+  # Extension Pack disabled 2026-11-24: it is unfree, so not on
+  # cache.nixos.org, and forced a long local VirtualBox rebuild on every
+  # nixpkgs bump. Only needed for USB 2/3 passthrough, webcam passthrough,
+  # VRDP, disk encryption, PXE. Clipboard sharing does not need it.
+  virtualisation.virtualbox.host.enableExtensionPack = false;
   # guest.* removed 2026-07-23: this machine is the VirtualBox *host*,
   # never a guest — those options only produced boot noise every time
   # (vboxguest/vboxsf module load failures, vboxnet0-start errors,
